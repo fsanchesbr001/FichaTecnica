@@ -1,10 +1,11 @@
-package com.fabriciosanches.contatos.security;
+package com.fabriciosanches.fichatecnica.security;
 
-import com.fabriciosanches.contatos.usuario.UsuarioRepository;
+import com.fabriciosanches.fichatecnica.usuario.UsuarioRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -24,7 +25,9 @@ public class SecurityFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest  request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
+    protected void doFilterInternal(@NonNull HttpServletRequest  request, @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
         var tokenJWT = recuperarToken(request);
         if(tokenJWT!=null){
             var subject = tokenService.getSubject(tokenJWT);

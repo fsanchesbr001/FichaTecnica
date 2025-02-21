@@ -1,4 +1,7 @@
 package com.fabriciosanches.fichatecnica.repository;
 
-public interface ItensProdutoRepository {
+import com.fabriciosanches.fichatecnica.domain.itensProduto.ItensProduto;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface ItensProdutoRepository extends JpaRepository<ItensProduto, Long> {
 }

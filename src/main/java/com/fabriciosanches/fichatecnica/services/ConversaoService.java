@@ -1,9 +1,9 @@
 package com.fabriciosanches.fichatecnica.services;
 
-import com.fabriciosanches.fichatecnica.domain.medidas.DadosUnidadeMedida;
-import com.fabriciosanches.fichatecnica.domain.medidas.UnidadeMedida;
+import com.fabriciosanches.fichatecnica.domain.conversao.Conversao;
+import com.fabriciosanches.fichatecnica.domain.conversao.DadosConversao;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
-import com.fabriciosanches.fichatecnica.repository.UnidadeMedidaRepository;
+import com.fabriciosanches.fichatecnica.repository.ConversaoRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -14,73 +14,77 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Service
-public class UnidadeMedidaService {
-    private final Logger logger = LogManager.getLogger(UnidadeMedidaService.class);
-    private final UnidadeMedidaRepository repository;
+public class ConversaoService {
+    private final Logger logger = LogManager.getLogger(ConversaoService.class);
+    private final ConversaoRepository repository;
 
-    public UnidadeMedidaService(UnidadeMedidaRepository repository) {
+    public ConversaoService(ConversaoRepository repository) {
         this.repository = repository;
     }
 
-    private Optional<List<DadosUnidadeMedida>> obterLista() {
+    private Optional<List<DadosConversao>> obterLista() {
         logger.info("Inicio do método obterLista");
-        Optional<List<DadosUnidadeMedida>> listaRecord =
-                Optional.of(DadosUnidadeMedida.from(repository.findAll()));
+        Optional<List<DadosConversao>> listaRecord =
+                Optional.of(DadosConversao.from(repository.findAll()));
 
-        logger.info("Lista de unidades de medida encontrada: {}", listaRecord.get());
+        logger.info("Lista de conversão encontrada: {}", listaRecord.get());
         logger.info("Fim do método obterLista");
         return listaRecord;
     }
 
-    public List<DadosUnidadeMedida> listar() {
+    public List<DadosConversao> listar() {
        return obterLista().map(lista -> lista.stream()
-                        .sorted(Comparator.comparing(DadosUnidadeMedida::nome))
+                        .sorted(Comparator.comparing(DadosConversao::unidadeDe))
                         .toList()).orElseThrow(
-                                () -> new FichaTecnicaException("Lista de unidades de medida não encontrada"));
+                                () -> new FichaTecnicaException("Lista de conversões não encontrada"));
 
     }
 
-    public DadosUnidadeMedida buscarPorId(Long id) {
+    public DadosConversao buscarPorId(Long id) {
         return obterLista().map(lista -> lista.stream()
                 .filter(unidade -> unidade.codigo().equals(id))
                 .findFirst()
-                .orElseThrow(() -> new FichaTecnicaException("Unidade de medida não encontrada")))
-                .orElseThrow(() -> new FichaTecnicaException("Lista de unidades de medida não encontrada"));
+                .orElseThrow(() -> new FichaTecnicaException("Conversão não encontrada")))
+                .orElseThrow(() -> new FichaTecnicaException("Lista de conversões não encontrada"));
     }
 
-    public long findByName(String nome) {
-        return repository.countByName(nome);
+    public long findByConversaoDePara(Long conversaoDe, Long conversaoPara) {
+        return repository.countByUnidadeDeAndUnidadePara(conversaoDe, conversaoPara);
     }
 
-    public DadosUnidadeMedida atualizarUnidade(Long id, DadosUnidadeMedida novosDados) {
-        Optional<UnidadeMedida> unidadeExistente = repository.findById(id);
-        if (unidadeExistente.isPresent()) {
-            UnidadeMedida unidade = unidadeExistente.get();
-            unidade.setNome(novosDados.nome());
-            unidade.setSigla(novosDados.sigla());
+    public DadosConversao atualizarConversao(Long id, DadosConversao novosDados) {
+        Optional<Conversao> conversaoExistente = repository.findById(id);
+        if (conversaoExistente.isPresent()) {
+            Conversao conversao = conversaoExistente.get();
+            conversao.setUnidadeDe(novosDados.unidadeDe());
+            conversao.setUnidadePara(novosDados.unidadePara());
+            conversao.setOperacao(novosDados.operacao());
+            conversao.setValor(novosDados.valor());
 
             // Atualize outros campos conforme necessário
-            repository.save(unidade);
-            return new DadosUnidadeMedida(unidade);
+            repository.save(conversao);
+            return new DadosConversao(conversao);
         } else {
-            throw new FichaTecnicaException("Unidade com ID " + id + " não encontrada");
+            throw new FichaTecnicaException("Conversao com ID " + id + " não encontrada");
         }
     }
 
-    public DadosUnidadeMedida cadastrarUnidade(DadosUnidadeMedida unidade) {
-        Objects.requireNonNull(unidade, "Unidade de medida não pode ser nula");
-        Objects.requireNonNull(unidade.nome(), "Nome da unidade de medida não pode ser nulo");
-        Objects.requireNonNull(unidade.sigla(), "Sigla da unidade de medida não pode ser nula");
+    public DadosConversao cadastrarConversao(DadosConversao conversao) {
+        Objects.requireNonNull(conversao, "Conversão não pode ser nula");
+        Objects.requireNonNull(conversao.unidadeDe(), "UnidadeDe não pode ser nulo");
+        Objects.requireNonNull(conversao.operacao(), "Operação não pode ser nula");
+        Objects.requireNonNull(conversao.valor(), "Valor não pode ser nulo");
 
-        if (findByName(unidade.nome()) > 0) {
-            throw new FichaTecnicaException("Unidade de medida já cadastrada");
+
+        if (findByConversaoDePara(conversao.unidadeDe(), conversao.unidadePara()) > 0) {
+            throw new FichaTecnicaException("Conversão já cadastrada");
         }
 
-        UnidadeMedida unidadeMedida = new UnidadeMedida(unidade);
-        return new DadosUnidadeMedida(repository.save(unidadeMedida));
+        Conversao novaConversao = new Conversao(conversao);
+        return new DadosConversao(repository.save(novaConversao));
     }
 
-    public void deletarUnidade(Long id) {
+    public void deletarConversao(Long id) {
         repository.deleteById(id);
     }
 }

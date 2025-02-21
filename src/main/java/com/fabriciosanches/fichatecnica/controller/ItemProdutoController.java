@@ -1,9 +1,11 @@
 package com.fabriciosanches.fichatecnica.controller;
 
-import com.fabriciosanches.fichatecnica.domain.medidas.DadosUnidadeMedida;
+import com.fabriciosanches.fichatecnica.domain.itensProduto.DadosItensProduto;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
-import com.fabriciosanches.fichatecnica.services.UnidadeMedidaService;
+import com.fabriciosanches.fichatecnica.services.ItensProdutoService;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
@@ -13,96 +15,94 @@ import java.util.List;
 
 
 @RestController
+@RequiredArgsConstructor
+@Slf4j
 @RequestMapping("ficha-tecnica")
-public class MedidasController {
-    private static final Logger logger = LogManager.getLogger(MedidasController.class);
+public class ItemProdutoController {
+    private static final Logger logger = LogManager.getLogger(ItemProdutoController.class);
 
-    final UnidadeMedidaService unidadeService;
+    final ItensProdutoService itensProdutoService;
 
-    public MedidasController(UnidadeMedidaService unidadeService) {
-        this.unidadeService = unidadeService;
-    }
-
-    @GetMapping("/unidades-medida")
-    public ResponseEntity<List<DadosUnidadeMedida>> buscarLista(){
-        logger.info("Inicio do método buscarLista");
-        logger.info("Buscando lista de unidades de medida");
+    @GetMapping("/itens-produto")
+    public ResponseEntity<List<DadosItensProduto>> buscarLista(){
+        log.info("Inicio do método buscarLista");
+        log.info("Buscando lista de itens de produto");
         try {
-            List<DadosUnidadeMedida> medidas = unidadeService.listar();
-            logger.info("Lista de unidades de medida encontrada: {}", medidas);
-            logger.info("Fim do método buscarLista");
-            return ResponseEntity.ok(medidas);
+            List<DadosItensProduto> itensProdutos = itensProdutoService.listar();
+            log.info("Lista de itens de produtos encontrada: {}", itensProdutos);
+            log.info("Fim do método buscarLista");
+            return ResponseEntity.ok(itensProdutos);
         }
         catch (FichaTecnicaException e){
-            logger.error("Erro ao buscar lista de unidades de medida", e);
+            log.error("Erro ao buscar lista de itens de produto", e);
             return ResponseEntity.notFound().build();
         }
 
     }
 
-    @GetMapping("/unidades-medida/{id}")
-    public ResponseEntity<DadosUnidadeMedida> buscarPorId(@PathVariable Long id){
-        logger.info("Inicio do método buscarPorId");
-        logger.info("Buscando unidade de medida por id: {}", id);
+    @GetMapping("/itens-produto/{id}")
+    public ResponseEntity<DadosItensProduto> buscarPorId(@PathVariable Long id){
+        log.info("Inicio do método buscarPorId");
+        log.info("Buscando itens de produto por id: {}", id);
         try {
-            DadosUnidadeMedida medida = unidadeService.buscarPorId(id);
-            logger.info("Unidade de medida encontrada: {}", medida);
-            logger.info("Fim do método buscarPorId");
-            return ResponseEntity.ok(medida);
+            DadosItensProduto dadosItensProduto = itensProdutoService.buscarPorId(id);
+            log.info("Item de produto encontrado: {}", dadosItensProduto);
+            log.info("Fim do método buscarPorId");
+            return ResponseEntity.ok(dadosItensProduto);
         }
         catch (FichaTecnicaException e){
-            logger.error("Erro ao buscar unidade de medida por id", e);
+            log.error("Erro ao buscar itens de produto por id", e);
             return ResponseEntity.notFound().build();
         }
     }
 
-    @DeleteMapping("/unidades-medida/{id}")
+    @DeleteMapping("/itens-produto/{id}")
     @Transactional
-    public ResponseEntity apagar(@PathVariable Long id) {
-        logger.info("Inicio do método apagar");
-        logger.info("Apagando unidade de medida por id: {}", id);
+    public ResponseEntity<Void> apagar(@PathVariable Long id) {
+        log.info("Inicio do método apagar");
+        log.info("Apagando itens de produto por id: {}", id);
         try {
-            unidadeService.deletarUnidade(id);
-            logger.info("Unidade de medida apagada com sucesso");
-            logger.info("Fim do método apagar");
+            itensProdutoService.deletarItemProduto(id);
+            log.info("Item de Produto apagado com sucesso");
+            log.info("Fim do método apagar");
             return ResponseEntity.noContent().build();
         }
         catch (FichaTecnicaException e){
-            logger.error("Erro ao apagar unidade de medida por id", e);
+            log.error("Erro ao apagar item de produto por id", e);
             return ResponseEntity.notFound().build();
         }
     }
 
-    @PutMapping("/unidades-medida/{id}")
+    @PutMapping("/itens-produto/{id}")
     @Transactional
-    public ResponseEntity<DadosUnidadeMedida> atualizarUnidade(@PathVariable Long id, @RequestBody DadosUnidadeMedida unidade) {
-        logger.info("Inicio do método atualizarUnidade");
-        logger.info("Atualizando unidade de medida por id: {}", id);
+    public ResponseEntity<DadosItensProduto> atualizar(@PathVariable Long id, @RequestBody DadosItensProduto itensProduto) {
+        log.info("Inicio do método atualizar");
+        log.info("Atualizando itens de produto por id: {}", id);
         try {
-            DadosUnidadeMedida medida = unidadeService.atualizarUnidade(id, unidade);
-            logger.info("Unidade de medida atualizada com sucesso: {}", medida);
-            logger.info("Fim do método atualizarUnidade");
-            return ResponseEntity.ok(medida);
+            DadosItensProduto itemProduto = itensProdutoService.atualizarItensProduto(id, itensProduto);
+            log.info("Item de produto atualizado com sucesso: {}", itemProduto);
+            log.info("Fim do método atualizar");
+            return ResponseEntity.ok(itemProduto);
         }
         catch (FichaTecnicaException e){
-            logger.error("Erro ao atualizar unidade de medida por id", e);
+            log.error("Erro ao atualizar item de produto por id", e);
             return ResponseEntity.notFound().build();
         }
     }
 
-    @PostMapping("/unidades-medida")
+    @PostMapping("/itens-produto")
     @Transactional
-    public ResponseEntity<DadosUnidadeMedida> cadastrarUnidade(@RequestBody DadosUnidadeMedida unidade) {
-        logger.info("Inicio do método cadastrarUnidade");
-        logger.info("Cadastrando unidade de medida: {}", unidade);
+    public ResponseEntity<DadosItensProduto> cadastrar(@RequestBody DadosItensProduto item) {
+        log.info("Inicio do método cadastrar");
+        log.info("Cadastrando item de produto: {}", item);
         try {
-            DadosUnidadeMedida medida = unidadeService.cadastrarUnidade(unidade);
-            logger.info("Unidade de medida cadastrada com sucesso: {}", medida);
-            logger.info("Fim do método cadastrarUnidade");
-            return ResponseEntity.ok(medida);
+            DadosItensProduto itemAtual = itensProdutoService.cadastrar(item);
+            log.info("Item de Produto cadastrado com sucesso: {}",itemAtual );
+            log.info("Fim do método cadastrar");
+            return ResponseEntity.ok(itemAtual);
         }
         catch (FichaTecnicaException e){
-            logger.error("Erro ao cadastrar unidade de medida", e);
+            logger.error("Erro ao cadastrar item de Produto", e);
             return ResponseEntity.badRequest().build();
         }
     }

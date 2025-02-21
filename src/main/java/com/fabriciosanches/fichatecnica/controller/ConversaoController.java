@@ -1,8 +1,9 @@
 package com.fabriciosanches.fichatecnica.controller;
 
-import com.fabriciosanches.fichatecnica.domain.medidas.DadosUnidadeMedida;
+import com.fabriciosanches.fichatecnica.domain.conversao.DadosConversao;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
-import com.fabriciosanches.fichatecnica.services.UnidadeMedidaService;
+import com.fabriciosanches.fichatecnica.services.ConversaoService;
+
 import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,95 +15,95 @@ import java.util.List;
 
 @RestController
 @RequestMapping("ficha-tecnica")
-public class MedidasController {
-    private static final Logger logger = LogManager.getLogger(MedidasController.class);
+public class ConversaoController {
+    private static final Logger logger = LogManager.getLogger(ConversaoController.class);
 
-    final UnidadeMedidaService unidadeService;
+    final ConversaoService conversaoService;
 
-    public MedidasController(UnidadeMedidaService unidadeService) {
-        this.unidadeService = unidadeService;
+    public ConversaoController(ConversaoService conversaoService) {
+        this.conversaoService =conversaoService;
     }
 
-    @GetMapping("/unidades-medida")
-    public ResponseEntity<List<DadosUnidadeMedida>> buscarLista(){
+    @GetMapping("/conversoes")
+    public ResponseEntity<List<DadosConversao>> buscarLista(){
         logger.info("Inicio do método buscarLista");
-        logger.info("Buscando lista de unidades de medida");
+        logger.info("Buscando lista de conversões");
         try {
-            List<DadosUnidadeMedida> medidas = unidadeService.listar();
-            logger.info("Lista de unidades de medida encontrada: {}", medidas);
+            List<DadosConversao> conversoes = conversaoService.listar();
+            logger.info("Lista de conversoes encontrada: {}", conversoes);
             logger.info("Fim do método buscarLista");
-            return ResponseEntity.ok(medidas);
+            return ResponseEntity.ok(conversoes);
         }
         catch (FichaTecnicaException e){
-            logger.error("Erro ao buscar lista de unidades de medida", e);
+            logger.error("Erro ao buscar lista de conversoes", e);
             return ResponseEntity.notFound().build();
         }
 
     }
 
-    @GetMapping("/unidades-medida/{id}")
-    public ResponseEntity<DadosUnidadeMedida> buscarPorId(@PathVariable Long id){
+    @GetMapping("/conversoes/{id}")
+    public ResponseEntity<DadosConversao> buscarPorId(@PathVariable Long id){
         logger.info("Inicio do método buscarPorId");
-        logger.info("Buscando unidade de medida por id: {}", id);
+        logger.info("Buscando conversoes por id: {}", id);
         try {
-            DadosUnidadeMedida medida = unidadeService.buscarPorId(id);
-            logger.info("Unidade de medida encontrada: {}", medida);
+            DadosConversao conversao = conversaoService.buscarPorId(id);
+            logger.info("Conversao encontrada: {}", conversao);
             logger.info("Fim do método buscarPorId");
-            return ResponseEntity.ok(medida);
+            return ResponseEntity.ok(conversao);
         }
         catch (FichaTecnicaException e){
-            logger.error("Erro ao buscar unidade de medida por id", e);
+            logger.error("Erro ao buscar conversao por id", e);
             return ResponseEntity.notFound().build();
         }
     }
 
-    @DeleteMapping("/unidades-medida/{id}")
+    @DeleteMapping("/conversoes/{id}")
     @Transactional
-    public ResponseEntity apagar(@PathVariable Long id) {
+    public ResponseEntity<Void> apagar(@PathVariable Long id) {
         logger.info("Inicio do método apagar");
-        logger.info("Apagando unidade de medida por id: {}", id);
+        logger.info("Apagando conversoes por id: {}", id);
         try {
-            unidadeService.deletarUnidade(id);
-            logger.info("Unidade de medida apagada com sucesso");
+            conversaoService.deletarConversao(id);
+            logger.info("Conversao apagada com sucesso");
             logger.info("Fim do método apagar");
             return ResponseEntity.noContent().build();
         }
         catch (FichaTecnicaException e){
-            logger.error("Erro ao apagar unidade de medida por id", e);
+            logger.error("Erro ao apagar conversao por id", e);
             return ResponseEntity.notFound().build();
         }
     }
 
-    @PutMapping("/unidades-medida/{id}")
+    @PutMapping("/conversoes/{id}")
     @Transactional
-    public ResponseEntity<DadosUnidadeMedida> atualizarUnidade(@PathVariable Long id, @RequestBody DadosUnidadeMedida unidade) {
-        logger.info("Inicio do método atualizarUnidade");
-        logger.info("Atualizando unidade de medida por id: {}", id);
+    public ResponseEntity<DadosConversao> atualizarConversao(@PathVariable Long id, @RequestBody DadosConversao conversao) {
+        logger.info("Inicio do método atualizarConversao");
+        logger.info("Atualizando conversao por id: {}", id);
         try {
-            DadosUnidadeMedida medida = unidadeService.atualizarUnidade(id, unidade);
-            logger.info("Unidade de medida atualizada com sucesso: {}", medida);
-            logger.info("Fim do método atualizarUnidade");
-            return ResponseEntity.ok(medida);
+            DadosConversao conversoes = conversaoService.atualizarConversao(id, conversao);
+            logger.info("Conversao atualizada com sucesso: {}", conversoes);
+            logger.info("Fim do método atualizarConversao");
+            return ResponseEntity.ok(conversoes);
         }
         catch (FichaTecnicaException e){
-            logger.error("Erro ao atualizar unidade de medida por id", e);
+            logger.error("Erro ao atualizar conversao por id", e);
             return ResponseEntity.notFound().build();
         }
     }
 
-    @PostMapping("/unidades-medida")
+    @PostMapping("/conversoes")
     @Transactional
-    public ResponseEntity<DadosUnidadeMedida> cadastrarUnidade(@RequestBody DadosUnidadeMedida unidade) {
-        logger.info("Inicio do método cadastrarUnidade");
-        logger.info("Cadastrando unidade de medida: {}", unidade);
+    public ResponseEntity<DadosConversao> cadastrarConversao(@RequestBody DadosConversao conversao) {
+        logger.info("Inicio do método cadastrarConversao");
+        logger.info("Cadastrando unidade de medida: {}", conversao);
         try {
-            DadosUnidadeMedida medida = unidadeService.cadastrarUnidade(unidade);
-            logger.info("Unidade de medida cadastrada com sucesso: {}", medida);
-            logger.info("Fim do método cadastrarUnidade");
-            return ResponseEntity.ok(medida);
+            DadosConversao dadosConversao = conversaoService.cadastrarConversao(conversao);
+            logger.info("Conversao cadastrada com sucesso: {}", dadosConversao);
+            logger.info("Fim do método cadastrarConversao");
+            return ResponseEntity.ok(dadosConversao);
         }
         catch (FichaTecnicaException e){
-            logger.error("Erro ao cadastrar unidade de medida", e);
+            logger.error("Erro ao cadastrar conversao", e);
             return ResponseEntity.badRequest().build();
         }
     }

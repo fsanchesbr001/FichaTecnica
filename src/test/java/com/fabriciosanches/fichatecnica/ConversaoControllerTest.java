@@ -1,4 +1,96 @@
 package com.fabriciosanches.fichatecnica;
 
-public class ConversaoControllerTest {
+import com.fabriciosanches.fichatecnica.controller.ConversaoController;
+import com.fabriciosanches.fichatecnica.domain.conversao.DadosConversao;
+import com.fabriciosanches.fichatecnica.services.ConversaoService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Objects;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.*;
+
+class ConversaoControllerTest {
+
+    @Mock
+    private ConversaoService conversaoService;
+
+    @InjectMocks
+    private ConversaoController conversaoController;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    void testBuscarLista() {
+        DadosConversao dadosConversao = new DadosConversao(1L, 1L, 2L, "MULTIPLICACAO", BigDecimal.TEN);
+        when(conversaoService.listar()).thenReturn(List.of(dadosConversao));
+
+        ResponseEntity<List<DadosConversao>> response = conversaoController.buscarLista();
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(1, Objects.requireNonNull(response.getBody()).size());
+        verify(conversaoService, times(1)).listar();
+    }
+
+    @Test
+    void testBuscarPorId() {
+        DadosConversao dadosConversao = new DadosConversao(1L, 1L, 2L, "MULTIPLICACAO", BigDecimal.TEN);
+        when(conversaoService.buscarPorId(1L)).thenReturn(dadosConversao);
+
+        ResponseEntity<DadosConversao> response = conversaoController.buscarPorId(1L);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(dadosConversao, response.getBody());
+        verify(conversaoService, times(1)).buscarPorId(1L);
+    }
+
+    @Test
+    void testApagar() {
+        doNothing().when(conversaoService).deletarConversao(1L);
+
+        ResponseEntity<Void> response = conversaoController.apagar(1L);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(conversaoService, times(1)).deletarConversao(1L);
+    }
+
+    @Test
+    void testAtualizarConversao() {
+        DadosConversao dadosConversao = new DadosConversao(1L, 1L, 2L, "MULTIPLICACAO", BigDecimal.TEN);
+        when(conversaoService.atualizarConversao(eq(1L), any(DadosConversao.class))).thenReturn(dadosConversao);
+
+        ResponseEntity<DadosConversao> response = conversaoController.atualizarConversao(1L, dadosConversao);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(dadosConversao, response.getBody());
+        verify(conversaoService, times(1)).atualizarConversao(eq(1L), any(DadosConversao.class));
+    }
+
+    @Test
+    void testCadastrarConversao() {
+        DadosConversao dadosConversao = new DadosConversao(1L, 1L, 2L, "MULTIPLICACAO", BigDecimal.TEN);
+        when(conversaoService.cadastrarConversao(any(DadosConversao.class))).thenReturn(dadosConversao);
+
+        ResponseEntity<DadosConversao> response = conversaoController.cadastrarConversao(dadosConversao);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(dadosConversao, response.getBody());
+        verify(conversaoService, times(1)).cadastrarConversao(any(DadosConversao.class));
+    }
 }
