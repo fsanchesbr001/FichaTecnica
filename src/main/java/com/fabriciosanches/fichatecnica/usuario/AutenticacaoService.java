@@ -1,4 +1,4 @@
-package com.fabriciosanches.contatos.usuario;
+package com.fabriciosanches.fichatecnica.usuario;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;

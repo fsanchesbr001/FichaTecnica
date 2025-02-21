@@ -1,18 +1,18 @@
-package com.fabriciosanches.contatos.security;
+package com.fabriciosanches.fichatecnica.security;
 
+import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.fabriciosanches.contatos.usuario.Usuario;
+import com.fabriciosanches.fichatecnica.usuario.Usuario;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-
-import com.auth0.jwt.JWT;
 
 @Service
 public class TokenService {

@@ -1,11 +1,14 @@
 package com.fabriciosanches.fichatecnica.repository;
 
-import com.fabriciosanches.fichatecnica.domain.itens.Item;
+import com.fabriciosanches.fichatecnica.domain.historicoItem.HistoricoItem;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface ItemRepository extends JpaRepository<Item, Long> {
-    @Query("SELECT COUNT(i) FROM Item i WHERE i.nome = :nome")
-    long countByName(@Param("nome") String nome);
+public interface HistoricoItemRepository extends JpaRepository<HistoricoItem, Long> {
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM HistoricoItem h WHERE h.item.codigo = :codigoItem")
+    void deleteByItemCodigo(Long codigoItem);
 }

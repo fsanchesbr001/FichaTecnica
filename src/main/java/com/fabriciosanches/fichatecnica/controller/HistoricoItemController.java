@@ -1,8 +1,9 @@
 package com.fabriciosanches.fichatecnica.controller;
 
-import com.fabriciosanches.fichatecnica.domain.itens.DadosItem;
+import com.fabriciosanches.fichatecnica.domain.historicoItem.DadosHistoricoItem;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
-import com.fabriciosanches.fichatecnica.services.ItemService;
+import com.fabriciosanches.fichatecnica.services.HistoricoItemService;
+
 import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,42 +14,42 @@ import java.util.List;
 
 @RestController
 @RequestMapping("ficha-tecnica")
-public class ItemController {
+public class HistoricoItemController {
 
-    private static final Logger logger = LogManager.getLogger(ItemController.class);
+    private static final Logger logger = LogManager.getLogger(HistoricoItemController.class);
 
-    final ItemService itemService;
+    final HistoricoItemService historicoItemService;
 
-    public ItemController(ItemService itemService) {
-        this.itemService = itemService;
+    public HistoricoItemController(HistoricoItemService historicoItemService) {
+        this.historicoItemService = historicoItemService;
     }
 
-    @GetMapping("/itens")
-    public ResponseEntity<List<DadosItem>> buscarLista(){
+    @GetMapping("/historico-itens")
+    public ResponseEntity<List<DadosHistoricoItem>> buscarLista(){
         logger.info("Inicio do método buscarLista");
-        logger.info("Buscando lista de itens");
+        logger.info("Buscando lista de historico de itens");
         try {
-            List<DadosItem> itens = itemService.listar();
-            logger.info("Lista de itens encontrada: {}", itens);
+            List<DadosHistoricoItem> dadosHistoricoItemList = historicoItemService.listar();
+            logger.info("Lista de historico de itens encontrada: {}", dadosHistoricoItemList);
             logger.info("Fim do método buscarLista");
-            return ResponseEntity.ok(itens);
+            return ResponseEntity.ok(dadosHistoricoItemList);
         }
         catch (FichaTecnicaException e){
-            logger.error("Erro ao buscar lista de itens", e);
+            logger.error("Erro ao buscar lista de historico de itens", e);
             return ResponseEntity.notFound().build();
         }
 
     }
 
-    @GetMapping("/itens/{id}")
-    public ResponseEntity<DadosItem> buscarPorId(@PathVariable Long id){
+    @GetMapping("/historico-itens/{id}")
+    public ResponseEntity<DadosHistoricoItem> buscarPorId(@PathVariable Long id){
         logger.info("Inicio do método buscarPorId");
         logger.info("Buscando item por id: {}", id);
         try {
-            DadosItem item = itemService.buscarPorId(id);
-            logger.info("Item encontrado: {}", item);
+            DadosHistoricoItem historicoItem = historicoItemService.buscarPorId(id);
+            logger.info("Item encontrado: {}", historicoItem);
             logger.info("Fim do método buscarPorId");
-            return ResponseEntity.ok(item);
+            return ResponseEntity.ok(historicoItem);
         }
         catch (FichaTecnicaException e){
             logger.error("Erro ao buscar item por id", e);
@@ -56,30 +57,49 @@ public class ItemController {
         }
     }
 
-    @DeleteMapping("/itens/{id}")
+    @DeleteMapping("/historico-itens/{id}")
     @Transactional
-    public ResponseEntity apagar(@PathVariable Long id) {
+    public ResponseEntity<Void> apagar(@PathVariable Long id) {
         logger.info("Inicio do método apagar");
-        logger.info("Apagando item por id: {}", id);
+        logger.info("Apagando historico de item por id: {}", id);
         try {
-            itemService.deletarItem(id);
-            logger.info("Item apagado com sucesso");
+            historicoItemService.deletarItem(id);
+            logger.info("Historico do Item apagado com sucesso");
             logger.info("Fim do método apagar");
             return ResponseEntity.noContent().build();
         }
         catch (FichaTecnicaException e){
-            logger.error("Erro ao apagar item por id", e);
+            logger.error("Erro ao apagar historico do item por id", e);
             return ResponseEntity.notFound().build();
         }
     }
 
-    @PutMapping("/itens/{id}")
+    @DeleteMapping("/historico-itens/itens/{codItem}")
     @Transactional
-    public ResponseEntity<DadosItem> atualizarItem(@PathVariable Long id, @RequestBody DadosItem dadosItem) {
+    public ResponseEntity<Void> apagarPorCodItem(@PathVariable Long codItem) {
+        logger.info("Inicio do método apagarPorCodItem");
+        logger.info("Apagando historico de item por codItem: {}", codItem);
+        try {
+            historicoItemService.deletarPorCodigoItem(codItem);
+            logger.info("Historico do Item apagado com sucesso");
+            logger.info("Fim do método apagarPorCodItem");
+            return ResponseEntity.noContent().build();
+        }
+        catch (FichaTecnicaException e){
+            logger.error("Erro ao apagar historico do item por id", e);
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
+
+    @PutMapping("/historico-itens/{id}")
+    @Transactional
+    public ResponseEntity<DadosHistoricoItem> atualizar(@PathVariable Long id, @RequestBody DadosHistoricoItem dadosHistoricoItem) {
         logger.info("Inicio do método atualizarItem");
         logger.info("Atualizando item por id: {}", id);
         try {
-            DadosItem item = itemService.atualizarItem(id, dadosItem);
+            DadosHistoricoItem item = historicoItemService.atualizarHistoricoItem(id, dadosHistoricoItem);
             logger.info("Item atualizado com sucesso: {}", item);
             logger.info("Fim do método atualizarUnidade");
             return ResponseEntity.ok(item);
@@ -90,19 +110,19 @@ public class ItemController {
         }
     }
 
-    @PostMapping("/itens")
+    @PostMapping("/historico-itens")
     @Transactional
-    public ResponseEntity<DadosItem> cadastrarItem(@RequestBody DadosItem dadosItem) {
-        logger.info("Inicio do método cadastrarItem");
-        logger.info("Cadastrando Item: {}", dadosItem);
+    public ResponseEntity<DadosHistoricoItem> cadastrar(@RequestBody DadosHistoricoItem dadosHistoricoItem) {
+        logger.info("Inicio do método cadastrar");
+        logger.info("Cadastrando Historico do Item: {}", dadosHistoricoItem);
         try {
-            DadosItem item = itemService.cadastrarItem(dadosItem);
-            logger.info("Item cadastrado com sucesso: {}", item);
-            logger.info("Fim do método cadastrarItem");
-            return ResponseEntity.ok(item);
+            DadosHistoricoItem dadosHistorico = historicoItemService.cadastrarItem(dadosHistoricoItem);
+            logger.info("Historico de Item cadastrado com sucesso: {}", dadosHistorico);
+            logger.info("Fim do método cadastrar");
+            return ResponseEntity.ok(dadosHistorico);
         }
         catch (FichaTecnicaException e){
-            logger.error("Erro ao cadastrar item", e);
+            logger.error("Erro ao cadastrar historico do item", e);
             return ResponseEntity.badRequest().build();
         }
     }

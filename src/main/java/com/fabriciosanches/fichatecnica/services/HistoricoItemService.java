@@ -1,89 +1,84 @@
 package com.fabriciosanches.fichatecnica.services;
 
-import com.fabriciosanches.fichatecnica.domain.itens.DadosItem;
-import com.fabriciosanches.fichatecnica.domain.itens.Item;
+import com.fabriciosanches.fichatecnica.domain.historicoItem.DadosHistoricoItem;
+import com.fabriciosanches.fichatecnica.domain.historicoItem.HistoricoItem;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
-import com.fabriciosanches.fichatecnica.repository.ItemRepository;
+import com.fabriciosanches.fichatecnica.repository.HistoricoItemRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 @Service
-public class ItemService {
+public class HistoricoItemService {
 
-    private final Logger logger = LogManager.getLogger(UnidadeMedidaService.class);
-    private final ItemRepository repository;
+    private final Logger logger = LogManager.getLogger(HistoricoItemService.class);
+    private final HistoricoItemRepository repository;
 
-    public ItemService(ItemRepository repository) {
+    public HistoricoItemService(HistoricoItemRepository repository) {
         this.repository = repository;
     }
 
-    private Optional<List<DadosItem>> obterLista() {
+    private Optional<List<DadosHistoricoItem>> obterLista() {
         logger.info("Inicio do método obterLista");
-        Optional<List<DadosItem>> listaRecord =
-                Optional.of(DadosItem.from(repository.findAll()));
+        Optional<List<DadosHistoricoItem>> listaRecord =
+                Optional.of(DadosHistoricoItem.from(repository.findAll()));
 
-        logger.info("Lista de itens encontrada: {}", listaRecord.get());
+        logger.info("Lista de historico de itens encontrada: {}", listaRecord.get());
         logger.info("Fim do método obterLista");
         return listaRecord;
     }
 
-    public List<DadosItem> listar() {
+    public List<DadosHistoricoItem> listar() {
         return obterLista().map(lista -> lista.stream()
-                .sorted(Comparator.comparing(DadosItem::nome))
                 .toList()).orElseThrow(
-                () -> new FichaTecnicaException("Lista de itens não encontrada"));
+                () -> new FichaTecnicaException("Lista de historico de itens não encontrada"));
 
     }
 
-    public DadosItem buscarPorId(Long id) {
+    public DadosHistoricoItem buscarPorId(Long id) {
         return obterLista().map(lista -> lista.stream()
                         .filter(item -> item.codigo().equals(id))
                         .findFirst()
-                        .orElseThrow(() -> new FichaTecnicaException("Item não encontrado")))
-                .orElseThrow(() -> new FichaTecnicaException("Lista de itens não encontrada"));
+                        .orElseThrow(() -> new FichaTecnicaException("Historico de item não encontrado")))
+                .orElseThrow(() -> new FichaTecnicaException("Lista de historico de itens não encontrada"));
     }
 
-    public long findByName(String nome) {
-        return repository.countByName(nome);
-    }
 
-    public DadosItem atualizarItem(Long id, DadosItem novosDados) {
-        Optional<Item> itemExistente = repository.findById(id);
-        if (itemExistente.isPresent()) {
-            Item item = itemExistente.get();
-            item.setNome(novosDados.nome());
-            item.setValor(novosDados.valor());
-            item.setUnidadeMedida(novosDados.unidadeMedida());
+    public DadosHistoricoItem atualizarHistoricoItem(Long id, DadosHistoricoItem novosDados) {
+        Optional<HistoricoItem> historicoExistente = repository.findById(id);
+        if (historicoExistente.isPresent()) {
+            HistoricoItem historicoItem = historicoExistente.get();
+            historicoItem.setItem(novosDados.item());
+            historicoItem.setValor(novosDados.valor());
+            historicoItem.setDataInicio(novosDados.dataInicio());
 
             // Atualize outros campos conforme necessário
-            repository.save(item);
-            return new DadosItem(item);
+            repository.save(historicoItem);
+            return new DadosHistoricoItem(historicoItem);
         } else {
-            throw new FichaTecnicaException("Item com ID " + id + " não encontrado");
+            throw new FichaTecnicaException("Historico de item com ID " + id + " não encontrado");
         }
     }
 
-    public DadosItem cadastrarItem(DadosItem item) {
-        Objects.requireNonNull(item, "Item não pode ser nulo");
-        Objects.requireNonNull(item.nome(), "Nome do item não pode ser nulo");
-        Objects.requireNonNull(item.unidadeMedida(), "Unidade de medida não pode ser nula");
-        Objects.requireNonNull(item.valor(), "Valor do item não pode ser nulo");
+    public DadosHistoricoItem cadastrarItem(DadosHistoricoItem historicoItem) {
+        Objects.requireNonNull(historicoItem, "Historico de item não pode ser nulo");
+        Objects.requireNonNull(historicoItem.item(), "Item não pode ser nulo");
+        Objects.requireNonNull(historicoItem.dataInicio(), "Data Inicio não pode ser nula");
+        Objects.requireNonNull(historicoItem.valor(), "Valor do item não pode ser nulo");
 
-        if (findByName(item.nome()) > 0) {
-            throw new FichaTecnicaException("Item já cadastrado");
-        }
-
-        Item novoItem = new Item(item);
-        return new DadosItem(repository.save(novoItem));
+        HistoricoItem novoHistoricoItem = new HistoricoItem(historicoItem);
+        return new DadosHistoricoItem(repository.save(novoHistoricoItem));
     }
 
     public void deletarItem(Long id) {
         repository.deleteById(id);
+    }
+
+    public void deletarPorCodigoItem(Long codItem) {
+        repository.deleteByItemCodigo(codItem);
     }
 }

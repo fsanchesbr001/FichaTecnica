@@ -1,4 +1,4 @@
-package com.fabriciosanches.contatos.util;
+package com.fabriciosanches.fichatecnica.util;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
