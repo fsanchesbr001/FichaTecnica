@@ -1,5 +1,6 @@
-package com.fabriciosanches.fichatecnica.usuario;
+package com.fabriciosanches.fichatecnica.repository;
 
+import com.fabriciosanches.fichatecnica.domains.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 

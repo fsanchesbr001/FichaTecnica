@@ -1,6 +1,6 @@
-package com.fabriciosanches.fichatecnica.domain.produto;
+package com.fabriciosanches.fichatecnica.domains;
 
-import com.fabriciosanches.fichatecnica.domain.itensProduto.ItensProduto;
+import com.fabriciosanches.fichatecnica.dtos.ProdutoDTO;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -31,11 +31,11 @@ public class Produto {
     @JsonManagedReference
     private List<ItensProduto> itens;
 
-    public Produto(DadosProduto dadosProduto) {
-        this.codigo = dadosProduto.codigo();
-        this.nome = dadosProduto.nome();
-        this.descricao = dadosProduto.descricao();
-        this.imagem = dadosProduto.imagem();
-        this.valor = dadosProduto.valor();
+    public Produto(ProdutoDTO produtoDTO) {
+        this.codigo = produtoDTO.codigo();
+        this.nome = produtoDTO.nome();
+        this.descricao = produtoDTO.descricao();
+        this.imagem = produtoDTO.imagem();
+        this.valor = produtoDTO.valor();
     }
 }

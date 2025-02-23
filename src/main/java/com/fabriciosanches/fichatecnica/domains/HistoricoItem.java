@@ -1,6 +1,6 @@
-package com.fabriciosanches.fichatecnica.domain.historicoItem;
+package com.fabriciosanches.fichatecnica.domains;
 
-import com.fabriciosanches.fichatecnica.domain.itens.Item;
+import com.fabriciosanches.fichatecnica.dtos.HistoricoItemDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,10 +29,10 @@ public class HistoricoItem {
 
     private LocalDate dataInicio;
 
-    public HistoricoItem(DadosHistoricoItem dadosHistoricoItem) {
-        this.codigo = dadosHistoricoItem.codigo();
-        this.item = dadosHistoricoItem.item();
-        this.valor = dadosHistoricoItem.valor();
-        this.dataInicio = dadosHistoricoItem.dataInicio();
+    public HistoricoItem(HistoricoItemDTO historicoItemDTO) {
+        this.codigo = historicoItemDTO.codigo();
+        this.item = historicoItemDTO.item();
+        this.valor = historicoItemDTO.valor();
+        this.dataInicio = historicoItemDTO.dataInicio();
     }
 }

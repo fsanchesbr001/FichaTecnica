@@ -1,7 +1,7 @@
 package com.fabriciosanches.fichatecnica.services;
 
-import com.fabriciosanches.fichatecnica.domain.itensProduto.DadosItensProduto;
-import com.fabriciosanches.fichatecnica.domain.itensProduto.ItensProduto;
+import com.fabriciosanches.fichatecnica.dtos.ItensProdutoDTO;
+import com.fabriciosanches.fichatecnica.domains.ItensProduto;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.repository.ItensProdutoRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,24 +21,24 @@ public class ItensProdutoService {
     private final ItensProdutoRepository repository;
 
 
-    private Optional<List<DadosItensProduto>> obterLista() {
+    private Optional<List<ItensProdutoDTO>> obterLista() {
         log.info("Inicio do método obterLista");
-        Optional<List<DadosItensProduto>> listaRecord =
-                Optional.of(DadosItensProduto.from(repository.findAll()));
+        Optional<List<ItensProdutoDTO>> listaRecord =
+                Optional.of(ItensProdutoDTO.from(repository.findAll()));
 
         log.info("Lista de ItensProduto encontrada: {}", listaRecord.get());
         log.info("Fim do método obterLista");
         return listaRecord;
     }
 
-    public List<DadosItensProduto> listar() {
+    public List<ItensProdutoDTO> listar() {
         return obterLista().map(lista -> lista.stream()
                 .toList()).orElseThrow(
                 () -> new FichaTecnicaException("Lista de ItensProduto não encontrada"));
 
     }
 
-    public DadosItensProduto buscarPorId(Long id) {
+    public ItensProdutoDTO buscarPorId(Long id) {
         return obterLista().map(lista -> lista.stream()
                         .filter(itemProd -> itemProd.codigo().equals(id))
                         .findFirst()
@@ -46,26 +46,26 @@ public class ItensProdutoService {
                 .orElseThrow(() -> new FichaTecnicaException("Item Produto não encontrada"));
     }
 
-    public DadosItensProduto atualizarItensProduto(Long id, DadosItensProduto novosDados) {
+    public ItensProdutoDTO atualizarItensProduto(Long id, ItensProdutoDTO novosDados) {
         Optional<ItensProduto> itensProdutoExistente = repository.findById(id);
         if (itensProdutoExistente.isPresent()) {
             ItensProduto itensProduto = itensProdutoExistente.get();
             itensProduto.setCodigo(novosDados.codigo());
-            itensProduto.setProduto(novosDados.produto());
             itensProduto.setQuantidade(novosDados.quantidade());
             itensProduto.setValor(novosDados.valor());
+            itensProduto.setCdItem(novosDados.codigoItem());
+            itensProduto.setCdProduto(novosDados.codProduto());
 
             // Atualize outros campos conforme necessário
             repository.save(itensProduto);
-            return new DadosItensProduto(itensProduto);
+            return new ItensProdutoDTO(itensProduto);
         } else {
             throw new FichaTecnicaException("Item de Produto com ID " + id + " não encontrado");
         }
     }
 
-    public DadosItensProduto cadastrar(DadosItensProduto itemProduto) {
+    public ItensProdutoDTO cadastrar(ItensProdutoDTO itemProduto) {
         Objects.requireNonNull(itemProduto, "itemProduto não pode ser nula");
-        Objects.requireNonNull(itemProduto.produto(), "Produto não pode ser nulo");
         Objects.requireNonNull(itemProduto.codProduto(), "Codigo do Produto não pode ser nulo");
         Objects.requireNonNull(itemProduto.quantidade(), "Quantidade não pode ser nula");
         Objects.requireNonNull(itemProduto.codigoItem(), "Codigo do Item não pode ser nulo");
@@ -74,7 +74,7 @@ public class ItensProdutoService {
 
 
         ItensProduto novoItemProduto = new ItensProduto(itemProduto);
-        return new DadosItensProduto(repository.save(novoItemProduto));
+        return new ItensProdutoDTO(repository.save(novoItemProduto));
     }
 
     public void deletarItemProduto(Long id) {

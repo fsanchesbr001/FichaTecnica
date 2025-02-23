@@ -1,6 +1,6 @@
-package com.fabriciosanches.fichatecnica.domain.itens;
+package com.fabriciosanches.fichatecnica.domains;
 
-import com.fabriciosanches.fichatecnica.domain.medidas.UnidadeMedida;
+import com.fabriciosanches.fichatecnica.dtos.ItemDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,10 +25,10 @@ public class Item {
     private UnidadeMedida unidadeMedida;
     private BigDecimal valor;
 
-    public Item(DadosItem dadosItem) {
-        this.codigo = dadosItem.codigo();
-        this.nome = dadosItem.nome();
-        this.unidadeMedida = dadosItem.unidadeMedida();
-        this.valor = dadosItem.valor();
+    public Item(ItemDTO itemDTO) {
+        this.codigo = itemDTO.codigo();
+        this.nome = itemDTO.nome();
+        this.unidadeMedida = itemDTO.unidadeMedida();
+        this.valor = itemDTO.valor();
     }
 }

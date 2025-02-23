@@ -1,6 +1,6 @@
 package com.fabriciosanches.fichatecnica.repository;
 
-import com.fabriciosanches.fichatecnica.domain.historicoItem.HistoricoItem;
+import com.fabriciosanches.fichatecnica.domains.HistoricoItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

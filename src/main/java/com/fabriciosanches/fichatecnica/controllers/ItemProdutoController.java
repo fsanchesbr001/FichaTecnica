@@ -1,6 +1,6 @@
-package com.fabriciosanches.fichatecnica.controller;
+package com.fabriciosanches.fichatecnica.controllers;
 
-import com.fabriciosanches.fichatecnica.domain.itensProduto.DadosItensProduto;
+import com.fabriciosanches.fichatecnica.dtos.ItensProdutoDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.services.ItensProdutoService;
 import jakarta.transaction.Transactional;
@@ -24,11 +24,11 @@ public class ItemProdutoController {
     final ItensProdutoService itensProdutoService;
 
     @GetMapping("/itens-produto")
-    public ResponseEntity<List<DadosItensProduto>> buscarLista(){
+    public ResponseEntity<List<ItensProdutoDTO>> buscarLista(){
         log.info("Inicio do método buscarLista");
         log.info("Buscando lista de itens de produto");
         try {
-            List<DadosItensProduto> itensProdutos = itensProdutoService.listar();
+            List<ItensProdutoDTO> itensProdutos = itensProdutoService.listar();
             log.info("Lista de itens de produtos encontrada: {}", itensProdutos);
             log.info("Fim do método buscarLista");
             return ResponseEntity.ok(itensProdutos);
@@ -41,14 +41,14 @@ public class ItemProdutoController {
     }
 
     @GetMapping("/itens-produto/{id}")
-    public ResponseEntity<DadosItensProduto> buscarPorId(@PathVariable Long id){
+    public ResponseEntity<ItensProdutoDTO> buscarPorId(@PathVariable Long id){
         log.info("Inicio do método buscarPorId");
         log.info("Buscando itens de produto por id: {}", id);
         try {
-            DadosItensProduto dadosItensProduto = itensProdutoService.buscarPorId(id);
-            log.info("Item de produto encontrado: {}", dadosItensProduto);
+            ItensProdutoDTO itensProdutoDTO = itensProdutoService.buscarPorId(id);
+            log.info("Item de produto encontrado: {}", itensProdutoDTO);
             log.info("Fim do método buscarPorId");
-            return ResponseEntity.ok(dadosItensProduto);
+            return ResponseEntity.ok(itensProdutoDTO);
         }
         catch (FichaTecnicaException e){
             log.error("Erro ao buscar itens de produto por id", e);
@@ -75,11 +75,11 @@ public class ItemProdutoController {
 
     @PutMapping("/itens-produto/{id}")
     @Transactional
-    public ResponseEntity<DadosItensProduto> atualizar(@PathVariable Long id, @RequestBody DadosItensProduto itensProduto) {
+    public ResponseEntity<ItensProdutoDTO> atualizar(@PathVariable Long id, @RequestBody ItensProdutoDTO itensProduto) {
         log.info("Inicio do método atualizar");
         log.info("Atualizando itens de produto por id: {}", id);
         try {
-            DadosItensProduto itemProduto = itensProdutoService.atualizarItensProduto(id, itensProduto);
+            ItensProdutoDTO itemProduto = itensProdutoService.atualizarItensProduto(id, itensProduto);
             log.info("Item de produto atualizado com sucesso: {}", itemProduto);
             log.info("Fim do método atualizar");
             return ResponseEntity.ok(itemProduto);
@@ -92,11 +92,11 @@ public class ItemProdutoController {
 
     @PostMapping("/itens-produto")
     @Transactional
-    public ResponseEntity<DadosItensProduto> cadastrar(@RequestBody DadosItensProduto item) {
+    public ResponseEntity<ItensProdutoDTO> cadastrar(@RequestBody ItensProdutoDTO item) {
         log.info("Inicio do método cadastrar");
         log.info("Cadastrando item de produto: {}", item);
         try {
-            DadosItensProduto itemAtual = itensProdutoService.cadastrar(item);
+            ItensProdutoDTO itemAtual = itensProdutoService.cadastrar(item);
             log.info("Item de Produto cadastrado com sucesso: {}",itemAtual );
             log.info("Fim do método cadastrar");
             return ResponseEntity.ok(itemAtual);

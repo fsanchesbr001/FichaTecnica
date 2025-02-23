@@ -1,4 +1,4 @@
-package com.fabriciosanches.fichatecnica.usuario;
+package com.fabriciosanches.fichatecnica.domains;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

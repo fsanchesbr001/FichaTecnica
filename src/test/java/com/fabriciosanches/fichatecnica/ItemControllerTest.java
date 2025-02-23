@@ -1,7 +1,7 @@
 package com.fabriciosanches.fichatecnica;
 
-import com.fabriciosanches.fichatecnica.controller.ItemController;
-import com.fabriciosanches.fichatecnica.domain.itens.DadosItem;
+import com.fabriciosanches.fichatecnica.controllers.ItemController;
+import com.fabriciosanches.fichatecnica.dtos.ItemDTO;
 import com.fabriciosanches.fichatecnica.services.ItemService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,10 +31,10 @@ class ItemControllerTest {
 
     @Test
     void testListar() {
-        DadosItem dadosItem = new DadosItem(1L, "Item1", null, BigDecimal.TEN);
-        when(itemService.listar()).thenReturn(List.of(dadosItem));
+        ItemDTO itemDTO = new ItemDTO(1L, "Item1", null, BigDecimal.TEN);
+        when(itemService.listar()).thenReturn(List.of(itemDTO));
 
-        ResponseEntity<List<DadosItem>> response = itemController.buscarLista();
+        ResponseEntity<List<ItemDTO>> response = itemController.buscarLista();
 
         assertNotNull(response);
         assertEquals(200, response.getStatusCode().value());
@@ -45,10 +45,10 @@ class ItemControllerTest {
 
     @Test
     void testBuscarPorId() {
-        DadosItem dadosItem = new DadosItem(1L, "Item1", null, BigDecimal.TEN);
-        when(itemService.buscarPorId(1L)).thenReturn(dadosItem);
+        ItemDTO itemDTO = new ItemDTO(1L, "Item1", null, BigDecimal.TEN);
+        when(itemService.buscarPorId(1L)).thenReturn(itemDTO);
 
-        ResponseEntity<DadosItem> response = itemController.buscarPorId(1L);
+        ResponseEntity<ItemDTO> response = itemController.buscarPorId(1L);
 
         assertNotNull(response);
         assertEquals(200, response.getStatusCode().value());
@@ -58,10 +58,10 @@ class ItemControllerTest {
 
     @Test
     void testCadastrarItem() {
-        DadosItem dadosItem = new DadosItem(1L, "Item1", null, BigDecimal.TEN);
-        when(itemService.cadastrarItem(any(DadosItem.class))).thenReturn(dadosItem);
+        ItemDTO itemDTO = new ItemDTO(1L, "Item1", null, BigDecimal.TEN);
+        when(itemService.cadastrarItem(any(ItemDTO.class))).thenReturn(itemDTO);
 
-        ResponseEntity<DadosItem> response = itemController.cadastrarItem(dadosItem);
+        ResponseEntity<ItemDTO> response = itemController.cadastrarItem(itemDTO);
 
         assertNotNull(response);
         assertEquals(200, response.getStatusCode().value());
@@ -71,10 +71,10 @@ class ItemControllerTest {
 
     @Test
     void testAtualizarItem() {
-        DadosItem dadosItem = new DadosItem(1L, "Item1", null, BigDecimal.TEN);
-        when(itemService.atualizarItem(eq(1L), any(DadosItem.class))).thenReturn(dadosItem);
+        ItemDTO itemDTO = new ItemDTO(1L, "Item1", null, BigDecimal.TEN);
+        when(itemService.atualizarItem(eq(1L), any(ItemDTO.class))).thenReturn(itemDTO);
 
-        ResponseEntity<DadosItem> response = itemController.atualizarItem(1L, dadosItem);
+        ResponseEntity<ItemDTO> response = itemController.atualizarItem(1L, itemDTO);
 
         assertNotNull(response);
         assertEquals(200, response.getStatusCode().value());

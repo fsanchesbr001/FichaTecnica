@@ -1,6 +1,6 @@
-package com.fabriciosanches.fichatecnica.controller;
+package com.fabriciosanches.fichatecnica.controllers;
 
-import com.fabriciosanches.fichatecnica.domain.produto.DadosProduto;
+import com.fabriciosanches.fichatecnica.dtos.ProdutoDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.services.ProdutoService;
 import jakarta.transaction.Transactional;
@@ -24,11 +24,11 @@ public class ProductController {
     }
 
     @GetMapping("/produtos")
-    public ResponseEntity<List<DadosProduto>> buscarLista(){
+    public ResponseEntity<List<ProdutoDTO>> buscarLista(){
         logger.info("Inicio do método buscarLista");
         logger.info("Buscando lista de produto");
         try {
-            List<DadosProduto> produtos = produtoService.listar();
+            List<ProdutoDTO> produtos = produtoService.listar();
             logger.info("Lista de produtos encontrada: {}", produtos);
             logger.info("Fim do método buscarLista");
             return ResponseEntity.ok(produtos);
@@ -41,11 +41,11 @@ public class ProductController {
     }
 
     @GetMapping("/produtos/{id}")
-    public ResponseEntity<DadosProduto> buscarPorId(@PathVariable Long id){
+    public ResponseEntity<ProdutoDTO> buscarPorId(@PathVariable Long id){
         logger.info("Inicio do método buscarPorId");
         logger.info("Buscando produto por id: {}", id);
         try {
-            DadosProduto produto = produtoService.buscarPorId(id);
+            ProdutoDTO produto = produtoService.buscarPorId(id);
             logger.info("Produto encontrado: {}", produto);
             logger.info("Fim do método buscarPorId");
             return ResponseEntity.ok(produto);
@@ -75,11 +75,11 @@ public class ProductController {
 
     @PutMapping("/produtos/{id}")
     @Transactional
-    public ResponseEntity<DadosProduto> atualizarProduto(@PathVariable Long id, @RequestBody DadosProduto produto) {
+    public ResponseEntity<ProdutoDTO> atualizarProduto(@PathVariable Long id, @RequestBody ProdutoDTO produto) {
         logger.info("Inicio do método atualizarProduto");
         logger.info("Atualizando produto por id: {}", id);
         try {
-            DadosProduto novoProduto = produtoService.atualizarProduto(id, produto);
+            ProdutoDTO novoProduto = produtoService.atualizarProduto(id, produto);
             logger.info("Produto atualizado com sucesso: {}", novoProduto);
             logger.info("Fim do método atualizarProduto");
             return ResponseEntity.ok(novoProduto);
@@ -92,11 +92,11 @@ public class ProductController {
 
     @PostMapping("/produtos")
     @Transactional
-    public ResponseEntity<DadosProduto> cadastrarProduto(@RequestBody DadosProduto produto) {
+    public ResponseEntity<ProdutoDTO> cadastrarProduto(@RequestBody ProdutoDTO produto) {
         logger.info("Inicio do método cadastrarProduto");
         logger.info("Cadastrando produto: {}", produto);
         try {
-            DadosProduto novoProduto = produtoService.cadastrarProduto(produto);
+            ProdutoDTO novoProduto = produtoService.cadastrarProduto(produto);
             logger.info("Produto cadastrado com sucesso: {}", novoProduto);
             logger.info("Fim do método cadastrarProduto");
             return ResponseEntity.ok(novoProduto);

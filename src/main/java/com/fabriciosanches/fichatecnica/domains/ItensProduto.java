@@ -1,8 +1,7 @@
-package com.fabriciosanches.fichatecnica.domain.itensProduto;
+package com.fabriciosanches.fichatecnica.domains;
 
 
-import com.fabriciosanches.fichatecnica.domain.medidas.UnidadeMedida;
-import com.fabriciosanches.fichatecnica.domain.produto.Produto;
+import com.fabriciosanches.fichatecnica.dtos.ItensProdutoDTO;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -20,8 +19,11 @@ public class ItensProduto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private Long codigo;
-    private Long codigoProduto;
-    private Long codigoItem;
+
+    private Long cdProduto;
+
+    private Long cdItem;
+
     private Integer quantidade;
     private BigDecimal valor;
     @OneToOne
@@ -34,12 +36,12 @@ public class ItensProduto {
     @JsonBackReference
     private Produto produto;
 
-    public ItensProduto(DadosItensProduto dadosItensProduto) {
-        this.codigo = dadosItensProduto.codigo();
-        this.quantidade = dadosItensProduto.quantidade();
-        this.valor = dadosItensProduto.valor();
-        this.produto = dadosItensProduto.produto();
-        this.unidadeMedida = dadosItensProduto.unidadeMedida();
-        this.codigoProduto = dadosItensProduto.codProduto();
+    public ItensProduto(ItensProdutoDTO itensProdutoDTO) {
+        this.codigo = itensProdutoDTO.codigo();
+        this.quantidade = itensProdutoDTO.quantidade();
+        this.cdProduto = itensProdutoDTO.codProduto();
+        this.cdItem = itensProdutoDTO.codigoItem();
+        this.valor = itensProdutoDTO.valor();
+        this.unidadeMedida = itensProdutoDTO.unidadeMedida();
     }
 }

@@ -1,5 +1,6 @@
-package com.fabriciosanches.fichatecnica.domain.medidas;
+package com.fabriciosanches.fichatecnica.domains;
 
+import com.fabriciosanches.fichatecnica.dtos.UnidadeMedidaDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,9 +20,9 @@ public class UnidadeMedida {
     private String nome;
     private String sigla;
 
-    public UnidadeMedida(DadosUnidadeMedida dadosUnidadeMedida) {
-        this.codigo = dadosUnidadeMedida.codigo();
-        this.nome = dadosUnidadeMedida.nome();
-        this.sigla = dadosUnidadeMedida.sigla();
+    public UnidadeMedida(UnidadeMedidaDTO unidadeMedidaDTO) {
+        this.codigo = unidadeMedidaDTO.codigo();
+        this.nome = unidadeMedidaDTO.nome();
+        this.sigla = unidadeMedidaDTO.sigla();
     }
 }

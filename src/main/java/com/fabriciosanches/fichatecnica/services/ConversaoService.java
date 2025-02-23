@@ -1,7 +1,7 @@
 package com.fabriciosanches.fichatecnica.services;
 
-import com.fabriciosanches.fichatecnica.domain.conversao.Conversao;
-import com.fabriciosanches.fichatecnica.domain.conversao.DadosConversao;
+import com.fabriciosanches.fichatecnica.domains.Conversao;
+import com.fabriciosanches.fichatecnica.dtos.ConversaoDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.repository.ConversaoRepository;
 import org.apache.logging.log4j.LogManager;
@@ -22,25 +22,25 @@ public class ConversaoService {
         this.repository = repository;
     }
 
-    private Optional<List<DadosConversao>> obterLista() {
+    private Optional<List<ConversaoDTO>> obterLista() {
         logger.info("Inicio do método obterLista");
-        Optional<List<DadosConversao>> listaRecord =
-                Optional.of(DadosConversao.from(repository.findAll()));
+        Optional<List<ConversaoDTO>> listaRecord =
+                Optional.of(ConversaoDTO.from(repository.findAll()));
 
         logger.info("Lista de conversão encontrada: {}", listaRecord.get());
         logger.info("Fim do método obterLista");
         return listaRecord;
     }
 
-    public List<DadosConversao> listar() {
+    public List<ConversaoDTO> listar() {
        return obterLista().map(lista -> lista.stream()
-                        .sorted(Comparator.comparing(DadosConversao::unidadeDe))
+                        .sorted(Comparator.comparing(ConversaoDTO::unidadeDe))
                         .toList()).orElseThrow(
                                 () -> new FichaTecnicaException("Lista de conversões não encontrada"));
 
     }
 
-    public DadosConversao buscarPorId(Long id) {
+    public ConversaoDTO buscarPorId(Long id) {
         return obterLista().map(lista -> lista.stream()
                 .filter(unidade -> unidade.codigo().equals(id))
                 .findFirst()
@@ -52,7 +52,7 @@ public class ConversaoService {
         return repository.countByUnidadeDeAndUnidadePara(conversaoDe, conversaoPara);
     }
 
-    public DadosConversao atualizarConversao(Long id, DadosConversao novosDados) {
+    public ConversaoDTO atualizarConversao(Long id, ConversaoDTO novosDados) {
         Optional<Conversao> conversaoExistente = repository.findById(id);
         if (conversaoExistente.isPresent()) {
             Conversao conversao = conversaoExistente.get();
@@ -63,13 +63,13 @@ public class ConversaoService {
 
             // Atualize outros campos conforme necessário
             repository.save(conversao);
-            return new DadosConversao(conversao);
+            return new ConversaoDTO(conversao);
         } else {
             throw new FichaTecnicaException("Conversao com ID " + id + " não encontrada");
         }
     }
 
-    public DadosConversao cadastrarConversao(DadosConversao conversao) {
+    public ConversaoDTO cadastrarConversao(ConversaoDTO conversao) {
         Objects.requireNonNull(conversao, "Conversão não pode ser nula");
         Objects.requireNonNull(conversao.unidadeDe(), "UnidadeDe não pode ser nulo");
         Objects.requireNonNull(conversao.operacao(), "Operação não pode ser nula");
@@ -81,7 +81,7 @@ public class ConversaoService {
         }
 
         Conversao novaConversao = new Conversao(conversao);
-        return new DadosConversao(repository.save(novaConversao));
+        return new ConversaoDTO(repository.save(novaConversao));
     }
 
     public void deletarConversao(Long id) {

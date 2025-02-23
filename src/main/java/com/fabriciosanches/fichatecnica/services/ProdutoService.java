@@ -1,7 +1,7 @@
 package com.fabriciosanches.fichatecnica.services;
 
-import com.fabriciosanches.fichatecnica.domain.produto.DadosProduto;
-import com.fabriciosanches.fichatecnica.domain.produto.Produto;
+import com.fabriciosanches.fichatecnica.dtos.ProdutoDTO;
+import com.fabriciosanches.fichatecnica.domains.Produto;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.repository.ProdutoRepository;
 import org.apache.logging.log4j.LogManager;
@@ -22,25 +22,25 @@ public class ProdutoService {
         this.repository = repository;
     }
 
-    private Optional<List<DadosProduto>> obterLista() {
+    private Optional<List<ProdutoDTO>> obterLista() {
         logger.info("Inicio do método obterLista");
-        Optional<List<DadosProduto>> listaRecord =
-                Optional.of(DadosProduto.from(repository.findAll()));
+        Optional<List<ProdutoDTO>> listaRecord =
+                Optional.of(ProdutoDTO.from(repository.findAll()));
 
         logger.info("Lista de produtos encontrada: {}", listaRecord.get());
         logger.info("Fim do método obterLista");
         return listaRecord;
     }
 
-    public List<DadosProduto> listar() {
+    public List<ProdutoDTO> listar() {
        return obterLista().map(lista -> lista.stream()
-                        .sorted(Comparator.comparing(DadosProduto::nome))
+                        .sorted(Comparator.comparing(ProdutoDTO::nome))
                         .toList()).orElseThrow(
                                 () -> new FichaTecnicaException("Lista de produtos não encontrada"));
 
     }
 
-    public DadosProduto buscarPorId(Long id) {
+    public ProdutoDTO buscarPorId(Long id) {
         return obterLista().map(lista -> lista.stream()
                 .filter(produto -> produto.codigo().equals(id))
                 .findFirst()
@@ -52,7 +52,7 @@ public class ProdutoService {
         return repository.countByName(nome);
     }
 
-    public DadosProduto atualizarProduto(Long id, DadosProduto novosDados) {
+    public ProdutoDTO atualizarProduto(Long id, ProdutoDTO novosDados) {
         Optional<Produto> produtoExistente = repository.findById(id);
         if (produtoExistente.isPresent()) {
             Produto produto = produtoExistente.get();
@@ -64,13 +64,13 @@ public class ProdutoService {
 
             // Atualize outros campos conforme necessário
             repository.save(produto);
-            return new DadosProduto(produto);
+            return new ProdutoDTO(produto);
         } else {
             throw new FichaTecnicaException("Produto com ID " + id + " não encontrada");
         }
     }
 
-    public DadosProduto cadastrarProduto(DadosProduto produto) {
+    public ProdutoDTO cadastrarProduto(ProdutoDTO produto) {
         Objects.requireNonNull(produto, "Produto não pode ser nulo");
         Objects.requireNonNull(produto.nome(), "Nome do produto não pode ser nulo");
         Objects.requireNonNull(produto.descricao(), "Descricao não pode ser nula");
@@ -82,7 +82,7 @@ public class ProdutoService {
         }
 
         Produto novoProduto = new Produto(produto);
-        return new DadosProduto(repository.save(novoProduto));
+        return new ProdutoDTO(repository.save(novoProduto));
     }
 
     public void deletarProduto(Long id) {

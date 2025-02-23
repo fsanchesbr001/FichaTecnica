@@ -1,6 +1,6 @@
-package com.fabriciosanches.fichatecnica.controller;
+package com.fabriciosanches.fichatecnica.controllers;
 
-import com.fabriciosanches.fichatecnica.domain.historicoItem.DadosHistoricoItem;
+import com.fabriciosanches.fichatecnica.dtos.HistoricoItemDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.services.HistoricoItemService;
 
@@ -25,14 +25,14 @@ public class HistoricoItemController {
     }
 
     @GetMapping("/historico-itens")
-    public ResponseEntity<List<DadosHistoricoItem>> buscarLista(){
+    public ResponseEntity<List<HistoricoItemDTO>> buscarLista(){
         logger.info("Inicio do método buscarLista");
         logger.info("Buscando lista de historico de itens");
         try {
-            List<DadosHistoricoItem> dadosHistoricoItemList = historicoItemService.listar();
-            logger.info("Lista de historico de itens encontrada: {}", dadosHistoricoItemList);
+            List<HistoricoItemDTO> historicoItemDTOList = historicoItemService.listar();
+            logger.info("Lista de historico de itens encontrada: {}", historicoItemDTOList);
             logger.info("Fim do método buscarLista");
-            return ResponseEntity.ok(dadosHistoricoItemList);
+            return ResponseEntity.ok(historicoItemDTOList);
         }
         catch (FichaTecnicaException e){
             logger.error("Erro ao buscar lista de historico de itens", e);
@@ -42,11 +42,11 @@ public class HistoricoItemController {
     }
 
     @GetMapping("/historico-itens/{id}")
-    public ResponseEntity<DadosHistoricoItem> buscarPorId(@PathVariable Long id){
+    public ResponseEntity<HistoricoItemDTO> buscarPorId(@PathVariable Long id){
         logger.info("Inicio do método buscarPorId");
         logger.info("Buscando item por id: {}", id);
         try {
-            DadosHistoricoItem historicoItem = historicoItemService.buscarPorId(id);
+            HistoricoItemDTO historicoItem = historicoItemService.buscarPorId(id);
             logger.info("Item encontrado: {}", historicoItem);
             logger.info("Fim do método buscarPorId");
             return ResponseEntity.ok(historicoItem);
@@ -95,11 +95,11 @@ public class HistoricoItemController {
 
     @PutMapping("/historico-itens/{id}")
     @Transactional
-    public ResponseEntity<DadosHistoricoItem> atualizar(@PathVariable Long id, @RequestBody DadosHistoricoItem dadosHistoricoItem) {
+    public ResponseEntity<HistoricoItemDTO> atualizar(@PathVariable Long id, @RequestBody HistoricoItemDTO historicoItemDTO) {
         logger.info("Inicio do método atualizarItem");
         logger.info("Atualizando item por id: {}", id);
         try {
-            DadosHistoricoItem item = historicoItemService.atualizarHistoricoItem(id, dadosHistoricoItem);
+            HistoricoItemDTO item = historicoItemService.atualizarHistoricoItem(id, historicoItemDTO);
             logger.info("Item atualizado com sucesso: {}", item);
             logger.info("Fim do método atualizarUnidade");
             return ResponseEntity.ok(item);
@@ -112,11 +112,11 @@ public class HistoricoItemController {
 
     @PostMapping("/historico-itens")
     @Transactional
-    public ResponseEntity<DadosHistoricoItem> cadastrar(@RequestBody DadosHistoricoItem dadosHistoricoItem) {
+    public ResponseEntity<HistoricoItemDTO> cadastrar(@RequestBody HistoricoItemDTO historicoItemDTO) {
         logger.info("Inicio do método cadastrar");
-        logger.info("Cadastrando Historico do Item: {}", dadosHistoricoItem);
+        logger.info("Cadastrando Historico do Item: {}", historicoItemDTO);
         try {
-            DadosHistoricoItem dadosHistorico = historicoItemService.cadastrarItem(dadosHistoricoItem);
+            HistoricoItemDTO dadosHistorico = historicoItemService.cadastrarItem(historicoItemDTO);
             logger.info("Historico de Item cadastrado com sucesso: {}", dadosHistorico);
             logger.info("Fim do método cadastrar");
             return ResponseEntity.ok(dadosHistorico);

@@ -1,6 +1,6 @@
 package com.fabriciosanches.fichatecnica.security;
 
-import com.fabriciosanches.fichatecnica.usuario.UsuarioRepository;
+import com.fabriciosanches.fichatecnica.repository.UsuarioRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

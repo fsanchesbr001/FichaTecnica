@@ -1,6 +1,6 @@
-package com.fabriciosanches.fichatecnica.controller;
+package com.fabriciosanches.fichatecnica.controllers;
 
-import com.fabriciosanches.fichatecnica.domain.conversao.DadosConversao;
+import com.fabriciosanches.fichatecnica.dtos.ConversaoDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.services.ConversaoService;
 
@@ -25,11 +25,11 @@ public class ConversaoController {
     }
 
     @GetMapping("/conversoes")
-    public ResponseEntity<List<DadosConversao>> buscarLista(){
+    public ResponseEntity<List<ConversaoDTO>> buscarLista(){
         logger.info("Inicio do método buscarLista");
         logger.info("Buscando lista de conversões");
         try {
-            List<DadosConversao> conversoes = conversaoService.listar();
+            List<ConversaoDTO> conversoes = conversaoService.listar();
             logger.info("Lista de conversoes encontrada: {}", conversoes);
             logger.info("Fim do método buscarLista");
             return ResponseEntity.ok(conversoes);
@@ -42,11 +42,11 @@ public class ConversaoController {
     }
 
     @GetMapping("/conversoes/{id}")
-    public ResponseEntity<DadosConversao> buscarPorId(@PathVariable Long id){
+    public ResponseEntity<ConversaoDTO> buscarPorId(@PathVariable Long id){
         logger.info("Inicio do método buscarPorId");
         logger.info("Buscando conversoes por id: {}", id);
         try {
-            DadosConversao conversao = conversaoService.buscarPorId(id);
+            ConversaoDTO conversao = conversaoService.buscarPorId(id);
             logger.info("Conversao encontrada: {}", conversao);
             logger.info("Fim do método buscarPorId");
             return ResponseEntity.ok(conversao);
@@ -76,11 +76,11 @@ public class ConversaoController {
 
     @PutMapping("/conversoes/{id}")
     @Transactional
-    public ResponseEntity<DadosConversao> atualizarConversao(@PathVariable Long id, @RequestBody DadosConversao conversao) {
+    public ResponseEntity<ConversaoDTO> atualizarConversao(@PathVariable Long id, @RequestBody ConversaoDTO conversao) {
         logger.info("Inicio do método atualizarConversao");
         logger.info("Atualizando conversao por id: {}", id);
         try {
-            DadosConversao conversoes = conversaoService.atualizarConversao(id, conversao);
+            ConversaoDTO conversoes = conversaoService.atualizarConversao(id, conversao);
             logger.info("Conversao atualizada com sucesso: {}", conversoes);
             logger.info("Fim do método atualizarConversao");
             return ResponseEntity.ok(conversoes);
@@ -93,14 +93,14 @@ public class ConversaoController {
 
     @PostMapping("/conversoes")
     @Transactional
-    public ResponseEntity<DadosConversao> cadastrarConversao(@RequestBody DadosConversao conversao) {
+    public ResponseEntity<ConversaoDTO> cadastrarConversao(@RequestBody ConversaoDTO conversao) {
         logger.info("Inicio do método cadastrarConversao");
         logger.info("Cadastrando unidade de medida: {}", conversao);
         try {
-            DadosConversao dadosConversao = conversaoService.cadastrarConversao(conversao);
-            logger.info("Conversao cadastrada com sucesso: {}", dadosConversao);
+            ConversaoDTO conversaoDTO = conversaoService.cadastrarConversao(conversao);
+            logger.info("Conversao cadastrada com sucesso: {}", conversaoDTO);
             logger.info("Fim do método cadastrarConversao");
-            return ResponseEntity.ok(dadosConversao);
+            return ResponseEntity.ok(conversaoDTO);
         }
         catch (FichaTecnicaException e){
             logger.error("Erro ao cadastrar conversao", e);

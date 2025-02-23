@@ -1,7 +1,7 @@
 package com.fabriciosanches.fichatecnica.services;
 
-import com.fabriciosanches.fichatecnica.domain.historicoItem.DadosHistoricoItem;
-import com.fabriciosanches.fichatecnica.domain.historicoItem.HistoricoItem;
+import com.fabriciosanches.fichatecnica.dtos.HistoricoItemDTO;
+import com.fabriciosanches.fichatecnica.domains.HistoricoItem;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.repository.HistoricoItemRepository;
 import org.apache.logging.log4j.LogManager;
@@ -22,24 +22,24 @@ public class HistoricoItemService {
         this.repository = repository;
     }
 
-    private Optional<List<DadosHistoricoItem>> obterLista() {
+    private Optional<List<HistoricoItemDTO>> obterLista() {
         logger.info("Inicio do método obterLista");
-        Optional<List<DadosHistoricoItem>> listaRecord =
-                Optional.of(DadosHistoricoItem.from(repository.findAll()));
+        Optional<List<HistoricoItemDTO>> listaRecord =
+                Optional.of(HistoricoItemDTO.from(repository.findAll()));
 
         logger.info("Lista de historico de itens encontrada: {}", listaRecord.get());
         logger.info("Fim do método obterLista");
         return listaRecord;
     }
 
-    public List<DadosHistoricoItem> listar() {
+    public List<HistoricoItemDTO> listar() {
         return obterLista().map(lista -> lista.stream()
                 .toList()).orElseThrow(
                 () -> new FichaTecnicaException("Lista de historico de itens não encontrada"));
 
     }
 
-    public DadosHistoricoItem buscarPorId(Long id) {
+    public HistoricoItemDTO buscarPorId(Long id) {
         return obterLista().map(lista -> lista.stream()
                         .filter(item -> item.codigo().equals(id))
                         .findFirst()
@@ -48,7 +48,7 @@ public class HistoricoItemService {
     }
 
 
-    public DadosHistoricoItem atualizarHistoricoItem(Long id, DadosHistoricoItem novosDados) {
+    public HistoricoItemDTO atualizarHistoricoItem(Long id, HistoricoItemDTO novosDados) {
         Optional<HistoricoItem> historicoExistente = repository.findById(id);
         if (historicoExistente.isPresent()) {
             HistoricoItem historicoItem = historicoExistente.get();
@@ -58,20 +58,20 @@ public class HistoricoItemService {
 
             // Atualize outros campos conforme necessário
             repository.save(historicoItem);
-            return new DadosHistoricoItem(historicoItem);
+            return new HistoricoItemDTO(historicoItem);
         } else {
             throw new FichaTecnicaException("Historico de item com ID " + id + " não encontrado");
         }
     }
 
-    public DadosHistoricoItem cadastrarItem(DadosHistoricoItem historicoItem) {
+    public HistoricoItemDTO cadastrarItem(HistoricoItemDTO historicoItem) {
         Objects.requireNonNull(historicoItem, "Historico de item não pode ser nulo");
         Objects.requireNonNull(historicoItem.item(), "Item não pode ser nulo");
         Objects.requireNonNull(historicoItem.dataInicio(), "Data Inicio não pode ser nula");
         Objects.requireNonNull(historicoItem.valor(), "Valor do item não pode ser nulo");
 
         HistoricoItem novoHistoricoItem = new HistoricoItem(historicoItem);
-        return new DadosHistoricoItem(repository.save(novoHistoricoItem));
+        return new HistoricoItemDTO(repository.save(novoHistoricoItem));
     }
 
     public void deletarItem(Long id) {
