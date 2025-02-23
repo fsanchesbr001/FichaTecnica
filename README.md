@@ -16,3 +16,4 @@ Este projeto tem como objetivo a criação de uma ficha técnica de um produto, 
 
 ## Controle de Versão
 - 21-02-2025 - Versão Inicial
+- 22-02-2025 - Refatoração de Código
