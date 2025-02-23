@@ -1,7 +1,7 @@
 package com.fabriciosanches.fichatecnica;
 
-import com.fabriciosanches.fichatecnica.domain.conversao.Conversao;
-import com.fabriciosanches.fichatecnica.domain.conversao.DadosConversao;
+import com.fabriciosanches.fichatecnica.domains.Conversao;
+import com.fabriciosanches.fichatecnica.dtos.ConversaoDTO;
 import com.fabriciosanches.fichatecnica.repository.ConversaoRepository;
 import com.fabriciosanches.fichatecnica.services.ConversaoService;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,10 +32,10 @@ class ConversaoServiceTest {
 
     @Test
     void testListar() {
-        DadosConversao dadosConversao = new DadosConversao(1L, 1L, 2L, "MULTIPLICACAO", BigDecimal.TEN);
-        when(repository.findAll()).thenReturn(List.of(new Conversao(dadosConversao)));
+        ConversaoDTO conversaoDTO = new ConversaoDTO(1L, 1L, 2L, "MULTIPLICACAO", BigDecimal.TEN);
+        when(repository.findAll()).thenReturn(List.of(new Conversao(conversaoDTO)));
 
-        List<DadosConversao> result = service.listar();
+        List<ConversaoDTO> result = service.listar();
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -44,10 +44,10 @@ class ConversaoServiceTest {
 
     @Test
     void testBuscarPorId() {
-        DadosConversao dadosConversao = new DadosConversao(1L, 1L, 2L, "MULTIPLICACAO", BigDecimal.TEN);
-        when(repository.findAll()).thenReturn(List.of(new Conversao(dadosConversao)));
+        ConversaoDTO conversaoDTO = new ConversaoDTO(1L, 1L, 2L, "MULTIPLICACAO", BigDecimal.TEN);
+        when(repository.findAll()).thenReturn(List.of(new Conversao(conversaoDTO)));
 
-        DadosConversao result = service.buscarPorId(1L);
+        ConversaoDTO result = service.buscarPorId(1L);
 
         assertNotNull(result);
         assertEquals(1L, result.codigo());
@@ -55,11 +55,11 @@ class ConversaoServiceTest {
 
     @Test
     void testCadastrarConversao() {
-        DadosConversao dadosConversao = new DadosConversao(1L, 1L, 2L, "MULTIPLICACAO", BigDecimal.TEN);
-        Conversao conversao = new Conversao(dadosConversao);
+        ConversaoDTO conversaoDTO = new ConversaoDTO(1L, 1L, 2L, "MULTIPLICACAO", BigDecimal.TEN);
+        Conversao conversao = new Conversao(conversaoDTO);
         when(repository.save(any(Conversao.class))).thenReturn(conversao);
 
-        DadosConversao result = service.cadastrarConversao(dadosConversao);
+        ConversaoDTO result = service.cadastrarConversao(conversaoDTO);
 
         assertNotNull(result);
         assertEquals(1L, result.codigo());
@@ -67,13 +67,13 @@ class ConversaoServiceTest {
 
     @Test
     void testAtualizarConversao() {
-        DadosConversao dadosConversao = new DadosConversao(1L, 1L, 2L, "MULTIPLICACAO", BigDecimal.TEN);
-        Conversao conversao = new Conversao(dadosConversao);
+        ConversaoDTO conversaoDTO = new ConversaoDTO(1L, 1L, 2L, "MULTIPLICACAO", BigDecimal.TEN);
+        Conversao conversao = new Conversao(conversaoDTO);
         when(repository.findById(1L)).thenReturn(Optional.of(conversao));
         when(repository.save(any(Conversao.class))).thenReturn(conversao);
 
-        DadosConversao novosDados = new DadosConversao(1L, 1L, 2L, "DIVISAO", BigDecimal.ONE);
-        DadosConversao result = service.atualizarConversao(1L, novosDados);
+        ConversaoDTO novosDados = new ConversaoDTO(1L, 1L, 2L, "DIVISAO", BigDecimal.ONE);
+        ConversaoDTO result = service.atualizarConversao(1L, novosDados);
 
         assertNotNull(result);
         assertEquals("DIVISAO", result.operacao());

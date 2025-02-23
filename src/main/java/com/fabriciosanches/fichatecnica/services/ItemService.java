@@ -1,8 +1,8 @@
 package com.fabriciosanches.fichatecnica.services;
 
-import com.fabriciosanches.fichatecnica.domain.historicoItem.HistoricoItem;
-import com.fabriciosanches.fichatecnica.domain.itens.DadosItem;
-import com.fabriciosanches.fichatecnica.domain.itens.Item;
+import com.fabriciosanches.fichatecnica.domains.HistoricoItem;
+import com.fabriciosanches.fichatecnica.dtos.ItemDTO;
+import com.fabriciosanches.fichatecnica.domains.Item;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.repository.HistoricoItemRepository;
 import com.fabriciosanches.fichatecnica.repository.ItemRepository;
@@ -32,25 +32,25 @@ public class ItemService {
         this.historicoItemRepository = historicoItemRepository;
     }
 
-    private Optional<List<DadosItem>> obterLista() {
+    private Optional<List<ItemDTO>> obterLista() {
         logger.info("Inicio do método obterLista");
-        Optional<List<DadosItem>> listaRecord =
-                Optional.of(DadosItem.from(repository.findAll()));
+        Optional<List<ItemDTO>> listaRecord =
+                Optional.of(ItemDTO.from(repository.findAll()));
 
         logger.info("Lista de itens encontrada: {}", listaRecord.get());
         logger.info("Fim do método obterLista");
         return listaRecord;
     }
 
-    public List<DadosItem> listar() {
+    public List<ItemDTO> listar() {
         return obterLista().map(lista -> lista.stream()
-                .sorted(Comparator.comparing(DadosItem::nome))
+                .sorted(Comparator.comparing(ItemDTO::nome))
                 .toList()).orElseThrow(
                 () -> new FichaTecnicaException("Lista de itens não encontrada"));
 
     }
 
-    public DadosItem buscarPorId(Long id) {
+    public ItemDTO buscarPorId(Long id) {
         return obterLista().map(lista -> lista.stream()
                         .filter(item -> item.codigo().equals(id))
                         .findFirst()
@@ -64,7 +64,7 @@ public class ItemService {
 
     @Modifying
     @Transactional
-    public DadosItem atualizarItem(Long id, DadosItem novosDados) {
+    public ItemDTO atualizarItem(Long id, ItemDTO novosDados) {
         Optional<Item> itemExistente = repository.findById(id);
         if (itemExistente.isPresent()) {
             Item item = itemExistente.get();
@@ -74,13 +74,13 @@ public class ItemService {
 
             // Atualize outros campos conforme necessário
 
-            DadosItem dadosItem = new DadosItem(repository.save(item));
+            ItemDTO itemDTO = new ItemDTO(repository.save(item));
 
             HistoricoItem historicoItem = new HistoricoItem(null, item, novosDados.valor(), LocalDate.now());
 
             historicoItemRepository.save(historicoItem);
 
-            return dadosItem;
+            return itemDTO;
         } else {
             throw new FichaTecnicaException("Item com ID " + id + " não encontrado");
         }
@@ -88,7 +88,7 @@ public class ItemService {
 
     @Modifying
     @Transactional
-    public DadosItem cadastrarItem(DadosItem item) {
+    public ItemDTO cadastrarItem(ItemDTO item) {
         Objects.requireNonNull(item, "Item não pode ser nulo");
         Objects.requireNonNull(item.nome(), "Nome do item não pode ser nulo");
         Objects.requireNonNull(item.unidadeMedida(), "Unidade de medida não pode ser nula");
@@ -100,13 +100,13 @@ public class ItemService {
 
         Item novoItem = new Item(item);
 
-        DadosItem dadosItem = new DadosItem(repository.save(novoItem));
+        ItemDTO itemDTO = new ItemDTO(repository.save(novoItem));
 
         HistoricoItem historicoItem = new HistoricoItem(null, novoItem, item.valor(), LocalDate.now());
 
         historicoItemRepository.save(historicoItem);
 
-        return dadosItem;
+        return itemDTO;
     }
 
     @Modifying

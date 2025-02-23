@@ -1,6 +1,6 @@
-package com.fabriciosanches.fichatecnica.controller;
+package com.fabriciosanches.fichatecnica.controllers;
 
-import com.fabriciosanches.fichatecnica.domain.itens.DadosItem;
+import com.fabriciosanches.fichatecnica.dtos.ItemDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.services.ItemService;
 import jakarta.transaction.Transactional;
@@ -24,11 +24,11 @@ public class ItemController {
     }
 
     @GetMapping("/itens")
-    public ResponseEntity<List<DadosItem>> buscarLista(){
+    public ResponseEntity<List<ItemDTO>> buscarLista(){
         logger.info("Inicio do método buscarLista");
         logger.info("Buscando lista de itens");
         try {
-            List<DadosItem> itens = itemService.listar();
+            List<ItemDTO> itens = itemService.listar();
             logger.info("Lista de itens encontrada: {}", itens);
             logger.info("Fim do método buscarLista");
             return ResponseEntity.ok(itens);
@@ -41,11 +41,11 @@ public class ItemController {
     }
 
     @GetMapping("/itens/{id}")
-    public ResponseEntity<DadosItem> buscarPorId(@PathVariable Long id){
+    public ResponseEntity<ItemDTO> buscarPorId(@PathVariable Long id){
         logger.info("Inicio do método buscarPorId");
         logger.info("Buscando item por id: {}", id);
         try {
-            DadosItem item = itemService.buscarPorId(id);
+            ItemDTO item = itemService.buscarPorId(id);
             logger.info("Item encontrado: {}", item);
             logger.info("Fim do método buscarPorId");
             return ResponseEntity.ok(item);
@@ -75,11 +75,11 @@ public class ItemController {
 
     @PutMapping("/itens/{id}")
     @Transactional
-    public ResponseEntity<DadosItem> atualizarItem(@PathVariable Long id, @RequestBody DadosItem dadosItem) {
+    public ResponseEntity<ItemDTO> atualizarItem(@PathVariable Long id, @RequestBody ItemDTO itemDTO) {
         logger.info("Inicio do método atualizarItem");
         logger.info("Atualizando item por id: {}", id);
         try {
-            DadosItem item = itemService.atualizarItem(id, dadosItem);
+            ItemDTO item = itemService.atualizarItem(id, itemDTO);
             logger.info("Item atualizado com sucesso: {}", item);
             logger.info("Fim do método atualizarUnidade");
             return ResponseEntity.ok(item);
@@ -92,11 +92,11 @@ public class ItemController {
 
     @PostMapping("/itens")
     @Transactional
-    public ResponseEntity<DadosItem> cadastrarItem(@RequestBody DadosItem dadosItem) {
+    public ResponseEntity<ItemDTO> cadastrarItem(@RequestBody ItemDTO itemDTO) {
         logger.info("Inicio do método cadastrarItem");
-        logger.info("Cadastrando Item: {}", dadosItem);
+        logger.info("Cadastrando Item: {}", itemDTO);
         try {
-            DadosItem item = itemService.cadastrarItem(dadosItem);
+            ItemDTO item = itemService.cadastrarItem(itemDTO);
             logger.info("Item cadastrado com sucesso: {}", item);
             logger.info("Fim do método cadastrarItem");
             return ResponseEntity.ok(item);

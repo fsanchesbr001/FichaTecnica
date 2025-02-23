@@ -1,6 +1,6 @@
-package com.fabriciosanches.fichatecnica.controller;
+package com.fabriciosanches.fichatecnica.controllers;
 
-import com.fabriciosanches.fichatecnica.domain.medidas.DadosUnidadeMedida;
+import com.fabriciosanches.fichatecnica.dtos.UnidadeMedidaDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.services.UnidadeMedidaService;
 import jakarta.transaction.Transactional;
@@ -24,11 +24,11 @@ public class MedidasController {
     }
 
     @GetMapping("/unidades-medida")
-    public ResponseEntity<List<DadosUnidadeMedida>> buscarLista(){
+    public ResponseEntity<List<UnidadeMedidaDTO>> buscarLista(){
         logger.info("Inicio do método buscarLista");
         logger.info("Buscando lista de unidades de medida");
         try {
-            List<DadosUnidadeMedida> medidas = unidadeService.listar();
+            List<UnidadeMedidaDTO> medidas = unidadeService.listar();
             logger.info("Lista de unidades de medida encontrada: {}", medidas);
             logger.info("Fim do método buscarLista");
             return ResponseEntity.ok(medidas);
@@ -41,11 +41,11 @@ public class MedidasController {
     }
 
     @GetMapping("/unidades-medida/{id}")
-    public ResponseEntity<DadosUnidadeMedida> buscarPorId(@PathVariable Long id){
+    public ResponseEntity<UnidadeMedidaDTO> buscarPorId(@PathVariable Long id){
         logger.info("Inicio do método buscarPorId");
         logger.info("Buscando unidade de medida por id: {}", id);
         try {
-            DadosUnidadeMedida medida = unidadeService.buscarPorId(id);
+            UnidadeMedidaDTO medida = unidadeService.buscarPorId(id);
             logger.info("Unidade de medida encontrada: {}", medida);
             logger.info("Fim do método buscarPorId");
             return ResponseEntity.ok(medida);
@@ -75,11 +75,11 @@ public class MedidasController {
 
     @PutMapping("/unidades-medida/{id}")
     @Transactional
-    public ResponseEntity<DadosUnidadeMedida> atualizarUnidade(@PathVariable Long id, @RequestBody DadosUnidadeMedida unidade) {
+    public ResponseEntity<UnidadeMedidaDTO> atualizarUnidade(@PathVariable Long id, @RequestBody UnidadeMedidaDTO unidade) {
         logger.info("Inicio do método atualizarUnidade");
         logger.info("Atualizando unidade de medida por id: {}", id);
         try {
-            DadosUnidadeMedida medida = unidadeService.atualizarUnidade(id, unidade);
+            UnidadeMedidaDTO medida = unidadeService.atualizarUnidade(id, unidade);
             logger.info("Unidade de medida atualizada com sucesso: {}", medida);
             logger.info("Fim do método atualizarUnidade");
             return ResponseEntity.ok(medida);
@@ -92,11 +92,11 @@ public class MedidasController {
 
     @PostMapping("/unidades-medida")
     @Transactional
-    public ResponseEntity<DadosUnidadeMedida> cadastrarUnidade(@RequestBody DadosUnidadeMedida unidade) {
+    public ResponseEntity<UnidadeMedidaDTO> cadastrarUnidade(@RequestBody UnidadeMedidaDTO unidade) {
         logger.info("Inicio do método cadastrarUnidade");
         logger.info("Cadastrando unidade de medida: {}", unidade);
         try {
-            DadosUnidadeMedida medida = unidadeService.cadastrarUnidade(unidade);
+            UnidadeMedidaDTO medida = unidadeService.cadastrarUnidade(unidade);
             logger.info("Unidade de medida cadastrada com sucesso: {}", medida);
             logger.info("Fim do método cadastrarUnidade");
             return ResponseEntity.ok(medida);

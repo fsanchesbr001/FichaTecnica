@@ -1,8 +1,8 @@
 package com.fabriciosanches.fichatecnica;
 
-import com.fabriciosanches.fichatecnica.domain.itens.DadosItem;
-import com.fabriciosanches.fichatecnica.domain.itens.Item;
-import com.fabriciosanches.fichatecnica.domain.medidas.UnidadeMedida;
+import com.fabriciosanches.fichatecnica.dtos.ItemDTO;
+import com.fabriciosanches.fichatecnica.domains.Item;
+import com.fabriciosanches.fichatecnica.domains.UnidadeMedida;
 import com.fabriciosanches.fichatecnica.repository.HistoricoItemRepository;
 import com.fabriciosanches.fichatecnica.repository.ItemRepository;
 import com.fabriciosanches.fichatecnica.services.ItemService;
@@ -42,10 +42,10 @@ class ItemServiceTest {
         unidadeMedida.setNome("Unidade");
         unidadeMedida.setSigla("UN");
 
-        DadosItem dadosItem = new DadosItem(1L, "Item1", unidadeMedida, BigDecimal.TEN);
-        when(itemRepository.findAll()).thenReturn(List.of(new Item(dadosItem)));
+        ItemDTO itemDTO = new ItemDTO(1L, "Item1", unidadeMedida, BigDecimal.TEN);
+        when(itemRepository.findAll()).thenReturn(List.of(new Item(itemDTO)));
 
-        List<DadosItem> result = itemService.listar();
+        List<ItemDTO> result = itemService.listar();
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -59,10 +59,10 @@ class ItemServiceTest {
         unidadeMedida.setNome("Unidade");
         unidadeMedida.setSigla("UN");
 
-        DadosItem dadosItem = new DadosItem(1L, "Item1", unidadeMedida, BigDecimal.TEN);
-        when(itemRepository.findAll()).thenReturn(List.of(new Item(dadosItem)));
+        ItemDTO itemDTO = new ItemDTO(1L, "Item1", unidadeMedida, BigDecimal.TEN);
+        when(itemRepository.findAll()).thenReturn(List.of(new Item(itemDTO)));
 
-        DadosItem result = itemService.buscarPorId(1L);
+        ItemDTO result = itemService.buscarPorId(1L);
 
         assertNotNull(result);
         assertEquals("Item1", result.nome());
@@ -75,11 +75,11 @@ class ItemServiceTest {
         unidadeMedida.setNome("Unidade");
         unidadeMedida.setSigla("UN");
 
-        DadosItem dadosItem = new DadosItem(1L, "Item1", unidadeMedida, BigDecimal.TEN);
-        Item item = new Item(dadosItem);
+        ItemDTO itemDTO = new ItemDTO(1L, "Item1", unidadeMedida, BigDecimal.TEN);
+        Item item = new Item(itemDTO);
         when(itemRepository.save(any(Item.class))).thenReturn(item);
 
-        DadosItem result = itemService.cadastrarItem(dadosItem);
+        ItemDTO result = itemService.cadastrarItem(itemDTO);
 
         assertNotNull(result);
         assertEquals("Item1", result.nome());
@@ -87,13 +87,13 @@ class ItemServiceTest {
 
     @Test
     void testAtualizarItem() {
-        DadosItem dadosItem = new DadosItem(1L, "Item1", null, BigDecimal.TEN);
-        Item item = new Item(dadosItem);
+        ItemDTO itemDTO = new ItemDTO(1L, "Item1", null, BigDecimal.TEN);
+        Item item = new Item(itemDTO);
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
         when(itemRepository.save(any(Item.class))).thenReturn(item);
 
-        DadosItem novosDados = new DadosItem(1L, "Item2", null, BigDecimal.ONE);
-        DadosItem result = itemService.atualizarItem(1L, novosDados);
+        ItemDTO novosDados = new ItemDTO(1L, "Item2", null, BigDecimal.ONE);
+        ItemDTO result = itemService.atualizarItem(1L, novosDados);
 
         assertNotNull(result);
         assertEquals("Item2", result.nome());

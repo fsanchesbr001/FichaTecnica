@@ -1,8 +1,8 @@
 package com.fabriciosanches.fichatecnica;
 
-import com.fabriciosanches.fichatecnica.domain.historicoItem.DadosHistoricoItem;
-import com.fabriciosanches.fichatecnica.domain.historicoItem.HistoricoItem;
-import com.fabriciosanches.fichatecnica.domain.itens.Item;
+import com.fabriciosanches.fichatecnica.dtos.HistoricoItemDTO;
+import com.fabriciosanches.fichatecnica.domains.HistoricoItem;
+import com.fabriciosanches.fichatecnica.domains.Item;
 import com.fabriciosanches.fichatecnica.repository.HistoricoItemRepository;
 import com.fabriciosanches.fichatecnica.services.HistoricoItemService;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,7 +42,7 @@ class HistoricoItemServiceTest {
         HistoricoItem historicoItem = new HistoricoItem(1L, item, BigDecimal.TEN, LocalDate.now());
         when(historicoItemRepository.findAll()).thenReturn(List.of(historicoItem));
 
-        List<DadosHistoricoItem> result = historicoItemService.listar();
+        List<HistoricoItemDTO> result = historicoItemService.listar();
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -59,7 +59,7 @@ class HistoricoItemServiceTest {
         HistoricoItem historicoItem = new HistoricoItem(1L, item, BigDecimal.TEN, LocalDate.now());
         when(historicoItemRepository.findAll()).thenReturn(List.of(historicoItem));
 
-        DadosHistoricoItem result = historicoItemService.buscarPorId(1L);
+        HistoricoItemDTO result = historicoItemService.buscarPorId(1L);
 
         assertNotNull(result);
         assertEquals("Item1", result.item().getNome());
@@ -72,11 +72,11 @@ class HistoricoItemServiceTest {
         item.setNome("Item1");
         item.setValor(BigDecimal.TEN);
 
-        DadosHistoricoItem dadosHistoricoItem = new DadosHistoricoItem(1L, item, BigDecimal.TEN, LocalDate.now());
-        HistoricoItem historicoItem = new HistoricoItem(dadosHistoricoItem);
+        HistoricoItemDTO historicoItemDTO = new HistoricoItemDTO(1L, item, BigDecimal.TEN, LocalDate.now());
+        HistoricoItem historicoItem = new HistoricoItem(historicoItemDTO);
         when(historicoItemRepository.save(any(HistoricoItem.class))).thenReturn(historicoItem);
 
-        DadosHistoricoItem result = historicoItemService.cadastrarItem(dadosHistoricoItem);
+        HistoricoItemDTO result = historicoItemService.cadastrarItem(historicoItemDTO);
 
         assertNotNull(result);
         assertEquals("Item1", result.item().getNome());
@@ -93,8 +93,8 @@ class HistoricoItemServiceTest {
         when(historicoItemRepository.findById(1L)).thenReturn(Optional.of(historicoItem));
         when(historicoItemRepository.save(any(HistoricoItem.class))).thenReturn(historicoItem);
 
-        DadosHistoricoItem novosDados = new DadosHistoricoItem(1L, item, BigDecimal.ONE, LocalDate.now());
-        DadosHistoricoItem result = historicoItemService.atualizarHistoricoItem(1L, novosDados);
+        HistoricoItemDTO novosDados = new HistoricoItemDTO(1L, item, BigDecimal.ONE, LocalDate.now());
+        HistoricoItemDTO result = historicoItemService.atualizarHistoricoItem(1L, novosDados);
 
         assertNotNull(result);
         assertEquals(BigDecimal.ONE, result.valor());

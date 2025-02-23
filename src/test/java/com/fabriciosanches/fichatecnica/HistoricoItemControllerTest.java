@@ -1,7 +1,7 @@
 package com.fabriciosanches.fichatecnica;
 
-import com.fabriciosanches.fichatecnica.controller.HistoricoItemController;
-import com.fabriciosanches.fichatecnica.domain.historicoItem.DadosHistoricoItem;
+import com.fabriciosanches.fichatecnica.controllers.HistoricoItemController;
+import com.fabriciosanches.fichatecnica.dtos.HistoricoItemDTO;
 import com.fabriciosanches.fichatecnica.services.HistoricoItemService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,10 +35,10 @@ class HistoricoItemControllerTest {
 
     @Test
     void testBuscarLista() {
-        DadosHistoricoItem dadosHistoricoItem = new DadosHistoricoItem(1L, null, BigDecimal.TEN, LocalDate.now());
-        when(historicoItemService.listar()).thenReturn(List.of(dadosHistoricoItem));
+        HistoricoItemDTO historicoItemDTO = new HistoricoItemDTO(1L, null, BigDecimal.TEN, LocalDate.now());
+        when(historicoItemService.listar()).thenReturn(List.of(historicoItemDTO));
 
-        ResponseEntity<List<DadosHistoricoItem>> response = historicoItemController.buscarLista();
+        ResponseEntity<List<HistoricoItemDTO>> response = historicoItemController.buscarLista();
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -48,14 +48,14 @@ class HistoricoItemControllerTest {
 
     @Test
     void testBuscarPorId() {
-        DadosHistoricoItem dadosHistoricoItem = new DadosHistoricoItem(1L, null, BigDecimal.TEN, LocalDate.now());
-        when(historicoItemService.buscarPorId(1L)).thenReturn(dadosHistoricoItem);
+        HistoricoItemDTO historicoItemDTO = new HistoricoItemDTO(1L, null, BigDecimal.TEN, LocalDate.now());
+        when(historicoItemService.buscarPorId(1L)).thenReturn(historicoItemDTO);
 
-        ResponseEntity<DadosHistoricoItem> response = historicoItemController.buscarPorId(1L);
+        ResponseEntity<HistoricoItemDTO> response = historicoItemController.buscarPorId(1L);
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(dadosHistoricoItem, response.getBody());
+        assertEquals(historicoItemDTO, response.getBody());
         verify(historicoItemService, times(1)).buscarPorId(1L);
     }
 
@@ -81,27 +81,27 @@ class HistoricoItemControllerTest {
 
     @Test
     void testAtualizar() {
-        DadosHistoricoItem dadosHistoricoItem = new DadosHistoricoItem(1L, null, BigDecimal.TEN, LocalDate.now());
-        when(historicoItemService.atualizarHistoricoItem(eq(1L), any(DadosHistoricoItem.class))).thenReturn(dadosHistoricoItem);
+        HistoricoItemDTO historicoItemDTO = new HistoricoItemDTO(1L, null, BigDecimal.TEN, LocalDate.now());
+        when(historicoItemService.atualizarHistoricoItem(eq(1L), any(HistoricoItemDTO.class))).thenReturn(historicoItemDTO);
 
-        ResponseEntity<DadosHistoricoItem> response = historicoItemController.atualizar(1L, dadosHistoricoItem);
+        ResponseEntity<HistoricoItemDTO> response = historicoItemController.atualizar(1L, historicoItemDTO);
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(dadosHistoricoItem, response.getBody());
-        verify(historicoItemService, times(1)).atualizarHistoricoItem(eq(1L), any(DadosHistoricoItem.class));
+        assertEquals(historicoItemDTO, response.getBody());
+        verify(historicoItemService, times(1)).atualizarHistoricoItem(eq(1L), any(HistoricoItemDTO.class));
     }
 
     @Test
     void testCadastrar() {
-        DadosHistoricoItem dadosHistoricoItem = new DadosHistoricoItem(1L, null, BigDecimal.TEN, LocalDate.now());
-        when(historicoItemService.cadastrarItem(any(DadosHistoricoItem.class))).thenReturn(dadosHistoricoItem);
+        HistoricoItemDTO historicoItemDTO = new HistoricoItemDTO(1L, null, BigDecimal.TEN, LocalDate.now());
+        when(historicoItemService.cadastrarItem(any(HistoricoItemDTO.class))).thenReturn(historicoItemDTO);
 
-        ResponseEntity<DadosHistoricoItem> response = historicoItemController.cadastrar(dadosHistoricoItem);
+        ResponseEntity<HistoricoItemDTO> response = historicoItemController.cadastrar(historicoItemDTO);
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(dadosHistoricoItem, response.getBody());
-        verify(historicoItemService, times(1)).cadastrarItem(any(DadosHistoricoItem.class));
+        assertEquals(historicoItemDTO, response.getBody());
+        verify(historicoItemService, times(1)).cadastrarItem(any(HistoricoItemDTO.class));
     }
 }

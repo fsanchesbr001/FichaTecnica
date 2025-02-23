@@ -1,5 +1,6 @@
-package com.fabriciosanches.fichatecnica.domain.conversao;
+package com.fabriciosanches.fichatecnica.domains;
 
+import com.fabriciosanches.fichatecnica.dtos.ConversaoDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,11 +24,11 @@ public class Conversao {
     private String operacao;
     private BigDecimal valor;
 
-    public Conversao(DadosConversao dadosConversao) {
-        this.codigo = dadosConversao.codigo();
-        this.unidadeDe = dadosConversao.unidadeDe();
-        this.unidadePara = dadosConversao.unidadePara();
-        this.operacao = dadosConversao.operacao();
-        this.valor = dadosConversao.valor();
+    public Conversao(ConversaoDTO conversaoDTO) {
+        this.codigo = conversaoDTO.codigo();
+        this.unidadeDe = conversaoDTO.unidadeDe();
+        this.unidadePara = conversaoDTO.unidadePara();
+        this.operacao = conversaoDTO.operacao();
+        this.valor = conversaoDTO.valor();
     }
 }

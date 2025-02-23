@@ -1,5 +1,6 @@
-package com.fabriciosanches.fichatecnica.usuario;
+package com.fabriciosanches.fichatecnica.services;
 
+import com.fabriciosanches.fichatecnica.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

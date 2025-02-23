@@ -1,7 +1,7 @@
 package com.fabriciosanches.fichatecnica.services;
 
-import com.fabriciosanches.fichatecnica.domain.medidas.DadosUnidadeMedida;
-import com.fabriciosanches.fichatecnica.domain.medidas.UnidadeMedida;
+import com.fabriciosanches.fichatecnica.dtos.UnidadeMedidaDTO;
+import com.fabriciosanches.fichatecnica.domains.UnidadeMedida;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.repository.UnidadeMedidaRepository;
 import org.apache.logging.log4j.LogManager;
@@ -22,25 +22,25 @@ public class UnidadeMedidaService {
         this.repository = repository;
     }
 
-    private Optional<List<DadosUnidadeMedida>> obterLista() {
+    private Optional<List<UnidadeMedidaDTO>> obterLista() {
         logger.info("Inicio do método obterLista");
-        Optional<List<DadosUnidadeMedida>> listaRecord =
-                Optional.of(DadosUnidadeMedida.from(repository.findAll()));
+        Optional<List<UnidadeMedidaDTO>> listaRecord =
+                Optional.of(UnidadeMedidaDTO.from(repository.findAll()));
 
         logger.info("Lista de unidades de medida encontrada: {}", listaRecord.get());
         logger.info("Fim do método obterLista");
         return listaRecord;
     }
 
-    public List<DadosUnidadeMedida> listar() {
+    public List<UnidadeMedidaDTO> listar() {
        return obterLista().map(lista -> lista.stream()
-                        .sorted(Comparator.comparing(DadosUnidadeMedida::nome))
+                        .sorted(Comparator.comparing(UnidadeMedidaDTO::nome))
                         .toList()).orElseThrow(
                                 () -> new FichaTecnicaException("Lista de unidades de medida não encontrada"));
 
     }
 
-    public DadosUnidadeMedida buscarPorId(Long id) {
+    public UnidadeMedidaDTO buscarPorId(Long id) {
         return obterLista().map(lista -> lista.stream()
                 .filter(unidade -> unidade.codigo().equals(id))
                 .findFirst()
@@ -52,7 +52,7 @@ public class UnidadeMedidaService {
         return repository.countByName(nome);
     }
 
-    public DadosUnidadeMedida atualizarUnidade(Long id, DadosUnidadeMedida novosDados) {
+    public UnidadeMedidaDTO atualizarUnidade(Long id, UnidadeMedidaDTO novosDados) {
         Optional<UnidadeMedida> unidadeExistente = repository.findById(id);
         if (unidadeExistente.isPresent()) {
             UnidadeMedida unidade = unidadeExistente.get();
@@ -61,13 +61,13 @@ public class UnidadeMedidaService {
 
             // Atualize outros campos conforme necessário
             repository.save(unidade);
-            return new DadosUnidadeMedida(unidade);
+            return new UnidadeMedidaDTO(unidade);
         } else {
             throw new FichaTecnicaException("Unidade com ID " + id + " não encontrada");
         }
     }
 
-    public DadosUnidadeMedida cadastrarUnidade(DadosUnidadeMedida unidade) {
+    public UnidadeMedidaDTO cadastrarUnidade(UnidadeMedidaDTO unidade) {
         Objects.requireNonNull(unidade, "Unidade de medida não pode ser nula");
         Objects.requireNonNull(unidade.nome(), "Nome da unidade de medida não pode ser nulo");
         Objects.requireNonNull(unidade.sigla(), "Sigla da unidade de medida não pode ser nula");
@@ -77,7 +77,7 @@ public class UnidadeMedidaService {
         }
 
         UnidadeMedida unidadeMedida = new UnidadeMedida(unidade);
-        return new DadosUnidadeMedida(repository.save(unidadeMedida));
+        return new UnidadeMedidaDTO(repository.save(unidadeMedida));
     }
 
     public void deletarUnidade(Long id) {
