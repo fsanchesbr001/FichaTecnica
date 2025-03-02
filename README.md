@@ -17,3 +17,4 @@ Este projeto tem como objetivo a criação de uma ficha técnica de um produto, 
 ## Controle de Versão
 - 02/03/2025 - Refatoração Completa
 - 02/03/2025 - Criação do Banco de Dados
+- 02/03/2025 - Versão 1.1 - Estável sem Itens de Produto

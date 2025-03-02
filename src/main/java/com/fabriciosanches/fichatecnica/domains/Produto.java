@@ -1,12 +1,10 @@
 package com.fabriciosanches.fichatecnica.domains;
 
 import com.fabriciosanches.fichatecnica.dtos.ProdutoDTO;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 
 @Table(name = "produto")
@@ -27,9 +25,6 @@ public class Produto {
     private String imagem;
     private BigDecimal valor;
 
-    @OneToMany(mappedBy = "produto", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private List<ItensProduto> itens;
 
     public Produto(ProdutoDTO produtoDTO) {
         this.codigo = produtoDTO.codigo();

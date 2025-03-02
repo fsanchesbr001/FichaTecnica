@@ -60,7 +60,6 @@ public class ProdutoService {
             produto.setDescricao(novosDados.descricao());
             produto.setImagem(novosDados.imagem());
             produto.setValor(novosDados.valor());
-            produto.setItens(novosDados.itens());
 
             // Atualize outros campos conforme necessário
             repository.save(produto);
@@ -75,7 +74,6 @@ public class ProdutoService {
         Objects.requireNonNull(produto.nome(), "Nome do produto não pode ser nulo");
         Objects.requireNonNull(produto.descricao(), "Descricao não pode ser nula");
         Objects.requireNonNull(produto.valor(), "Valor não pode ser nulo");
-        Objects.requireNonNull(produto.itens(), "Itens não podem ser nulos");
 
         if (findByName(produto.nome()) > 0) {
             throw new FichaTecnicaException("Produto já cadastrado");
