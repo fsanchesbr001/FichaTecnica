@@ -28,7 +28,7 @@ public class TokenService {
             var algoritimo = Algorithm.HMAC256(secret);
             logger.info("Fim do método gerarToken");
             return JWT.create()
-                    .withIssuer("API Contatos")
+                    .withIssuer("API Ficha Tecnica")
                     .withSubject(usuario.getLogin())
                     .withExpiresAt(dataExpiracao())
                     .sign(algoritimo);
@@ -44,7 +44,7 @@ public class TokenService {
             var algoritimo = Algorithm.HMAC256(secret);
             logger.info("Fim do método getSubject");
             return JWT.require(algoritimo)
-                    .withIssuer("API Contatos")
+                    .withIssuer("API Ficha Tecnica")
                     .build()
                     .verify(tokenJWT)
                     .getSubject();
