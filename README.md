@@ -19,3 +19,4 @@ Este projeto tem como objetivo a criação de uma ficha técnica de um produto, 
 - 02/03/2025 - Criação do Banco de Dados
 - 02/03/2025 - Versão 1.1 - Estável sem Itens de Produto
 - 02/03/2025 - Versão 1.2 - Estável com Segurança de Usuário implementada
+- 03/03/2025 - Versão 1.2.1 - Estável com inicio de Itens de Produto
