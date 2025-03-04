@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 
 @Table(name = "produto")
@@ -24,6 +25,9 @@ public class Produto {
     private String descricao;
     private String imagem;
     private BigDecimal valor;
+
+    @OneToMany(mappedBy = "produto")
+    private List<ItemProduto> itensProduto;
 
 
     public Produto(ProdutoDTO produtoDTO) {

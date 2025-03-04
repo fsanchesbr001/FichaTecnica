@@ -14,7 +14,7 @@ public class ItemProdutoMapper {
     public static ItemProduto toEntity(ItemProdutoRequestDTO itemProdutoRequestDTO) {
         return new ItemProduto(null, itemProdutoRequestDTO.cdProduto(), itemProdutoRequestDTO.cdItem(),
                 itemProdutoRequestDTO.quantidade(), itemProdutoRequestDTO.cdUnidadePara(),
-                itemProdutoRequestDTO.valor());
+                itemProdutoRequestDTO.valor(), itemProdutoRequestDTO.produto());
     }
 
 }

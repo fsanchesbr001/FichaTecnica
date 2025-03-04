@@ -30,4 +30,9 @@ public class ItemProduto {
     private Long cdUnidadePara;
 
     private BigDecimal valor;
+
+
+    @ManyToOne
+    @JoinColumn(name = "cd_produto", insertable = false, updatable = false)
+    private Produto produto;
 }

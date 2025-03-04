@@ -111,7 +111,9 @@ public class ItemService {
 
     @Modifying
     public void deletarItem(Long id) {
-        historicoItemRepository.deleteByItemCodigo(id);
+        if(!historicoItemRepository.findByItemCodigo(id).isEmpty()) {
+            throw new FichaTecnicaException("Existem históricos para o item " + id);
+        }
         repository.deleteById(id);
     }
 }
