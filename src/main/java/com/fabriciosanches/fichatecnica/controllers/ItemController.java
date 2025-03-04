@@ -68,6 +68,10 @@ public class ItemController {
             return ResponseEntity.noContent().build();
         }
         catch (FichaTecnicaException e){
+            logger.error("Existem Históricos para o Item " + id);
+            return ResponseEntity.unprocessableEntity().build();
+        }
+        catch (Exception e){
             logger.error("Erro ao apagar item por id", e);
             return ResponseEntity.notFound().build();
         }

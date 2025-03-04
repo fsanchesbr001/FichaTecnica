@@ -38,7 +38,6 @@ public class HistoricoItemController {
             logger.error("Erro ao buscar lista de historico de itens", e);
             return ResponseEntity.notFound().build();
         }
-
     }
 
     @GetMapping("/historico-itens/{id}")
@@ -50,6 +49,22 @@ public class HistoricoItemController {
             logger.info("Item encontrado: {}", historicoItem);
             logger.info("Fim do método buscarPorId");
             return ResponseEntity.ok(historicoItem);
+        }
+        catch (FichaTecnicaException e){
+            logger.error("Erro ao buscar item por id", e);
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/historico-itens/itens/{id}")
+    public ResponseEntity<List<HistoricoItemDTO>> buscarPorItemId(@PathVariable Long id){
+        logger.info("Inicio do método buscarItemPorId");
+        logger.info("Buscando item por id: {}", id);
+        try {
+            List<HistoricoItemDTO> listaHistoricoItem = historicoItemService.buscarPorCodigoItem(id);
+            logger.info("Item encontrado: {}", listaHistoricoItem);
+            logger.info("Fim do método buscarPorId");
+            return ResponseEntity.ok(listaHistoricoItem);
         }
         catch (FichaTecnicaException e){
             logger.error("Erro ao buscar item por id", e);

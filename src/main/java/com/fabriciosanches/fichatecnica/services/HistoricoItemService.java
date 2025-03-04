@@ -81,4 +81,8 @@ public class HistoricoItemService {
     public void deletarPorCodigoItem(Long codItem) {
         repository.deleteByItemCodigo(codItem);
     }
+
+    public List<HistoricoItemDTO> buscarPorCodigoItem(Long codItem) {
+        return HistoricoItemDTO.from(repository.findByItemCodigo(codItem));
+    }
 }
