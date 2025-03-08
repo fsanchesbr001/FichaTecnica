@@ -21,3 +21,5 @@ Este projeto tem como objetivo a criação de uma ficha técnica de um produto, 
 - 02/03/2025 - Versão 1.2 - Estável com Segurança de Usuário implementada
 - 03/03/2025 - Versão 1.2.1 - Estável com inicio de Itens 
 - 04/03/2025 - Versão 1.3.0 - Estável com Itens e Histórico de Itens 
+- 07/03/2025 - Versão 1.3.1 - Estável com as Listagens e deleções de produtos
+
