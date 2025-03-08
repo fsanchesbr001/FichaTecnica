@@ -1,5 +1,6 @@
 package com.fabriciosanches.fichatecnica.domains;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,8 +19,6 @@ public class ItemProduto {
     @EqualsAndHashCode.Include
     private Long codigo;
 
-    @Column(name = "cd_produto")
-    private Long cdProduto;
 
     @Column(name = "cd_item")
     private Long cdItem;
@@ -31,8 +30,8 @@ public class ItemProduto {
 
     private BigDecimal valor;
 
-
     @ManyToOne
     @JoinColumn(name = "cd_produto", insertable = false, updatable = false)
+    @JsonBackReference
     private Produto produto;
 }

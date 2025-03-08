@@ -1,8 +1,7 @@
 package com.fabriciosanches.fichatecnica.controllers;
 
 
-import com.fabriciosanches.fichatecnica.dtos.ItemProdutoRequestDTO;
-import com.fabriciosanches.fichatecnica.dtos.ItemProdutoResponseDTO;
+import com.fabriciosanches.fichatecnica.dtos.ItemProdutoDTO;
 
 import com.fabriciosanches.fichatecnica.services.ItemProdutoService;
 import jakarta.validation.Valid;
@@ -23,26 +22,26 @@ public class ItemProdutoController {
     }
 
     @PostMapping
-    public ResponseEntity<ItemProdutoResponseDTO> adicionarItemProduto(@RequestBody @Valid @NonNull ItemProdutoRequestDTO itemProdutoRequestDTO) {
-        ItemProdutoResponseDTO novoItemProduto = itemProdutoService.save(itemProdutoRequestDTO);
+    public ResponseEntity<ItemProdutoDTO> adicionarItemProduto(@RequestBody @Valid @NonNull ItemProdutoDTO itemProdutoDTO) {
+        ItemProdutoDTO novoItemProduto = itemProdutoService.save(itemProdutoDTO);
         return ResponseEntity.ok(novoItemProduto);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ItemProdutoResponseDTO> alterarItemProduto(@PathVariable Long id, @RequestBody ItemProdutoRequestDTO itemProdutoAtual) {
-        ItemProdutoResponseDTO itemProdutoAtualizado = itemProdutoService.update(id, itemProdutoAtual);
+    public ResponseEntity<ItemProdutoDTO> alterarItemProduto(@PathVariable Long id, @RequestBody ItemProdutoDTO itemProdutoAtual) {
+        ItemProdutoDTO itemProdutoAtualizado = itemProdutoService.update(id, itemProdutoAtual);
         return ResponseEntity.ok(itemProdutoAtualizado);
     }
 
     @GetMapping
-    public ResponseEntity<List<ItemProdutoResponseDTO>> listarItemProdutos() {
-        List<ItemProdutoResponseDTO> itemProdutos = itemProdutoService.listAll();
+    public ResponseEntity<List<ItemProdutoDTO>> listarItemProdutos() {
+        List<ItemProdutoDTO> itemProdutos = itemProdutoService.listAll();
         return ResponseEntity.ok(itemProdutos);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluirItemProduto(@PathVariable Long id) {
-        ItemProdutoResponseDTO itemProdutoResponseDTO = itemProdutoService.findById(id);
+        ItemProdutoDTO itemProdutoResponseDTO = itemProdutoService.findById(id);
         if (itemProdutoResponseDTO == null) {
             return ResponseEntity.notFound().build();
         }
@@ -51,15 +50,9 @@ public class ItemProdutoController {
     }
 
     @GetMapping("/produto/{produtoId}")
-    public ResponseEntity<List<ItemProdutoResponseDTO>> listarItensPorProduto(@PathVariable Long produtoId) {
-        List<ItemProdutoResponseDTO> itens = itemProdutoService.findByCdProduto(produtoId);
+    public ResponseEntity<List<ItemProdutoDTO>> listarItensPorProduto(@PathVariable Long produtoId) {
+        List<ItemProdutoDTO> itens = itemProdutoService.findByCdProduto(produtoId);
         return ResponseEntity.ok(itens);
-    }
-
-    @GetMapping("/item/{itemId}")
-    public ResponseEntity<List<ItemProdutoResponseDTO>> listarProdutosPorItem(@PathVariable Long itemId) {
-        List<ItemProdutoResponseDTO> produtos = itemProdutoService.findByCdItem(itemId);
-        return ResponseEntity.ok(produtos);
     }
 }
 

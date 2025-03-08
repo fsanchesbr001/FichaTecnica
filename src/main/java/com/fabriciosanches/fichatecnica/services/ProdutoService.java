@@ -3,10 +3,12 @@ package com.fabriciosanches.fichatecnica.services;
 import com.fabriciosanches.fichatecnica.dtos.ProdutoDTO;
 import com.fabriciosanches.fichatecnica.domains.Produto;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.mappers.ProdutoMapper;
 import com.fabriciosanches.fichatecnica.repository.ProdutoRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
@@ -52,6 +54,7 @@ public class ProdutoService {
         return repository.countByName(nome);
     }
 
+    @Transactional
     public ProdutoDTO atualizarProduto(Long id, ProdutoDTO novosDados) {
         Optional<Produto> produtoExistente = repository.findById(id);
         if (produtoExistente.isPresent()) {
@@ -59,7 +62,9 @@ public class ProdutoService {
             produto.setNome(novosDados.nome());
             produto.setDescricao(novosDados.descricao());
             produto.setImagem(novosDados.imagem());
-            produto.setValor(novosDados.valor());
+            produto.setValorVenda(novosDados.valorVenda());
+            produto.setValorItens(novosDados.valorItens());
+            produto.setItensProduto(novosDados.itensProduto());
 
             // Atualize outros campos conforme necessário
             repository.save(produto);
@@ -69,20 +74,30 @@ public class ProdutoService {
         }
     }
 
-    public ProdutoDTO cadastrarProduto(ProdutoDTO produto) {
-        Objects.requireNonNull(produto, "Produto não pode ser nulo");
-        Objects.requireNonNull(produto.nome(), "Nome do produto não pode ser nulo");
-        Objects.requireNonNull(produto.descricao(), "Descricao não pode ser nula");
-        Objects.requireNonNull(produto.valor(), "Valor não pode ser nulo");
+    @Transactional
+    public ProdutoDTO cadastrarProduto(ProdutoDTO produtoDTO) {
+        Objects.requireNonNull(produtoDTO, "Produto não pode ser nulo");
+        Objects.requireNonNull(produtoDTO.nome(), "Nome do produto não pode ser nulo");
+        Objects.requireNonNull(produtoDTO.descricao(), "Descricao não pode ser nula");
+        Objects.requireNonNull(produtoDTO.valorVenda(), "Valor de Venda não pode ser nulo");
+        Objects.requireNonNull(produtoDTO.valorItens(), "Valor dos Itens não pode ser nulo");
+        Objects.requireNonNull(produtoDTO.itensProduto(), "Itens do Produto não podem ser nulos");
 
-        if (findByName(produto.nome()) > 0) {
+        if (findByName(produtoDTO.nome()) > 0) {
             throw new FichaTecnicaException("Produto já cadastrado");
         }
 
-        Produto novoProduto = new Produto(produto);
-        return new ProdutoDTO(repository.save(novoProduto));
+        Produto produto = ProdutoMapper.INSTANCE.toEntity(produtoDTO);
+        Produto produtoSalvo = repository.save(produto);
+
+        produtoDTO.itensProduto().forEach(item -> item.setProduto(produtoSalvo));
+        produtoSalvo.setItensProduto(produtoDTO.itensProduto());
+
+        return ProdutoMapper.INSTANCE.toDTO(repository.save(produtoSalvo));
+
     }
 
+    @Transactional
     public void deletarProduto(Long id) {
         repository.deleteById(id);
     }
