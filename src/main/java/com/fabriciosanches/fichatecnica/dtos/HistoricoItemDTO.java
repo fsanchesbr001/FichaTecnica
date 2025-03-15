@@ -16,6 +16,6 @@ public record HistoricoItemDTO(Long codigo, Item item, BigDecimal valor, LocalDa
     }
 
     public static List<HistoricoItemDTO> from(List<HistoricoItem> all) {
-        return all.stream().map(HistoricoItemDTO::new).toList();
+        return all.stream().map(com.fabriciosanches.fichatecnica.dtos.HistoricoItemDTO::new).toList();
     }
 }

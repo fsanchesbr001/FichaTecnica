@@ -3,7 +3,6 @@ package com.fabriciosanches.fichatecnica.services;
 import com.fabriciosanches.fichatecnica.dtos.ProdutoDTO;
 import com.fabriciosanches.fichatecnica.domains.Produto;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
-import com.fabriciosanches.fichatecnica.mappers.ProdutoMapper;
 import com.fabriciosanches.fichatecnica.repository.ProdutoRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -64,7 +63,7 @@ public class ProdutoService {
             produto.setImagem(novosDados.imagem());
             produto.setValorVenda(novosDados.valorVenda());
             produto.setValorItens(novosDados.valorItens());
-            produto.setItensProduto(novosDados.itensProduto());
+            produto.setItens(novosDados.itensProduto());
 
             // Atualize outros campos conforme necessário
             repository.save(produto);
@@ -87,13 +86,13 @@ public class ProdutoService {
             throw new FichaTecnicaException("Produto já cadastrado");
         }
 
-        Produto produto = ProdutoMapper.INSTANCE.toEntity(produtoDTO);
+        Produto produto = new Produto(produtoDTO);
         Produto produtoSalvo = repository.save(produto);
 
         produtoDTO.itensProduto().forEach(item -> item.setProduto(produtoSalvo));
-        produtoSalvo.setItensProduto(produtoDTO.itensProduto());
+        produtoSalvo.setItens(produtoDTO.itensProduto());
 
-        return ProdutoMapper.INSTANCE.toDTO(repository.save(produtoSalvo));
+        return new ProdutoDTO(repository.save(produtoSalvo));
 
     }
 

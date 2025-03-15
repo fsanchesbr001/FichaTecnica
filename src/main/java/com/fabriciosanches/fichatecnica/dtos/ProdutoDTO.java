@@ -11,7 +11,7 @@ import java.util.List;
 public record ProdutoDTO(Long codigo, String nome, String descricao, String imagem, BigDecimal valorVenda, BigDecimal valorItens
         ,List<ItemProduto> itensProduto) {
     public ProdutoDTO(Produto produto) {
-        this(produto.getCodigo(), produto.getNome(), produto.getDescricao(), produto.getImagem(), produto.getValorVenda(),produto.getValorItens(), produto.getItensProduto());
+        this(produto.getCodigo(), produto.getNome(), produto.getDescricao(), produto.getImagem(), produto.getValorVenda(),produto.getValorItens(), produto.getItens());
     }
 
     public static List<ProdutoDTO> from(List<Produto> lista) {

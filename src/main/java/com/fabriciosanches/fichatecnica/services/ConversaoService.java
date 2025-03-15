@@ -41,11 +41,11 @@ public class ConversaoService {
     }
 
     public ConversaoDTO buscarPorId(Long id) {
-        return obterLista().map(lista -> lista.stream()
-                .filter(unidade -> unidade.codigo().equals(id))
+        return repository.findAll().stream()
+                .map(ConversaoDTO::new)
+                .filter(conversao -> id.equals(conversao.codigo()))
                 .findFirst()
-                .orElseThrow(() -> new FichaTecnicaException("Conversão não encontrada")))
-                .orElseThrow(() -> new FichaTecnicaException("Lista de conversões não encontrada"));
+                .orElseThrow(() -> new FichaTecnicaException("Conversão com ID " + id + " não encontrada"));
     }
 
     public long findByConversaoDePara(Long conversaoDe, Long conversaoPara) {

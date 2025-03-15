@@ -34,8 +34,8 @@ class ConversaoControllerTest {
 
     @Test
     void testBuscarLista() {
-        ConversaoDTO conversaoDTO = new ConversaoDTO(1L, 1L, 2L, "MULTIPLICACAO", BigDecimal.TEN);
-        when(conversaoService.listar()).thenReturn(List.of(conversaoDTO));
+        ConversaoDTO conversaoResponseDTO = new ConversaoDTO(1L, 1L, 2L, "MULTIPLICACAO", BigDecimal.TEN);
+        when(conversaoService.listar()).thenReturn(List.of(conversaoResponseDTO));
 
         ResponseEntity<List<ConversaoDTO>> response = conversaoController.buscarLista();
 
@@ -70,27 +70,29 @@ class ConversaoControllerTest {
 
     @Test
     void testAtualizarConversao() {
-        ConversaoDTO conversaoDTO = new ConversaoDTO(1L, 1L, 2L, "MULTIPLICACAO", BigDecimal.TEN);
-        when(conversaoService.atualizarConversao(eq(1L), any(ConversaoDTO.class))).thenReturn(conversaoDTO);
+        ConversaoDTO conversaoRequestDTO = new ConversaoDTO( 1L,1L, 2L, "MULTIPLICACAO", BigDecimal.TEN);
+        when(conversaoService.atualizarConversao(eq(1L), any(ConversaoDTO.class)))
+                .thenReturn(new ConversaoDTO(1L, 1L, 2L, "MULTIPLICACAO", BigDecimal.TEN));
 
-        ResponseEntity<ConversaoDTO> response = conversaoController.atualizarConversao(1L, conversaoDTO);
+        ResponseEntity<ConversaoDTO> response = conversaoController.atualizarConversao(1L, conversaoRequestDTO);
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(conversaoDTO, response.getBody());
+        assertEquals(new ConversaoDTO(1L, 1L, 2L, "MULTIPLICACAO", BigDecimal.TEN), response.getBody());
         verify(conversaoService, times(1)).atualizarConversao(eq(1L), any(ConversaoDTO.class));
     }
 
     @Test
     void testCadastrarConversao() {
-        ConversaoDTO conversaoDTO = new ConversaoDTO(1L, 1L, 2L, "MULTIPLICACAO", BigDecimal.TEN);
-        when(conversaoService.cadastrarConversao(any(ConversaoDTO.class))).thenReturn(conversaoDTO);
+        ConversaoDTO conversaoRequestDTO = new ConversaoDTO( 1L,1L, 2L, "MULTIPLICACAO", BigDecimal.TEN);
+        when(conversaoService.cadastrarConversao(any(ConversaoDTO.class)))
+                .thenReturn(new ConversaoDTO(1L, 1L, 2L, "MULTIPLICACAO", BigDecimal.TEN));
 
-        ResponseEntity<ConversaoDTO> response = conversaoController.cadastrarConversao(conversaoDTO);
+        ResponseEntity<ConversaoDTO> response = conversaoController.cadastrarConversao(conversaoRequestDTO);
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(conversaoDTO, response.getBody());
+        assertEquals(new ConversaoDTO(1L, 1L, 2L, "MULTIPLICACAO", BigDecimal.TEN), response.getBody());
         verify(conversaoService, times(1)).cadastrarConversao(any(ConversaoDTO.class));
     }
 }

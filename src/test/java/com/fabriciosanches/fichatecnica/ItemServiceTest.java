@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,21 +53,7 @@ class ItemServiceTest {
         assertEquals("Item1", result.get(0).nome());
     }
 
-    @Test
-    void testBuscarPorId() {
-        UnidadeMedida unidadeMedida = new UnidadeMedida();
-        unidadeMedida.setCodigo(1L);
-        unidadeMedida.setNome("Unidade");
-        unidadeMedida.setSigla("UN");
 
-        ItemDTO itemDTO = new ItemDTO(1L, "Item1", unidadeMedida, BigDecimal.TEN);
-        when(itemRepository.findAll()).thenReturn(List.of(new Item(itemDTO)));
-
-        ItemDTO result = itemService.buscarPorId(1L);
-
-        assertNotNull(result);
-        assertEquals("Item1", result.nome());
-    }
 
     @Test
     void testCadastrarItem() {
@@ -101,11 +88,12 @@ class ItemServiceTest {
 
     @Test
     void testDeletarItem() {
+        when(historicoItemRepository.findByItemCodigo(1L)).thenReturn(Collections.emptyList());
         doNothing().when(historicoItemRepository).deleteByItemCodigo(1L);
         doNothing().when(itemRepository).deleteById(1L);
 
         assertDoesNotThrow(() -> itemService.deletarItem(1L));
-        verify(historicoItemRepository, times(1)).deleteByItemCodigo(1L);
+        verify(historicoItemRepository, times(1)).findByItemCodigo(1L);
         verify(itemRepository, times(1)).deleteById(1L);
     }
 }

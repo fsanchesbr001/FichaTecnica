@@ -81,27 +81,29 @@ class HistoricoItemControllerTest {
 
     @Test
     void testAtualizar() {
-        HistoricoItemDTO historicoItemDTO = new HistoricoItemDTO(1L, null, BigDecimal.TEN, LocalDate.now());
-        when(historicoItemService.atualizarHistoricoItem(eq(1L), any(HistoricoItemDTO.class))).thenReturn(historicoItemDTO);
+        HistoricoItemDTO historicoItemRequestDTO = new HistoricoItemDTO(1L, null, BigDecimal.TEN, LocalDate.now());
+        when(historicoItemService.atualizarHistoricoItem(eq(1L), any(HistoricoItemDTO.class)))
+                .thenReturn(new HistoricoItemDTO(1L, null, BigDecimal.TEN, LocalDate.now()));
 
-        ResponseEntity<HistoricoItemDTO> response = historicoItemController.atualizar(1L, historicoItemDTO);
+        ResponseEntity<HistoricoItemDTO> response = historicoItemController.atualizar(1L, historicoItemRequestDTO);
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(historicoItemDTO, response.getBody());
+        assertEquals(new HistoricoItemDTO(1L, null, BigDecimal.TEN, LocalDate.now()), response.getBody());
         verify(historicoItemService, times(1)).atualizarHistoricoItem(eq(1L), any(HistoricoItemDTO.class));
     }
 
     @Test
     void testCadastrar() {
-        HistoricoItemDTO historicoItemDTO = new HistoricoItemDTO(1L, null, BigDecimal.TEN, LocalDate.now());
-        when(historicoItemService.cadastrarItem(any(HistoricoItemDTO.class))).thenReturn(historicoItemDTO);
+        HistoricoItemDTO historicoItemDTO = new HistoricoItemDTO( 1L,null, BigDecimal.TEN, LocalDate.now());
+        when(historicoItemService.cadastrarItem(any(HistoricoItemDTO.class)))
+                .thenReturn(new HistoricoItemDTO(1L, null, BigDecimal.TEN, LocalDate.now()));
 
         ResponseEntity<HistoricoItemDTO> response = historicoItemController.cadastrar(historicoItemDTO);
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(historicoItemDTO, response.getBody());
+        assertEquals(new HistoricoItemDTO(1L, null, BigDecimal.TEN, LocalDate.now()), response.getBody());
         verify(historicoItemService, times(1)).cadastrarItem(any(HistoricoItemDTO.class));
     }
 }

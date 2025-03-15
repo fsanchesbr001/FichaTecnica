@@ -1,7 +1,7 @@
 package com.fabriciosanches.fichatecnica.services;
 
-import com.fabriciosanches.fichatecnica.dtos.HistoricoItemDTO;
 import com.fabriciosanches.fichatecnica.domains.HistoricoItem;
+import com.fabriciosanches.fichatecnica.dtos.HistoricoItemDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.repository.HistoricoItemRepository;
 import org.apache.logging.log4j.LogManager;
@@ -25,7 +25,7 @@ public class HistoricoItemService {
     private Optional<List<HistoricoItemDTO>> obterLista() {
         logger.info("Inicio do método obterLista");
         Optional<List<HistoricoItemDTO>> listaRecord =
-                Optional.of(HistoricoItemDTO.from(repository.findAll()));
+                Optional.of(com.fabriciosanches.fichatecnica.dtos.HistoricoItemDTO.from(repository.findAll()));
 
         logger.info("Lista de historico de itens encontrada: {}", listaRecord.get());
         logger.info("Fim do método obterLista");
@@ -83,6 +83,6 @@ public class HistoricoItemService {
     }
 
     public List<HistoricoItemDTO> buscarPorCodigoItem(Long codItem) {
-        return HistoricoItemDTO.from(repository.findByItemCodigo(codItem));
+        return com.fabriciosanches.fichatecnica.dtos.HistoricoItemDTO.from(repository.findByItemCodigo(codItem));
     }
 }

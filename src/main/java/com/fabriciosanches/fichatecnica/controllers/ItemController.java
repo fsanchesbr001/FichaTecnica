@@ -29,6 +29,10 @@ public class ItemController {
         logger.info("Buscando lista de itens");
         try {
             List<ItemDTO> itens = itemService.listar();
+            if (itens.isEmpty()) {
+                logger.error("Lista de itens não encontrada");
+                return ResponseEntity.noContent().build();
+            }
             logger.info("Lista de itens encontrada: {}", itens);
             logger.info("Fim do método buscarLista");
             return ResponseEntity.ok(itens);
@@ -46,6 +50,10 @@ public class ItemController {
         logger.info("Buscando item por id: {}", id);
         try {
             ItemDTO item = itemService.buscarPorId(id);
+            if (item == null) {
+                logger.error("Item não encontrado");
+                return ResponseEntity.noContent().build();
+            }
             logger.info("Item encontrado: {}", item);
             logger.info("Fim do método buscarPorId");
             return ResponseEntity.ok(item);
