@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @Table(name = "item")
@@ -18,11 +19,16 @@ public class Item {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private  Long codigo;
+
     private String nome;
 
     @OneToOne(optional = false)
     @JoinColumn(name = "cd_unidade_medida")
     private UnidadeMedida unidadeMedida;
+
+    @OneToMany(mappedBy = "item")
+    private List<ItemProduto> itensProduto;
+
     private BigDecimal valor;
 
     public Item(ItemDTO itemDTO) {
@@ -30,5 +36,6 @@ public class Item {
         this.nome = itemDTO.nome();
         this.unidadeMedida = itemDTO.unidadeMedida();
         this.valor = itemDTO.valor();
+
     }
 }

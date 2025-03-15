@@ -1,37 +1,45 @@
 package com.fabriciosanches.fichatecnica.domains;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-
-@Entity(name = "ItemProduto")
 @Table(name = "item_produto")
+@Entity(name = "ItemProduto")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class ItemProduto {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
     private Long codigo;
 
+    @ManyToOne
+    @JoinColumn(name = "cd_item")
+    private Item item;
 
-    @Column(name = "cd_item")
-    private Long cdItem;
+    @ManyToOne
+    @JoinColumn(name = "cd_produto")
+    private Produto produto;
 
-    private Integer quantidade;
+    @ManyToOne
+    @JoinColumn(name = "cd_unidade_de")
+    private UnidadeMedida unidadePara;
 
-    @Column(name = "cd_unidade_para")
-    private Long cdUnidadePara;
+    private BigDecimal quantidade;
 
     private BigDecimal valor;
 
-    @ManyToOne
-    @JoinColumn(name = "cd_produto", insertable = false, updatable = false)
-    @JsonBackReference
-    private Produto produto;
+    public ItemProduto(Item item, Produto produto, UnidadeMedida unidadePara,
+                       BigDecimal quantidade, BigDecimal valor) {
+        this.item = item;
+        this.produto = produto;
+        this.unidadePara = unidadePara;
+        this.quantidade = quantidade;
+        this.valor = valor;
+    }
+
 }

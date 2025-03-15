@@ -30,6 +30,10 @@ public class ConversaoController {
         logger.info("Buscando lista de conversões");
         try {
             List<ConversaoDTO> conversoes = conversaoService.listar();
+            if (conversoes.isEmpty()) {
+                logger.error("Lista de conversoes não encontrada");
+                return ResponseEntity.noContent().build();
+            }
             logger.info("Lista de conversoes encontrada: {}", conversoes);
             logger.info("Fim do método buscarLista");
             return ResponseEntity.ok(conversoes);
@@ -38,7 +42,6 @@ public class ConversaoController {
             logger.error("Erro ao buscar lista de conversoes", e);
             return ResponseEntity.notFound().build();
         }
-
     }
 
     @GetMapping("/conversoes/{id}")
@@ -97,10 +100,10 @@ public class ConversaoController {
         logger.info("Inicio do método cadastrarConversao");
         logger.info("Cadastrando unidade de medida: {}", conversao);
         try {
-            ConversaoDTO conversaoDTO = conversaoService.cadastrarConversao(conversao);
-            logger.info("Conversao cadastrada com sucesso: {}", conversaoDTO);
+            ConversaoDTO conversaoResponseDTO = conversaoService.cadastrarConversao(conversao);
+            logger.info("Conversao cadastrada com sucesso: {}", conversaoResponseDTO);
             logger.info("Fim do método cadastrarConversao");
-            return ResponseEntity.ok(conversaoDTO);
+            return ResponseEntity.ok(conversaoResponseDTO);
         }
         catch (FichaTecnicaException e){
             logger.error("Erro ao cadastrar conversao", e);

@@ -58,8 +58,9 @@ class ItemControllerTest {
 
     @Test
     void testCadastrarItem() {
-        ItemDTO itemDTO = new ItemDTO(1L, "Item1", null, BigDecimal.TEN);
-        when(itemService.cadastrarItem(any(ItemDTO.class))).thenReturn(itemDTO);
+        ItemDTO itemDTO = new ItemDTO(1L,"Item1", null, BigDecimal.TEN);
+        when(itemService.cadastrarItem(any(ItemDTO.class)))
+                .thenReturn(new ItemDTO(1L, "Item1", null, BigDecimal.TEN));
 
         ResponseEntity<ItemDTO> response = itemController.cadastrarItem(itemDTO);
 

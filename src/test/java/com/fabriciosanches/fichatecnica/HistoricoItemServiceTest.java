@@ -1,8 +1,8 @@
 package com.fabriciosanches.fichatecnica;
 
-import com.fabriciosanches.fichatecnica.dtos.HistoricoItemDTO;
 import com.fabriciosanches.fichatecnica.domains.HistoricoItem;
 import com.fabriciosanches.fichatecnica.domains.Item;
+import com.fabriciosanches.fichatecnica.dtos.HistoricoItemDTO;
 import com.fabriciosanches.fichatecnica.repository.HistoricoItemRepository;
 import com.fabriciosanches.fichatecnica.services.HistoricoItemService;
 import org.junit.jupiter.api.BeforeEach;
@@ -72,7 +72,7 @@ class HistoricoItemServiceTest {
         item.setNome("Item1");
         item.setValor(BigDecimal.TEN);
 
-        HistoricoItemDTO historicoItemDTO = new HistoricoItemDTO(1L, item, BigDecimal.TEN, LocalDate.now());
+        HistoricoItemDTO historicoItemDTO = new HistoricoItemDTO(1L,item, BigDecimal.TEN, LocalDate.now());
         HistoricoItem historicoItem = new HistoricoItem(historicoItemDTO);
         when(historicoItemRepository.save(any(HistoricoItem.class))).thenReturn(historicoItem);
 
@@ -93,7 +93,7 @@ class HistoricoItemServiceTest {
         when(historicoItemRepository.findById(1L)).thenReturn(Optional.of(historicoItem));
         when(historicoItemRepository.save(any(HistoricoItem.class))).thenReturn(historicoItem);
 
-        HistoricoItemDTO novosDados = new HistoricoItemDTO(1L, item, BigDecimal.ONE, LocalDate.now());
+        HistoricoItemDTO novosDados = new HistoricoItemDTO(1L,item, BigDecimal.ONE, LocalDate.now());
         HistoricoItemDTO result = historicoItemService.atualizarHistoricoItem(1L, novosDados);
 
         assertNotNull(result);

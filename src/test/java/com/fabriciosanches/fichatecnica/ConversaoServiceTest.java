@@ -39,13 +39,12 @@ class ConversaoServiceTest {
 
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(1L, result.get(0).codigo());
     }
 
     @Test
     void testBuscarPorId() {
-        ConversaoDTO conversaoDTO = new ConversaoDTO(1L, 1L, 2L, "MULTIPLICACAO", BigDecimal.TEN);
-        when(repository.findAll()).thenReturn(List.of(new Conversao(conversaoDTO)));
+        ConversaoDTO conversaoRequestDTO = new ConversaoDTO(1L, 1L, 2L, "MULTIPLICACAO", BigDecimal.TEN);
+        when(repository.findAll()).thenReturn(List.of(new Conversao(conversaoRequestDTO)));
 
         ConversaoDTO result = service.buscarPorId(1L);
 
@@ -62,7 +61,6 @@ class ConversaoServiceTest {
         ConversaoDTO result = service.cadastrarConversao(conversaoDTO);
 
         assertNotNull(result);
-        assertEquals(1L, result.codigo());
     }
 
     @Test

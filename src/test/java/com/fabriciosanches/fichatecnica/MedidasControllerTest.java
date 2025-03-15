@@ -66,7 +66,8 @@ class MedidasControllerTest {
     @Test
     void cadastrarUnidade_DeveCadastrarUnidade() {
         UnidadeMedidaDTO dados = new UnidadeMedidaDTO(1L, "Unidade A", "UA");
-        when(service.cadastrarUnidade(any(UnidadeMedidaDTO.class))).thenReturn(dados);
+        when(service.cadastrarUnidade(any(UnidadeMedidaDTO.class)))
+                .thenReturn(new UnidadeMedidaDTO(1L, "Unidade A", "UA"));
 
         ResponseEntity<UnidadeMedidaDTO> response = controller.cadastrarUnidade(dados);
 
@@ -78,7 +79,8 @@ class MedidasControllerTest {
     @Test
     void atualizarUnidade_DeveAtualizarUnidadeExistente() {
         UnidadeMedidaDTO dados = new UnidadeMedidaDTO(1L, "Unidade Atualizada", "UA");
-        when(service.atualizarUnidade(eq(1L), any(UnidadeMedidaDTO.class))).thenReturn(dados);
+        when(service.atualizarUnidade(eq(1L), any(UnidadeMedidaDTO.class)))
+                .thenReturn(new UnidadeMedidaDTO(1L, "Unidade Atualizada", "UA"));
 
         ResponseEntity<UnidadeMedidaDTO> response = controller.atualizarUnidade(1L, dados);
 

@@ -51,11 +51,11 @@ public class ItemService {
     }
 
     public ItemDTO buscarPorId(Long id) {
-        return obterLista().map(lista -> lista.stream()
-                        .filter(item -> item.codigo().equals(id))
-                        .findFirst()
-                        .orElseThrow(() -> new FichaTecnicaException("Item não encontrado")))
-                .orElseThrow(() -> new FichaTecnicaException("Lista de itens não encontrada"));
+        return repository.findAll().stream()
+                .map(ItemDTO::new)
+                .filter(item -> id.equals(item.codigo()))
+                .findFirst()
+                .orElseThrow(() -> new FichaTecnicaException("Item com ID " + id + " não encontrado"));
     }
 
     public long findByName(String nome) {
