@@ -71,18 +71,6 @@ CREATE TABLE `produto` (
                            PRIMARY KEY (`codigo`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Lista de produtos';
 
--- fichatecnica.historico_produto definição
-
-CREATE TABLE `historico_produto` (
-                                     `codigo` bigint NOT NULL AUTO_INCREMENT COMMENT 'codigo historico produto',
-                                     `cd_produto` bigint NOT NULL COMMENT 'id do produto',
-                                     `valor` decimal(10,2) NOT NULL,
-                                     `data_inicio` date NOT NULL,
-                                     `data_fim` date DEFAULT NULL,
-                                     PRIMARY KEY (`codigo`),
-                                     CONSTRAINT `historico_produto_produto_FK` FOREIGN KEY (`codigo`) REFERENCES `produto` (`codigo`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Historico de preços dos produtos';
-
 -- fichatecnica.item definição
 
 CREATE TABLE `item` (
@@ -109,13 +97,12 @@ CREATE TABLE `historico_item` (
 -- fichatecnica.item_produto definição
 
 CREATE TABLE `item_produto` (
-                                `codigo` bigint NOT NULL AUTO_INCREMENT,
                                 `cd_produto` bigint NOT NULL,
                                 `cd_item` bigint NOT NULL,
                                 `quantidade` decimal(10,0) NOT NULL,
                                 `cd_unidade_para` bigint NOT NULL,
                                 `valor` decimal(10,2) NOT NULL,
-                                PRIMARY KEY (`codigo`),
+                                PRIMARY KEY (`cd_produto`, `cd_item`),
                                 KEY `item_produto_produto_FK` (`cd_produto`),
                                 KEY `item_produto_item_FK` (`cd_item`),
                                 KEY `item_produto_unidade_medida_FK` (`cd_unidade_para`),

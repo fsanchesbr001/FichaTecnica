@@ -27,7 +27,7 @@ public class Item {
     private UnidadeMedida unidadeMedida;
 
     @OneToMany(mappedBy = "item")
-    private List<ItemProduto> itensProduto;
+    private List<ItemProduto> itemProdutoList;
 
     private BigDecimal valor;
 

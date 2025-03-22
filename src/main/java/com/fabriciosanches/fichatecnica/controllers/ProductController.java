@@ -29,6 +29,11 @@ public class ProductController {
         logger.info("Buscando lista de produto");
         try {
             List<ProdutoDTO> produtos = produtoService.listar();
+            if (produtos.isEmpty()){
+                logger.info("Lista de produtos vazia");
+                logger.info("Fim do método buscarLista");
+                return ResponseEntity.noContent().build();
+            }
             logger.info("Lista de produtos encontrada: {}", produtos);
             logger.info("Fim do método buscarLista");
             return ResponseEntity.ok(produtos);
@@ -46,6 +51,11 @@ public class ProductController {
         logger.info("Buscando produto por id: {}", id);
         try {
             ProdutoDTO produto = produtoService.buscarPorId(id);
+            if (produto == null){
+                logger.info("Produto não encontrado");
+                logger.info("Fim do método buscarPorId");
+                return ResponseEntity.noContent().build();
+            }
             logger.info("Produto encontrado: {}", produto);
             logger.info("Fim do método buscarPorId");
             return ResponseEntity.ok(produto);

@@ -1,5 +1,6 @@
 package com.fabriciosanches.fichatecnica.domains;
 
+import com.fabriciosanches.fichatecnica.dtos.ItemProdutoDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,34 +13,32 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class ItemProduto {
-    @EqualsAndHashCode.Include
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Id
-    private Long codigo;
+
+    @EmbeddedId
+    private ItemProdutoId id;
 
     @ManyToOne
-    @JoinColumn(name = "cd_item")
+    @JoinColumn(name = "cd_item" , insertable = false, updatable = false)
+    @MapsId("itemId")
     private Item item;
 
     @ManyToOne
-    @JoinColumn(name = "cd_produto")
+    @JoinColumn(name = "cd_produto" , insertable = false, updatable = false)
+    @MapsId("produtoId")
     private Produto produto;
 
     @ManyToOne
-    @JoinColumn(name = "cd_unidade_de")
+    @JoinColumn(name = "cd_unidade_para")
     private UnidadeMedida unidadePara;
 
-    private BigDecimal quantidade;
+    private Integer quantidade;
 
     private BigDecimal valor;
 
-    public ItemProduto(Item item, Produto produto, UnidadeMedida unidadePara,
-                       BigDecimal quantidade, BigDecimal valor) {
-        this.item = item;
-        this.produto = produto;
-        this.unidadePara = unidadePara;
-        this.quantidade = quantidade;
-        this.valor = valor;
+    public ItemProduto(ItemProdutoDTO itemProdutoDTO) {
+        this.id = new ItemProdutoId(itemProdutoDTO.cdProduto(), itemProdutoDTO.cdItem());
+        this.unidadePara = new UnidadeMedida(itemProdutoDTO.cdUnidadeMedida(), null, null);
+        this.quantidade = itemProdutoDTO.qtdItem();
+        this.valor = itemProdutoDTO.vlrItem();
     }
-
 }

@@ -12,6 +12,5 @@ public interface ProdutoRepository extends JpaRepository<Produto,Long> {
     @Query("SELECT COUNT(p) FROM Produto p WHERE p.nome = :nome")
     long countByName(@Param("nome") String nome);
 
-    @Query("SELECT p FROM Produto p JOIN p.itens ip WHERE ip.item.codigo= :cdItem")
-    List<Produto> findByCdItem(@Param("cdItem") Long cdItem);
+
 }

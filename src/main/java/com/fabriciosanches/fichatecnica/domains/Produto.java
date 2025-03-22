@@ -26,10 +26,16 @@ public class Produto {
     private String imagem;
     private BigDecimal valorVenda;
     private BigDecimal valorItens;
-    @OneToMany(mappedBy = "produto", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ItemProduto> itens;
 
-    public Produto(ProdutoDTO produto) {
-        this(produto.codigo(), produto.nome(), produto.descricao(), produto.imagem(), produto.valorVenda(),produto.valorItens(),produto.itensProduto());
+    @OneToMany(mappedBy = "produto", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ItemProduto> produtosList;
+
+    public Produto(ProdutoDTO produtoDTO) {
+        this.codigo = produtoDTO.codigo();
+        this.nome = produtoDTO.nome();
+        this.descricao = produtoDTO.descricao();
+        this.imagem = produtoDTO.imagem();
+        this.valorVenda = produtoDTO.valorVenda();
+        this.valorItens = produtoDTO.valorItens();
     }
 }

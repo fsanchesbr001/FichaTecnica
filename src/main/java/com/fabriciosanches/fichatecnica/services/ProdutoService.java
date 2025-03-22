@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -63,14 +64,16 @@ public class ProdutoService {
             produto.setImagem(novosDados.imagem());
             produto.setValorVenda(novosDados.valorVenda());
             produto.setValorItens(novosDados.valorItens());
-            produto.setItens(novosDados.itensProduto());
 
             // Atualize outros campos conforme necessário
             repository.save(produto);
-            return new ProdutoDTO(produto);
+            return new ProdutoDTO(produto.getCodigo(), produto.getNome(),
+                    produto.getDescricao(), produto.getImagem(),
+                    produto.getValorVenda(), produto.getValorItens());
         } else {
             throw new FichaTecnicaException("Produto com ID " + id + " não encontrada");
         }
+
     }
 
     @Transactional
@@ -79,20 +82,15 @@ public class ProdutoService {
         Objects.requireNonNull(produtoDTO.nome(), "Nome do produto não pode ser nulo");
         Objects.requireNonNull(produtoDTO.descricao(), "Descricao não pode ser nula");
         Objects.requireNonNull(produtoDTO.valorVenda(), "Valor de Venda não pode ser nulo");
-        Objects.requireNonNull(produtoDTO.valorItens(), "Valor dos Itens não pode ser nulo");
-        Objects.requireNonNull(produtoDTO.itensProduto(), "Itens do Produto não podem ser nulos");
+
 
         if (findByName(produtoDTO.nome()) > 0) {
             throw new FichaTecnicaException("Produto já cadastrado");
         }
 
         Produto produto = new Produto(produtoDTO);
-        Produto produtoSalvo = repository.save(produto);
 
-        produtoDTO.itensProduto().forEach(item -> item.setProduto(produtoSalvo));
-        produtoSalvo.setItens(produtoDTO.itensProduto());
-
-        return new ProdutoDTO(repository.save(produtoSalvo));
+        return ProdutoDTO.from(repository.save(produto));
 
     }
 
