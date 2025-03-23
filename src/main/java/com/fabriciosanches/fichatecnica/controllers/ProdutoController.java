@@ -14,12 +14,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("ficha-tecnica")
-public class ProductController {
-    private static final Logger logger = LogManager.getLogger(ProductController.class);
+public class ProdutoController {
+    private static final Logger logger = LogManager.getLogger(ProdutoController.class);
 
     final ProdutoService produtoService;
 
-    public ProductController(ProdutoService produtoService) {
+    public ProdutoController(ProdutoService produtoService) {
         this.produtoService = produtoService;
     }
 
