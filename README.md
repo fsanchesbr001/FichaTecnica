@@ -25,4 +25,5 @@ Este projeto tem como objetivo a criação de uma ficha técnica de um produto, 
 - 14/03/2025 - Versão 1.4.0 - Estável com refatoração de DTOs
 - 22/03/2025 - Versão 1.4.1 - Estável com Produto Ok
 - 23/03/2025 - Versão 1.5.0 - Estável e salvando ItensProduto
+- 25/03/2025 - Versão 1.5.1 - Estável com ItensProduto Ok e totais de Itens
 
