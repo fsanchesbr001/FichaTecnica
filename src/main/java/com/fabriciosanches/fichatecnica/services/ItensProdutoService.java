@@ -2,7 +2,8 @@ package com.fabriciosanches.fichatecnica.services;
 
 import com.fabriciosanches.fichatecnica.domains.*;
 import com.fabriciosanches.fichatecnica.dtos.ItemProdutoDTO;
-import com.fabriciosanches.fichatecnica.dtos.ProdutoCompleto;
+import com.fabriciosanches.fichatecnica.dtos.ProdutoCompletoDTO;
+import com.fabriciosanches.fichatecnica.dtos.QuantidadeValorDTO;
 import com.fabriciosanches.fichatecnica.dtos.UnidadeMedidaDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.repository.ItemProdutoRepository;
@@ -12,9 +13,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,7 +43,7 @@ public class ItensProdutoService {
         return itemProdutoRepository.findById(id).orElse(null);
     }
 
-    public List<ProdutoCompleto> salvar(Long idProduto, List<ItemProdutoDTO> itemProduto) {
+    public List<ProdutoCompletoDTO> salvar(Long idProduto, List<ItemProdutoDTO> itemProduto) {
         logger.info("Inicio do método salvar com Lista");
         Produto produto = getProduto(idProduto);
 
@@ -51,12 +52,12 @@ public class ItensProdutoService {
             throw new FichaTecnicaException("Item não encontrado");
         }
 
-        var produtoCompletoList = new ArrayList<ProdutoCompleto>();
+        var produtoCompletoList = new ArrayList<ProdutoCompletoDTO>();
         for (var item: itemProduto) {
             var itemEntity = getItem(item);
             var unidadeMedida = getUnidadeMedidaDTO(item);
             saveItem(item, produto, itemEntity, unidadeMedida);
-            produtoCompletoList.add(new ProdutoCompleto(produto.getNome(),itemEntity.getNome(),
+            produtoCompletoList.add(new ProdutoCompletoDTO(produto.getNome(),itemEntity.getNome(),
                     item.qtdItem(), item.cdUnidadeMedida(),
                     item.vlrItem()));
         }
@@ -64,6 +65,31 @@ public class ItensProdutoService {
         return produtoCompletoList;
     }
 
+    public List<ProdutoCompletoDTO> listarItensProduto(Long idProduto) {
+        logger.info("Inicio do método listarItensProduto");
+        Produto produto = getProduto(idProduto);
+
+        return produto.getProdutosList().stream().map(ip-> new ProdutoCompletoDTO(
+                ip.getProduto().getNome(),
+                ip.getItem().getNome(),ip.getQuantidade(),
+                ip.getUnidadePara().getCodigo(),ip.getValor())
+        ).collect(Collectors.toList());
+    }
+
+    public QuantidadeValorDTO calcularQuantidadeEValorTotal(Long idProduto) {
+        logger.info("Inicio do método calcularQuantidadeEValorTotal");
+        Produto produto = getProduto(idProduto);
+
+        int quantidadeTotal = 0;
+        BigDecimal valorTotal = BigDecimal.ZERO;
+
+        for (ItemProduto itemProduto : produto.getProdutosList()) {
+            quantidadeTotal += 1;
+            valorTotal = valorTotal.add(itemProduto.getValor());
+        }
+
+        return new QuantidadeValorDTO(quantidadeTotal, valorTotal);
+    }
     private Boolean isValidItens(List<ItemProdutoDTO> itemProduto) {
         var listItem = itemRepository.findAll();
         var itemIdsCompleta = listItem.stream().map(Item::getCodigo)
@@ -102,9 +128,6 @@ public class ItensProdutoService {
 
     private Item getItem(ItemProdutoDTO itemProduto) {
         return itemRepository.findById(itemProduto.cdItem())
-                .orElseThrow(()->{
-                    logger.error("Item não encontrado");
-                    throw new FichaTecnicaException("Item não encontrado");
-                });
+                .orElseThrow();
     }
 }
