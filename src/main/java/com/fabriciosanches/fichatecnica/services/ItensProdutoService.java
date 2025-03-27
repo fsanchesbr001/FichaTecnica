@@ -1,10 +1,7 @@
 package com.fabriciosanches.fichatecnica.services;
 
 import com.fabriciosanches.fichatecnica.domains.*;
-import com.fabriciosanches.fichatecnica.dtos.ItemProdutoDTO;
-import com.fabriciosanches.fichatecnica.dtos.ProdutoCompletoDTO;
-import com.fabriciosanches.fichatecnica.dtos.QuantidadeValorDTO;
-import com.fabriciosanches.fichatecnica.dtos.UnidadeMedidaDTO;
+import com.fabriciosanches.fichatecnica.dtos.*;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.repository.ItemProdutoRepository;
 import com.fabriciosanches.fichatecnica.repository.ItemRepository;
@@ -89,6 +86,22 @@ public class ItensProdutoService {
         }
 
         return new QuantidadeValorDTO(quantidadeTotal, valorTotal);
+    }
+
+    public List<ProdutosPorItemDTO> listarProdutosPorItem(Long codigoItem) {
+        logger.info("Inicio do método listarProdutosPorItem");
+        Item item = itemRepository.findById(codigoItem)
+                .orElseThrow(() -> {
+                    logger.error("Item não encontrado");
+                    return new FichaTecnicaException("Item não encontrado");
+                });
+
+        return itemProdutoRepository.findByItem(item).stream()
+                .map(itemProduto -> new ProdutosPorItemDTO(
+                        itemProduto.getProduto().getCodigo(),
+                        itemProduto.getProduto().getNome()
+                ))
+                .collect(Collectors.toList());
     }
     private Boolean isValidItens(List<ItemProdutoDTO> itemProduto) {
         var listItem = itemRepository.findAll();

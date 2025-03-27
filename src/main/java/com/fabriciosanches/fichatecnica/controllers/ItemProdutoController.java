@@ -2,6 +2,7 @@ package com.fabriciosanches.fichatecnica.controllers;
 
 import com.fabriciosanches.fichatecnica.dtos.ItemProdutoDTO;
 import com.fabriciosanches.fichatecnica.dtos.ProdutoCompletoDTO;
+import com.fabriciosanches.fichatecnica.dtos.ProdutosPorItemDTO;
 import com.fabriciosanches.fichatecnica.dtos.QuantidadeValorDTO;
 import com.fabriciosanches.fichatecnica.services.ItensProdutoService;
 import org.apache.logging.log4j.LogManager;
@@ -66,6 +67,21 @@ public class ItemProdutoController {
             return ResponseEntity.ok(valores);
         } catch (Exception e) {
             logger.error("Erro ao calcular valores", e);
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/itens/{idItem}/produtos")
+    public ResponseEntity<List<ProdutosPorItemDTO>> ListarProdutosPorItem(@PathVariable("idItem") Long idItem) {
+        logger.info("Inicio do método ListarProdutosPorItem");
+        logger.info("Buscando Item");
+        try {
+            List<ProdutosPorItemDTO> produtos = itensProdutoService.listarProdutosPorItem(idItem);
+            logger.info("Produtos obtidos");
+            logger.info("Fim do método ListarProdutosPorItem");
+            return ResponseEntity.ok(produtos);
+        } catch (Exception e) {
+            logger.error("Erro ao obter produtos", e);
             return ResponseEntity.badRequest().build();
         }
     }
