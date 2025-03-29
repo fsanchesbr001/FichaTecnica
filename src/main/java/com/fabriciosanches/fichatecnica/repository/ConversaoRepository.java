@@ -9,4 +9,5 @@ public interface ConversaoRepository extends JpaRepository<Conversao,Long> {
     @Query("SELECT COUNT(u) FROM Conversao u WHERE u.unidadeDe = :unidadeDe AND u.unidadePara = :unidadePara")
     long countByUnidadeDeAndUnidadePara(@Param("unidadeDe") Long unidadeDe, @Param("unidadePara") Long unidadePara);
 
+    Conversao findByUnidadeDeAndUnidadePara(Long unidadeDe, Long unidadePara);
 }

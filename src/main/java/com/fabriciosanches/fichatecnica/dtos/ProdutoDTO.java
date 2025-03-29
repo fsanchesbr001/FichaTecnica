@@ -1,13 +1,13 @@
 package com.fabriciosanches.fichatecnica.dtos;
 
 
-
 import com.fabriciosanches.fichatecnica.domains.Produto;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-public record ProdutoDTO(Long codigo, String nome, String descricao, String imagem, BigDecimal valorVenda,
+public record ProdutoDTO(Long codigo, String nome, String descricao, String imagem,
+                         BigDecimal valorVenda,
                          BigDecimal valorItens) {
     public ProdutoDTO {
         if (valorItens == null) {
