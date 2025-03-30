@@ -14,6 +14,11 @@ Este projeto tem como objetivo a criação de uma ficha técnica de um produto, 
 - [Java 17](https://docs.oracle.com/en/java/javase/17/)
 - [Maven](https://maven.apache.org/)
 
+## Próximos Passos
+- Implementar a funcionalidade de upload de imagens para os produtos.
+- Adicionar a funcionalidade de alterar ItensProduto.
+- Melhorar a segurança da aplicação, implementando controle de usuario.
+
 ## Controle de Versão
 - 02/03/2025 - Refatoração Completa
 - 02/03/2025 - Criação do Banco de Dados
@@ -28,4 +33,5 @@ Este projeto tem como objetivo a criação de uma ficha técnica de um produto, 
 - 25/03/2025 - Versão 1.5.1 - Estável com ItensProduto Ok e totais de Itens 
 - 27/03/2025 - Versão 1.5.2 - Estável com Lista de Produtos por itens Ok
 - 29/03/2025 - Versão 1.5.3 - Estável com Conversao de valores
+- 30/03/2025 - Versão 1.5.4 - Estável com atualização de valor dos Itens OK e deleção de ItensProduto OK
 

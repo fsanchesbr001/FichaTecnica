@@ -2,5 +2,5 @@ package com.fabriciosanches.fichatecnica.dtos;
 
 public record ConversaoValoresInputDTO(
          Long idItem,
-         Integer quantidade,
+         Double quantidade,
          Long idUnidade) {}

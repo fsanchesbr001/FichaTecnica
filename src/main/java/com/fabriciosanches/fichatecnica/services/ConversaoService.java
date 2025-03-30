@@ -10,7 +10,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -84,7 +83,7 @@ public class ConversaoService {
         repository.deleteById(id);
     }
 
-    public ConversaoValoresDTO obterValoresConversao(Long idItem, Integer quantidade, Long idUnidade) {
+    public ConversaoValoresDTO obterValoresConversao(Long idItem, Double quantidade, Long idUnidade) {
         logger.info("Iniciando o método obterValoresConversao com idItem: {}, quantidade: {}, idUnidade: {}", idItem, quantidade, idUnidade);
         var itemDto = itemService.buscarPorId(idItem);
 
@@ -97,11 +96,11 @@ public class ConversaoService {
         return converterValores(conversao, valorCompra, quantidade);
     }
 
-    private ConversaoValoresDTO converterValores(Conversao conversao, BigDecimal valorCompra, Integer quantidade) {
+    private ConversaoValoresDTO converterValores(Conversao conversao, BigDecimal valorCompra, Double quantidade) {
         logger.info("Iniciando o método converterValores com conversao: {}", conversao);
         var valorConvertido = switch (conversao.getOperacao()) {
             case "MULTIPLICA" -> valorCompra.multiply(conversao.getValor()).multiply(BigDecimal.valueOf(quantidade));
-            case "DIVIDE" -> valorCompra.divide(conversao.getValor(), RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(quantidade));
+            case "DIVIDE" -> valorCompra.divide(conversao.getValor()).multiply(BigDecimal.valueOf(quantidade));
             default -> throw new FichaTecnicaException("Operação inválida");
         };
 

@@ -44,6 +44,16 @@ CREATE TABLE `unidade_medida` (
                                   PRIMARY KEY (`codigo`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- Inserindo dados na tabela unidade_medida
+INSERT INTO unidade_medida(codigo, nome, sigla) VALUES(1, 'Quilograma', 'Kg');
+INSERT INTO unidade_medida(codigo, nome, sigla) VALUES(2, 'Grama', 'g');
+INSERT INTO unidade_medida(codigo, nome, sigla) VALUES(3, 'Litro', 'l');
+INSERT INTO unidade_medida(codigo, nome, sigla) VALUES(4, 'Mililitro', 'ml');
+INSERT INTO unidade_medida(codigo, nome, sigla) VALUES(5, 'Quilometro', 'Km');
+INSERT INTO unidade_medida(codigo, nome, sigla) VALUES(6, 'Metro', 'm');
+INSERT INTO unidade_medida(codigo, nome, sigla) VALUES(7, 'Duzia', 'dz');
+INSERT INTO unidade_medida(codigo, nome, sigla) VALUES(8, 'Unidade', 'un');
+
 -- fichatecnica.conversao definição
 
 CREATE TABLE `conversao` (
@@ -58,6 +68,16 @@ CREATE TABLE `conversao` (
                              CONSTRAINT `conversao_unidade_medida_FK` FOREIGN KEY (`unidade_de`) REFERENCES `unidade_medida` (`codigo`) ON DELETE RESTRICT ON UPDATE RESTRICT,
                              CONSTRAINT `conversao_unidade_medida_FK_1` FOREIGN KEY (`unidade_para`) REFERENCES `unidade_medida` (`codigo`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Tabela com regras de Conversao';
+
+-- Inserindo dados na tabela conversao
+INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(1, 1, 2, 'MULTIPLICA', 1000.00);
+INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(2, 2, 1, 'DIVIDE', 1000.00);
+INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(3, 3, 4, 'MULTIPLICA', 1000.00);
+INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(4, 4, 3, 'DIVIDE', 1000.00);
+INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(5, 5, 6, 'MULTIPLICA', 1000.00);
+INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(6, 6, 5, 'DIVIDE', 1000.00);
+INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(7, 7, 8, 'MULTIPLICA', 12.00);
+INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(8, 8, 7, 'DIVIDE', 12.00);
 
 -- fichatecnica.produto definição
 
@@ -99,7 +119,7 @@ CREATE TABLE `historico_item` (
 CREATE TABLE `item_produto` (
                                 `cd_produto` bigint NOT NULL,
                                 `cd_item` bigint NOT NULL,
-                                `quantidade` decimal(10,0) NOT NULL,
+                                `quantidade` decimal(10,2) NOT NULL,
                                 `cd_unidade_para` bigint NOT NULL,
                                 `valor` decimal(10,2) NOT NULL,
                                 PRIMARY KEY (`cd_produto`, `cd_item`),

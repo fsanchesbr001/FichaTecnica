@@ -1,6 +1,5 @@
 package com.fabriciosanches.fichatecnica.domains;
 
-import com.fabriciosanches.fichatecnica.dtos.ItemProdutoDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -31,14 +30,7 @@ public class ItemProduto {
     @JoinColumn(name = "cd_unidade_para")
     private UnidadeMedida unidadePara;
 
-    private Integer quantidade;
+    private Double quantidade;
 
     private BigDecimal valor;
-
-    public ItemProduto(ItemProdutoDTO itemProdutoDTO) {
-        this.id = new ItemProdutoId(itemProdutoDTO.cdProduto(), itemProdutoDTO.cdItem());
-        this.unidadePara = new UnidadeMedida(itemProdutoDTO.cdUnidadeMedida(), null, null);
-        this.quantidade = itemProdutoDTO.qtdItem();
-        this.valor = itemProdutoDTO.vlrItem();
-    }
 }

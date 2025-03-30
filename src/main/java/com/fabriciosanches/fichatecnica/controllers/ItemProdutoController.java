@@ -85,4 +85,20 @@ public class ItemProdutoController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @DeleteMapping("/produtos/{idProduto}/itens/{idItem}")
+    public ResponseEntity<Void> deletarItemProduto(@PathVariable("idProduto") Long idProduto,
+                                                    @PathVariable("idItem") Long idItem) {
+        logger.info("Inicio do método deletarItemProduto");
+        logger.info("Deletando item produto");
+        try {
+            itensProdutoService.deletarItemProduto(idProduto, idItem);
+            logger.info("Item produto deletado");
+            logger.info("Fim do método deletarItemProduto");
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            logger.error("Erro ao deletar item produto", e);
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }
