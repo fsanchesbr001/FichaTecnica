@@ -24,16 +24,19 @@ public class ItensProdutoService {
     private final ProdutoRepository produtoRepository;
     private final ItemRepository itemRepository;
     private final UnidadeMedidaService unidadeMedidaService;
+    private final ConversaoService conversaoService;
 
 
     public ItensProdutoService(ItemProdutoRepository itemProdutoRepository,
                                ProdutoRepository produtoRepository,
                                ItemRepository itemRepository,
-                               UnidadeMedidaService unidadeMedidaService) {
+                               UnidadeMedidaService unidadeMedidaService,
+                               ConversaoService conversaoService) {
         this.itemProdutoRepository = itemProdutoRepository;
         this.produtoRepository = produtoRepository;
         this.itemRepository = itemRepository;
         this.unidadeMedidaService = unidadeMedidaService;
+        this.conversaoService = conversaoService;
     }
 
     public ItemProduto buscarPorId(Long id) {
@@ -51,13 +54,22 @@ public class ItensProdutoService {
 
         var produtoCompletoList = new ArrayList<ProdutoCompletoDTO>();
         for (var item: itemProduto) {
-            var itemEntity = getItem(item);
+            var itemEntity = getItem(item.cdItem());
             var unidadeMedida = getUnidadeMedidaDTO(item);
-            saveItem(item, produto, itemEntity, unidadeMedida);
+            ConversaoValoresDTO conversaoValoresDTO = conversaoService.obterValoresConversao(item.cdItem(),
+                    item.qtdItem(),item.cdUnidadeMedida());
+            saveItem(item, produto, itemEntity, unidadeMedida, conversaoValoresDTO);
+
+
+
             produtoCompletoList.add(new ProdutoCompletoDTO(produto.getNome(),itemEntity.getNome(),
                     item.qtdItem(), item.cdUnidadeMedida(),
                     item.vlrItem()));
         }
+
+        QuantidadeValorDTO quantidadeValorDTO = calcularQuantidadeEValorTotal(produto.getCodigo());
+        produto.setValorItens(quantidadeValorDTO.valorTotal());
+        produtoRepository.save(produto);
 
         return produtoCompletoList;
     }
@@ -103,6 +115,21 @@ public class ItensProdutoService {
                 ))
                 .collect(Collectors.toList());
     }
+
+    public void deletarItemProduto(Long idProduto, Long idItem) {
+        logger.info("Inicio do método deletarItemProduto");
+
+        ItemProduto itemProduto = itemProdutoRepository.findByProdutoCodigoAndItemCodigo(idProduto, idItem);
+
+        itemProdutoRepository.delete(itemProduto);
+
+        QuantidadeValorDTO quantidadeValorDTO = calcularQuantidadeEValorTotal(idProduto);
+
+        var produto = getProduto(idProduto);
+        produto.setValorItens(quantidadeValorDTO.valorTotal());
+        produtoRepository.save(produto);
+    }
+
     private Boolean isValidItens(List<ItemProdutoDTO> itemProduto) {
         var listItem = itemRepository.findAll();
         var itemIdsCompleta = listItem.stream().map(Item::getCodigo)
@@ -111,14 +138,15 @@ public class ItensProdutoService {
         return  itemProduto.stream().allMatch(item -> itemIdsCompleta.contains(item.cdItem()));
     }
 
-    private void saveItem(ItemProdutoDTO itemProduto, Produto produto, Item item, UnidadeMedidaDTO unidadeMedida) {
+    private void saveItem(ItemProdutoDTO itemProduto, Produto produto, Item item,
+                          UnidadeMedidaDTO unidadeMedida, ConversaoValoresDTO conversaoValoresDTO) {
         var itemProdutoSalvo = new ItemProduto();
         itemProdutoSalvo.setId(new ItemProdutoId(produto.getCodigo(), item.getCodigo()));
         itemProdutoSalvo.setProduto(produto);
         itemProdutoSalvo.setItem(item);
         itemProdutoSalvo.setQuantidade(itemProduto.qtdItem());
         itemProdutoSalvo.setUnidadePara(UnidadeMedidaDTO.toEntity(unidadeMedida));
-        itemProdutoSalvo.setValor(itemProduto.vlrItem());
+        itemProdutoSalvo.setValor(conversaoValoresDTO.valor());
         itemProdutoRepository.save(itemProdutoSalvo);
     }
 
@@ -139,8 +167,8 @@ public class ItensProdutoService {
         return unidadeMedida;
     }
 
-    private Item getItem(ItemProdutoDTO itemProduto) {
-        return itemRepository.findById(itemProduto.cdItem())
+    private Item getItem(Long  idItem) {
+        return itemRepository.findById(idItem)
                 .orElseThrow();
     }
 }

@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface ItemProdutoRepository extends JpaRepository<ItemProduto, Long> {
     List<ItemProduto> findByItem(Item item);
-
+    ItemProduto findByProdutoCodigoAndItemCodigo(Long idProduto, Long idItem);
 }
