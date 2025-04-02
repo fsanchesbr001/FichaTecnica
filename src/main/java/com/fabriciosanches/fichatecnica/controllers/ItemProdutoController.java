@@ -101,4 +101,13 @@ public class ItemProdutoController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @PutMapping("/{idProduto}/{idItem}/quantidade")
+    public ResponseEntity<Void> atualizarQuantidadeItemProduto(
+            @PathVariable Long idProduto,
+            @PathVariable Long idItem,
+            @RequestParam Double novaQuantidade) {
+        itensProdutoService.atualizarQuantidadeItemProduto(idProduto, idItem, novaQuantidade);
+        return ResponseEntity.ok().build();
+    }
 }
