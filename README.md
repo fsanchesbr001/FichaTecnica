@@ -16,8 +16,12 @@ Este projeto tem como objetivo a criação de uma ficha técnica de um produto, 
 
 ## Próximos Passos
 - Implementar a funcionalidade de upload de imagens para os produtos.
-- Adicionar a funcionalidade de alterar ItensProduto.
-- Melhorar a segurança da aplicação, implementando controle de usuario.
+- Adicionar a funcionalidade de alterar Item.
+- Adicionar a funcionalidade de excluir Item.
+- Melhorar a segurança da aplicação, implementando controle de usuário.
+- Adicionar Observabilidade e monitoramento da aplicação.
+- Adicionar testes unitários
+- Adicionar Documentação da API com Swagger.
 
 ## Controle de Versão
 - 02/03/2025 - Refatoração Completa

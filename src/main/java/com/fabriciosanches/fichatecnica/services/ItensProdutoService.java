@@ -130,6 +130,38 @@ public class ItensProdutoService {
         produtoRepository.save(produto);
     }
 
+    public void atualizarQuantidadeItemProduto(Long idProduto, Long idItem, Double novaQuantidade) {
+        logger.info("Inicio do método atualizarQuantidadeItemProduto");
+
+        ItemProduto itemProduto = itemProdutoRepository.findByProdutoCodigoAndItemCodigo(idProduto, idItem);
+        if (itemProduto == null) {
+            throw new FichaTecnicaException("ItemProduto não encontrado para o produto e item especificados");
+        }
+
+        ItemProdutoDTO itemProdutoDTO = new ItemProdutoDTO(
+                itemProduto.getProduto().getCodigo(),
+                itemProduto.getItem().getCodigo(),
+                novaQuantidade,
+                itemProduto.getUnidadePara().getCodigo(),
+                itemProduto.getValor());
+
+        ConversaoValoresDTO conversaoValoresDTO = conversaoService.obterValoresConversao(
+                itemProdutoDTO.cdItem(),
+                itemProdutoDTO.qtdItem(),
+                itemProdutoDTO.cdUnidadeMedida());
+
+        itemProduto.setQuantidade(conversaoValoresDTO.quantidade());
+        itemProduto.setValor(conversaoValoresDTO.valor());
+        itemProdutoRepository.save(itemProduto);
+
+        var produto = getProduto(idProduto);
+        QuantidadeValorDTO quantidadeValorDTO = calcularQuantidadeEValorTotal(produto.getCodigo());
+        produto.setValorItens(quantidadeValorDTO.valorTotal());
+        produtoRepository.save(produto);
+
+        logger.info("Quantidade do ItemProduto atualizada com sucesso");
+    }
+
     private Boolean isValidItens(List<ItemProdutoDTO> itemProduto) {
         var listItem = itemRepository.findAll();
         var itemIdsCompleta = listItem.stream().map(Item::getCodigo)
