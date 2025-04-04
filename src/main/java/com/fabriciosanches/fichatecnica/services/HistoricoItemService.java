@@ -52,7 +52,7 @@ public class HistoricoItemService {
         Optional<HistoricoItem> historicoExistente = repository.findById(id);
         if (historicoExistente.isPresent()) {
             HistoricoItem historicoItem = historicoExistente.get();
-            historicoItem.setItem(novosDados.item());
+            historicoItem.setCdItem(novosDados.idItem());
             historicoItem.setValor(novosDados.valor());
             historicoItem.setDataInicio(novosDados.dataInicio());
 
@@ -66,7 +66,7 @@ public class HistoricoItemService {
 
     public HistoricoItemDTO cadastrarItem(HistoricoItemDTO historicoItem) {
         Objects.requireNonNull(historicoItem, "Historico de item não pode ser nulo");
-        Objects.requireNonNull(historicoItem.item(), "Item não pode ser nulo");
+        Objects.requireNonNull(historicoItem.idItem(), "Id de Item não pode ser nulo");
         Objects.requireNonNull(historicoItem.dataInicio(), "Data Inicio não pode ser nula");
         Objects.requireNonNull(historicoItem.valor(), "Valor do item não pode ser nulo");
 
@@ -83,6 +83,6 @@ public class HistoricoItemService {
     }
 
     public List<HistoricoItemDTO> buscarPorCodigoItem(Long codItem) {
-        return com.fabriciosanches.fichatecnica.dtos.HistoricoItemDTO.from(repository.findByItemCodigo(codItem));
+        return HistoricoItemDTO.from(repository.findByCdItem(codItem));
     }
 }

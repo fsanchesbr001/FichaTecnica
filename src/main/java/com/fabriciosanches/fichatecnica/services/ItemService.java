@@ -76,7 +76,7 @@ public class ItemService {
 
             ItemDTO itemDTO = new ItemDTO(repository.save(item));
 
-            HistoricoItem historicoItem = new HistoricoItem(null, item, novosDados.valor(), LocalDate.now());
+            HistoricoItem historicoItem = new HistoricoItem(null,itemDTO.codigo() , novosDados.valor(), LocalDate.now());
 
             historicoItemRepository.save(historicoItem);
 
@@ -102,7 +102,7 @@ public class ItemService {
 
         ItemDTO itemDTO = new ItemDTO(repository.save(novoItem));
 
-        HistoricoItem historicoItem = new HistoricoItem(null, novoItem, item.valor(), LocalDate.now());
+        HistoricoItem historicoItem = new HistoricoItem(null, itemDTO.codigo(), item.valor(), LocalDate.now());
 
         historicoItemRepository.save(historicoItem);
 
@@ -111,7 +111,7 @@ public class ItemService {
 
     @Modifying
     public void deletarItem(Long id) {
-        if(!historicoItemRepository.findByItemCodigo(id).isEmpty()) {
+        if(!historicoItemRepository.findByCdItem(id).isEmpty()) {
             throw new FichaTecnicaException("Existem históricos para o item " + id);
         }
         repository.deleteById(id);

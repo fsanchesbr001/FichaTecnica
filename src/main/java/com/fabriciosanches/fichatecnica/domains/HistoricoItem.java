@@ -21,9 +21,7 @@ public class HistoricoItem {
     @EqualsAndHashCode.Include
     private Long codigo;
 
-    @OneToOne(optional = false)
-    @JoinColumn(name = "cd_item")
-    private Item item;
+    private Long cdItem;
 
     private BigDecimal valor;
 
@@ -31,7 +29,7 @@ public class HistoricoItem {
 
     public HistoricoItem(HistoricoItemDTO historicoItemDTO) {
         this.codigo = historicoItemDTO.codigo();
-        this.item = historicoItemDTO.item();
+        this.cdItem = historicoItemDTO.idItem();
         this.valor = historicoItemDTO.valor();
         this.dataInicio = historicoItemDTO.dataInicio();
     }

@@ -11,8 +11,8 @@ import java.util.List;
 public interface HistoricoItemRepository extends JpaRepository<HistoricoItem, Long> {
     @Modifying
     @Transactional
-    @Query("DELETE FROM HistoricoItem h WHERE h.item.codigo = :codigoItem")
+    @Query("DELETE FROM HistoricoItem h WHERE h.cdItem = :codigoItem")
     void deleteByItemCodigo(Long codigoItem);
 
-    List<HistoricoItem> findByItemCodigo(Long codigoItem);
+    List<HistoricoItem> findByCdItem(Long codigoItem);
 }
