@@ -1,6 +1,5 @@
 package com.fabriciosanches.fichatecnica.services;
 
-import com.fabriciosanches.fichatecnica.domains.HistoricoItem;
 import com.fabriciosanches.fichatecnica.dtos.HistoricoItemDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.repository.HistoricoItemRepository;
@@ -9,7 +8,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -45,41 +43,6 @@ public class HistoricoItemService {
                         .findFirst()
                         .orElseThrow(() -> new FichaTecnicaException("Historico de item não encontrado")))
                 .orElseThrow(() -> new FichaTecnicaException("Lista de historico de itens não encontrada"));
-    }
-
-
-    public HistoricoItemDTO atualizarHistoricoItem(Long id, HistoricoItemDTO novosDados) {
-        Optional<HistoricoItem> historicoExistente = repository.findById(id);
-        if (historicoExistente.isPresent()) {
-            HistoricoItem historicoItem = historicoExistente.get();
-            historicoItem.setCdItem(novosDados.idItem());
-            historicoItem.setValor(novosDados.valor());
-            historicoItem.setDataInicio(novosDados.dataInicio());
-
-            // Atualize outros campos conforme necessário
-            repository.save(historicoItem);
-            return new HistoricoItemDTO(historicoItem);
-        } else {
-            throw new FichaTecnicaException("Historico de item com ID " + id + " não encontrado");
-        }
-    }
-
-    public HistoricoItemDTO cadastrarItem(HistoricoItemDTO historicoItem) {
-        Objects.requireNonNull(historicoItem, "Historico de item não pode ser nulo");
-        Objects.requireNonNull(historicoItem.idItem(), "Id de Item não pode ser nulo");
-        Objects.requireNonNull(historicoItem.dataInicio(), "Data Inicio não pode ser nula");
-        Objects.requireNonNull(historicoItem.valor(), "Valor do item não pode ser nulo");
-
-        HistoricoItem novoHistoricoItem = new HistoricoItem(historicoItem);
-        return new HistoricoItemDTO(repository.save(novoHistoricoItem));
-    }
-
-    public void deletarItem(Long id) {
-        repository.deleteById(id);
-    }
-
-    public void deletarPorCodigoItem(Long codItem) {
-        repository.deleteByItemCodigo(codItem);
     }
 
     public List<HistoricoItemDTO> buscarPorCodigoItem(Long codItem) {

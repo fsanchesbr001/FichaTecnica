@@ -110,6 +110,7 @@ public class ItemService {
     }
 
     @Modifying
+    @Transactional
     public void deletarItem(Long id) {
         if(!historicoItemRepository.findByCdItem(id).isEmpty()) {
             throw new FichaTecnicaException("Existem históricos para o item " + id);

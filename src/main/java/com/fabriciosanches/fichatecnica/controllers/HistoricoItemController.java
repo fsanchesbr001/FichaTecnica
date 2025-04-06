@@ -3,12 +3,13 @@ package com.fabriciosanches.fichatecnica.controllers;
 import com.fabriciosanches.fichatecnica.dtos.HistoricoItemDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.services.HistoricoItemService;
-
-import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -72,73 +73,5 @@ public class HistoricoItemController {
         }
     }
 
-    @DeleteMapping("/historico-itens/{id}")
-    @Transactional
-    public ResponseEntity<Void> apagar(@PathVariable Long id) {
-        logger.info("Inicio do método apagar");
-        logger.info("Apagando historico de item por id: {}", id);
-        try {
-            historicoItemService.deletarItem(id);
-            logger.info("Historico do Item apagado com sucesso");
-            logger.info("Fim do método apagar");
-            return ResponseEntity.noContent().build();
-        }
-        catch (FichaTecnicaException e){
-            logger.error("Erro ao apagar historico do item por id", e);
-            return ResponseEntity.notFound().build();
-        }
-    }
 
-    @DeleteMapping("/historico-itens/itens/{codItem}")
-    @Transactional
-    public ResponseEntity<Void> apagarPorCodItem(@PathVariable Long codItem) {
-        logger.info("Inicio do método apagarPorCodItem");
-        logger.info("Apagando historico de item por codItem: {}", codItem);
-        try {
-            historicoItemService.deletarPorCodigoItem(codItem);
-            logger.info("Historico do Item apagado com sucesso");
-            logger.info("Fim do método apagarPorCodItem");
-            return ResponseEntity.noContent().build();
-        }
-        catch (FichaTecnicaException e){
-            logger.error("Erro ao apagar historico do item por id", e);
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-
-
-    @PutMapping("/historico-itens/{id}")
-    @Transactional
-    public ResponseEntity<HistoricoItemDTO> atualizar(@PathVariable Long id, @RequestBody HistoricoItemDTO historicoItemDTO) {
-        logger.info("Inicio do método atualizarItem");
-        logger.info("Atualizando item por id: {}", id);
-        try {
-            HistoricoItemDTO item = historicoItemService.atualizarHistoricoItem(id, historicoItemDTO);
-            logger.info("Item atualizado com sucesso: {}", item);
-            logger.info("Fim do método atualizarUnidade");
-            return ResponseEntity.ok(item);
-        }
-        catch (FichaTecnicaException e){
-            logger.error("Erro ao atualizar unidade de medida por id", e);
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @PostMapping("/historico-itens")
-    @Transactional
-    public ResponseEntity<HistoricoItemDTO> cadastrar(@RequestBody HistoricoItemDTO historicoItemDTO) {
-        logger.info("Inicio do método cadastrar");
-        logger.info("Cadastrando Historico do Item: {}", historicoItemDTO);
-        try {
-            HistoricoItemDTO dadosHistorico = historicoItemService.cadastrarItem(historicoItemDTO);
-            logger.info("Historico de Item cadastrado com sucesso: {}", dadosHistorico);
-            logger.info("Fim do método cadastrar");
-            return ResponseEntity.ok(dadosHistorico);
-        }
-        catch (FichaTecnicaException e){
-            logger.error("Erro ao cadastrar historico do item", e);
-            return ResponseEntity.badRequest().build();
-        }
-    }
 }

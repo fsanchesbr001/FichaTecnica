@@ -39,3 +39,4 @@ Este projeto tem como objetivo a criação de uma ficha técnica de um produto, 
 - 29/03/2025 - Versão 1.5.3 - Estável com Conversão de valores
 - 30/03/2025 - Versão 1.5.4 - Estável com atualização de valor dos Itens OK e deleção de ItensProduto OK
 - 03/04/2025 - Versão 1.5.6 - Correção de referências Circulares em HistoricoItem
+- 05/04/2025 - Versão 1.5.7 - Correção de chave estrangeira e limpeza de codigo em HistoricoItem
