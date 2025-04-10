@@ -1,11 +1,8 @@
 package com.fabriciosanches.fichatecnica.controllers;
 
 import com.fabriciosanches.fichatecnica.dtos.ConversaoDTO;
-import com.fabriciosanches.fichatecnica.dtos.ConversaoValoresDTO;
-import com.fabriciosanches.fichatecnica.dtos.ConversaoValoresInputDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.services.ConversaoService;
-
 import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -113,19 +110,4 @@ public class ConversaoController {
         }
     }
 
-    @PostMapping("/conversoes/valores")
-    public ResponseEntity<ConversaoValoresDTO> obterValoresConversao(
-            @RequestBody ConversaoValoresInputDTO conversaoValoresInputDTO) {
-        logger.info("Inicio do método obterValoresConversao");
-        try {
-            ConversaoValoresDTO valoresDTO = conversaoService.obterValoresConversao(conversaoValoresInputDTO.idItem(),
-                    conversaoValoresInputDTO.quantidade(), conversaoValoresInputDTO.idUnidade());
-            logger.info("Valores de conversão obtidos com sucesso: {}", valoresDTO);
-            logger.info("Fim do método obterValoresConversao");
-            return ResponseEntity.ok(valoresDTO);
-        } catch (FichaTecnicaException e) {
-            logger.error("Erro ao obter valores de conversão", e);
-            return ResponseEntity.badRequest().build();
-        }
-    }
 }
