@@ -12,6 +12,7 @@ public record ItemDTO(Long codigo, String nome, UnidadeMedida unidadeMedida,
     public ItemDTO(Item item) {
         this(item.getCodigo(),item.getNome(), item.getUnidadeMedida(), item.getValor());
     }
+
     public static List<ItemDTO> from(List<Item> lista) {
         return lista.stream().map(ItemDTO::new).toList();
     }

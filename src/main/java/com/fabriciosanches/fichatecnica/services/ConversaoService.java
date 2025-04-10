@@ -1,8 +1,10 @@
 package com.fabriciosanches.fichatecnica.services;
 
 import com.fabriciosanches.fichatecnica.domains.Conversao;
+import com.fabriciosanches.fichatecnica.domains.Item;
 import com.fabriciosanches.fichatecnica.dtos.ConversaoDTO;
 import com.fabriciosanches.fichatecnica.dtos.ConversaoValoresDTO;
+import com.fabriciosanches.fichatecnica.dtos.ItemDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.repository.ConversaoRepository;
 import org.apache.logging.log4j.LogManager;
@@ -19,11 +21,9 @@ import java.util.Optional;
 public class ConversaoService {
     private final Logger logger = LogManager.getLogger(ConversaoService.class);
     private final ConversaoRepository repository;
-    private final ItemService itemService;
 
-    public ConversaoService(ConversaoRepository repository, ItemService itemService) {
+    public ConversaoService(ConversaoRepository repository) {
         this.repository = repository;
-        this.itemService = itemService;
     }
 
     private Optional<List<ConversaoDTO>> obterLista() {
@@ -83,9 +83,17 @@ public class ConversaoService {
         repository.deleteById(id);
     }
 
-    public ConversaoValoresDTO obterValoresConversao(Long idItem, Double quantidade, Long idUnidade) {
-        logger.info("Iniciando o método obterValoresConversao com idItem: {}, quantidade: {}, idUnidade: {}", idItem, quantidade, idUnidade);
-        var itemDto = itemService.buscarPorId(idItem);
+    public ConversaoValoresDTO obterValoresConversao(Item item, Double quantidade, Long idUnidade) {
+        logger.info("Iniciando o método obterValoresConversao com idItem: {}, quantidade: {}, idUnidade: {}",
+                item.getCodigo(), quantidade, idUnidade);
+        var valoresConversaoValidos = validaValoresConversao(item.getCodigo(), quantidade, idUnidade);
+        if (!valoresConversaoValidos) {
+            logger.error("Valores de conversão inválidos");
+            throw new FichaTecnicaException("Valores de conversão inválidos");
+        }
+        logger.info("Valores de conversão válidos");
+
+        var itemDto = new ItemDTO(item);
 
         var idUnidadeMedidaCompra = itemDto.unidadeMedida().getCodigo();
         var valorCompra = itemDto.valor();
@@ -94,6 +102,20 @@ public class ConversaoService {
                 idUnidade);
 
         return converterValores(conversao, valorCompra, quantidade);
+    }
+
+    private Boolean validaValoresConversao(Long idItem, Double quantidade, Long idUnidade) {
+        logger.info("Iniciando o método validaValoresConversao com idItem: {}, quantidade: {}, idUnidade: {}",
+                idItem, quantidade, idUnidade);
+        if (idItem == null || quantidade == null || idUnidade == null) {
+            logger.error("Valores de conversão inválidos");
+            throw new FichaTecnicaException("Valores de conversão inválidos");
+        }
+        if (quantidade <= 0) {
+            logger.error("Quantidade deve ser maior que zero");
+            throw new FichaTecnicaException("Quantidade deve ser maior que zero");
+        }
+        return Boolean.TRUE;
     }
 
     private ConversaoValoresDTO converterValores(Conversao conversao, BigDecimal valorCompra, Double quantidade) {

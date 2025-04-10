@@ -6,6 +6,7 @@ import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.repository.ItemProdutoRepository;
 import com.fabriciosanches.fichatecnica.repository.ItemRepository;
 import com.fabriciosanches.fichatecnica.repository.ProdutoRepository;
+import com.fabriciosanches.fichatecnica.repository.UnidadeMedidaRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -23,19 +24,19 @@ public class ItensProdutoService {
     private final ItemProdutoRepository itemProdutoRepository;
     private final ProdutoRepository produtoRepository;
     private final ItemRepository itemRepository;
-    private final UnidadeMedidaService unidadeMedidaService;
+    private final UnidadeMedidaRepository unidadeMedidaRepository;
     private final ConversaoService conversaoService;
 
 
     public ItensProdutoService(ItemProdutoRepository itemProdutoRepository,
                                ProdutoRepository produtoRepository,
                                ItemRepository itemRepository,
-                               UnidadeMedidaService unidadeMedidaService,
+                               UnidadeMedidaRepository unidadeMedidaRepository,
                                ConversaoService conversaoService) {
         this.itemProdutoRepository = itemProdutoRepository;
         this.produtoRepository = produtoRepository;
         this.itemRepository = itemRepository;
-        this.unidadeMedidaService = unidadeMedidaService;
+        this.unidadeMedidaRepository = unidadeMedidaRepository;
         this.conversaoService = conversaoService;
     }
 
@@ -56,7 +57,7 @@ public class ItensProdutoService {
         for (var item: itemProduto) {
             var itemEntity = getItem(item.cdItem());
             var unidadeMedida = getUnidadeMedidaDTO(item);
-            ConversaoValoresDTO conversaoValoresDTO = conversaoService.obterValoresConversao(item.cdItem(),
+            ConversaoValoresDTO conversaoValoresDTO = conversaoService.obterValoresConversao(itemEntity,
                     item.qtdItem(),item.cdUnidadeMedida());
             saveItem(item, produto, itemEntity, unidadeMedida, conversaoValoresDTO);
 
@@ -146,7 +147,7 @@ public class ItensProdutoService {
                 itemProduto.getValor());
 
         ConversaoValoresDTO conversaoValoresDTO = conversaoService.obterValoresConversao(
-                itemProdutoDTO.cdItem(),
+                itemProduto.getItem(),
                 itemProdutoDTO.qtdItem(),
                 itemProdutoDTO.cdUnidadeMedida());
 
@@ -191,12 +192,12 @@ public class ItensProdutoService {
     }
 
     private UnidadeMedidaDTO getUnidadeMedidaDTO(ItemProdutoDTO itemProduto) {
-        UnidadeMedidaDTO unidadeMedida = unidadeMedidaService.buscarPorId(itemProduto.cdUnidadeMedida());
-        if (unidadeMedida == null) {
-            logger.error("Unidade de medida não encontrada");
-            throw new FichaTecnicaException("Unidade de medida não encontrada");
-        }
-        return unidadeMedida;
+        UnidadeMedida unidadeMedida = unidadeMedidaRepository.findById(itemProduto.cdUnidadeMedida())
+                .orElseThrow(() -> {
+                    logger.error("Unidade de medida não encontrada");
+                    return new FichaTecnicaException("Unidade de medida não encontrada");
+                });
+        return new UnidadeMedidaDTO(unidadeMedida);
     }
 
     private Item getItem(Long  idItem) {
