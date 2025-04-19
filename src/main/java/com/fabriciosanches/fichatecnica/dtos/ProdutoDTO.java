@@ -2,13 +2,15 @@ package com.fabriciosanches.fichatecnica.dtos;
 
 
 import com.fabriciosanches.fichatecnica.domains.Produto;
+import com.fabriciosanches.fichatecnica.serializers.BigDecimalCurrencySerializer;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 public record ProdutoDTO(Long codigo, String nome, String descricao, String imagem,
-                         BigDecimal valorVenda,
-                         BigDecimal valorItens) {
+                         @JsonSerialize(using = BigDecimalCurrencySerializer.class) BigDecimal valorVenda,
+                         @JsonSerialize(using = BigDecimalCurrencySerializer.class) BigDecimal valorItens) {
     public ProdutoDTO {
         if (valorItens == null) {
             valorItens = BigDecimal.ZERO;

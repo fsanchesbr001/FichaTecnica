@@ -1,6 +1,8 @@
 package com.fabriciosanches.fichatecnica.domains;
 
 import com.fabriciosanches.fichatecnica.dtos.ProdutoDTO;
+import com.fabriciosanches.fichatecnica.serializers.BigDecimalCurrencySerializer;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,7 +26,11 @@ public class Produto {
     private String nome;
     private String descricao;
     private String imagem;
+
+    @JsonSerialize(using = BigDecimalCurrencySerializer.class)
     private BigDecimal valorVenda;
+
+    @JsonSerialize(using = BigDecimalCurrencySerializer.class)
     private BigDecimal valorItens;
 
     @OneToMany(mappedBy = "produto", cascade = CascadeType.ALL, orphanRemoval = true)

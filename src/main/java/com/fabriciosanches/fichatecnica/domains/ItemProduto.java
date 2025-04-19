@@ -1,5 +1,7 @@
 package com.fabriciosanches.fichatecnica.domains;
 
+import com.fabriciosanches.fichatecnica.serializers.BigDecimalCurrencySerializer;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,5 +34,6 @@ public class ItemProduto {
 
     private Double quantidade;
 
+    @JsonSerialize(using = BigDecimalCurrencySerializer.class)
     private BigDecimal valor;
 }

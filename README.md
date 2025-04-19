@@ -16,12 +16,12 @@ Este projeto tem como objetivo a criação de uma ficha técnica de um produto, 
 
 ## Próximos Passos
 - Implementar a funcionalidade de upload de imagens para os produtos.
-- Adicionar a funcionalidade de alterar Item.
 - Adicionar a funcionalidade de excluir Item.
 - Melhorar a segurança da aplicação, implementando controle de usuário.
 - Adicionar Observabilidade e monitoramento da aplicação.
 - Adicionar testes unitários
 - Adicionar Documentação da API com Swagger.
+- RecriR 
 
 ## Controle de Versão
 - 02/03/2025 - Refatoração Completa
@@ -41,3 +41,4 @@ Este projeto tem como objetivo a criação de uma ficha técnica de um produto, 
 - 03/04/2025 - Versão 1.5.6 - Correção de referências Circulares em HistoricoItem
 - 05/04/2025 - Versão 1.5.7 - Correção de chave estrangeira e limpeza de codigo em HistoricoItem
 - 09/04/2025 - Versão 1.5.8 - Versão Estável com alterar Item OK
+- 10/04/2025 - Versão 1.5.9 - Versão Estável com deletar item OK

@@ -1,6 +1,8 @@
 package com.fabriciosanches.fichatecnica.domains;
 
 import com.fabriciosanches.fichatecnica.dtos.ConversaoDTO;
+import com.fabriciosanches.fichatecnica.serializers.BigDecimalCurrencySerializer;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,6 +24,9 @@ public class Conversao {
     private Long unidadeDe;
     private Long unidadePara;
     private String operacao;
+
+    @Column(name = "valor", precision = 10, scale = 2)
+    @JsonSerialize(using = BigDecimalCurrencySerializer.class)
     private BigDecimal valor;
 
     public Conversao(ConversaoDTO conversaoDTO) {

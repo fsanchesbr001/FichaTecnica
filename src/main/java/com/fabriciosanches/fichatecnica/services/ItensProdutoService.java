@@ -88,16 +88,15 @@ public class ItensProdutoService {
 
     public QuantidadeValorDTO calcularQuantidadeEValorTotal(Long idProduto) {
         logger.info("Inicio do método calcularQuantidadeEValorTotal");
-        Produto produto = getProduto(idProduto);
-
         int quantidadeTotal = 0;
         BigDecimal valorTotal = BigDecimal.ZERO;
 
-        for (ItemProduto itemProduto : produto.getProdutosList()) {
+        List<ItemProduto> listItensProduto = itemProdutoRepository.findByProdutoCodigo(idProduto);
+
+        for (ItemProduto itemProduto : listItensProduto) {
             quantidadeTotal += 1;
             valorTotal = valorTotal.add(itemProduto.getValor());
         }
-
         return new QuantidadeValorDTO(quantidadeTotal, valorTotal);
     }
 

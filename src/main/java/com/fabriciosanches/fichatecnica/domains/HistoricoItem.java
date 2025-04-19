@@ -1,6 +1,8 @@
 package com.fabriciosanches.fichatecnica.domains;
 
 import com.fabriciosanches.fichatecnica.dtos.HistoricoItemDTO;
+import com.fabriciosanches.fichatecnica.serializers.BigDecimalCurrencySerializer;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,6 +25,7 @@ public class HistoricoItem {
 
     private Long cdItem;
 
+    @JsonSerialize(using = BigDecimalCurrencySerializer.class)
     private BigDecimal valor;
 
     private LocalDate dataInicio;

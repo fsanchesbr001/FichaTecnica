@@ -20,10 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ItemService {
@@ -152,10 +149,27 @@ public class ItemService {
     @Modifying
     @Transactional
     public void deletarItem(Long id) {
-        if(!historicoItemRepository.findByCdItem(id).isEmpty()) {
-            throw new FichaTecnicaException("Existem históricos para o item " + id);
+
+        logger.info("Inicio do método deletarItem");
+        Item item = repository.findById(id)
+                .orElseThrow(() -> new FichaTecnicaException("Item com ID " + id + " não encontrado"));
+        logger.info("Item encontrado: {}", item);
+
+        List<HistoricoItem> historicoItemList = historicoItemRepository.findByCdItem(id);
+
+        for (HistoricoItem historicoItem : historicoItemList) {
+            historicoItemRepository.deleteHistoricoItemByCdItem(historicoItem.getCdItem());
         }
-        repository.deleteById(id);
+
+        List<ItemProduto> itemProdutoList = itemProdutoRepository.findByItem(item);
+        for (ItemProduto itemProduto : itemProdutoList) {
+            Produto produto = itemProduto.getProduto();
+            //QuantidadeValorDTO quantidadeValorDTO = calcularQuantidadeEValorTotal(produto);
+            produto.setValorItens(produto.getValorItens().subtract(itemProduto.getValor()));
+            produtoRepository.save(produto);
+            itemProdutoRepository.deleteItemProduto(itemProduto.getId().getItemId());
+        }
+        repository.deleteItem(item.getCodigo());
     }
 
     public QuantidadeValorDTO calcularQuantidadeEValorTotal(Produto produto) {
