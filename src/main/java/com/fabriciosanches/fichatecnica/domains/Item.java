@@ -1,6 +1,8 @@
 package com.fabriciosanches.fichatecnica.domains;
 
 import com.fabriciosanches.fichatecnica.dtos.ItemDTO;
+import com.fabriciosanches.fichatecnica.serializers.BigDecimalCurrencySerializer;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,6 +31,7 @@ public class Item {
     @OneToMany(mappedBy = "item")
     private List<ItemProduto> itemProdutoList;
 
+    @JsonSerialize(using = BigDecimalCurrencySerializer.class)
     private BigDecimal valor;
 
     public Item(ItemDTO itemDTO) {

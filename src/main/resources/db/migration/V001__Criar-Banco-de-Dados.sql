@@ -70,14 +70,23 @@ CREATE TABLE `conversao` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Tabela com regras de Conversao';
 
 -- Inserindo dados na tabela conversao
-INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(1, 1, 2, 'MULTIPLICA', 1000.00);
-INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(2, 2, 1, 'DIVIDE', 1000.00);
-INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(3, 3, 4, 'MULTIPLICA', 1000.00);
-INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(4, 4, 3, 'DIVIDE', 1000.00);
-INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(5, 5, 6, 'MULTIPLICA', 1000.00);
-INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(6, 6, 5, 'DIVIDE', 1000.00);
-INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(7, 7, 8, 'MULTIPLICA', 12.00);
-INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(8, 8, 7, 'DIVIDE', 12.00);
+INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(1, 1, 2, 'DIVIDE', 1000.00);
+INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(2, 2, 1, 'MULTIPLICA', 1000.00);
+INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(3, 3, 4, 'DIVIDE', 1000.00);
+INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(4, 4, 3, 'MULTIPLICA', 1000.00);
+INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(5, 5, 6, 'DIVIDE', 1000.00);
+INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(6, 6, 5, 'MULTIPLICA', 1000.00);
+INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(7, 7, 8, 'DIVIDE', 12.00);
+INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(8, 8, 7, 'MULTIPLICA', 12.00);
+INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(9, 1, 1, 'MULTIPLICA', 1.00);
+INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(10, 2, 2, 'MULTIPLICA', 1.00);
+INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(11, 3, 3, 'MULTIPLICA', 1.00);
+INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(12, 4, 4, 'MULTIPLICA', 1.00);
+INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(13, 5, 5, 'MULTIPLICA', 1.00);
+INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(14, 6, 6, 'MULTIPLICA', 1.00);
+INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(15, 7, 7, 'MULTIPLICA', 1.00);
+INSERT INTO conversao(codigo, unidade_de, unidade_para, Operacao, valor) VALUES(16, 8, 8, 'MULTIPLICA', 1.00);
+
 
 -- fichatecnica.produto definição
 
@@ -111,7 +120,8 @@ CREATE TABLE `historico_item` (
                                   `valor` decimal(10,2) NOT NULL COMMENT 'Valor do Item no Histórico',
                                   `data_inicio` date NOT NULL COMMENT 'Data Inicio do preço',
                                   PRIMARY KEY (`codigo`),
-                                  CONSTRAINT `historico_item_item_FK` FOREIGN KEY (`codigo`) REFERENCES `item` (`codigo`) ON DELETE RESTRICT ON UPDATE RESTRICT
+                                  KEY `historico_item_item_FK` (`cd_item`),
+                                  CONSTRAINT `historico_item_item_FK` FOREIGN KEY (`cd_item`) REFERENCES `item` (`codigo`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Tabela com todas as atualizações de preços';
 
 -- fichatecnica.item_produto definição
