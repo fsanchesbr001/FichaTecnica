@@ -19,4 +19,6 @@ public record HistoricoItemDTO(Long codigo, Long idItem,
     public static List<HistoricoItemDTO> from(List<HistoricoItem> all) {
         return all.stream().map(HistoricoItemDTO::new).toList();
     }
+
+
 }
