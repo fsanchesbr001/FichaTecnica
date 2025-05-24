@@ -42,3 +42,4 @@ Este projeto tem como objetivo a criação de uma ficha técnica de um produto, 
 - 05/04/2025 - Versão 1.5.7 - Correção de chave estrangeira e limpeza de codigo em HistoricoItem
 - 09/04/2025 - Versão 1.5.8 - Versão Estável com alterar Item OK
 - 10/04/2025 - Versão 1.5.9 - Versão Estável com deletar item OK
+- 24/05/2025 - Versão 1.6.0 - Criação e populacao da tabela seguranca

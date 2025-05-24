@@ -16,18 +16,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
+
 
 @RestController
 @RequestMapping("/auth")
 public class AutenticacaoController {
 
 
-    private AuthenticationManager manager;
+    private final AuthenticationManager manager;
 
-    private TokenService tokenService;
+    private final TokenService tokenService;
 
-    private UsuarioRepository usuarioRepository;
+    private final UsuarioRepository usuarioRepository;
 
     public AutenticacaoController(AuthenticationManager manager,
                                   TokenService tokenService,
@@ -51,12 +51,18 @@ public class AutenticacaoController {
             return ResponseEntity.badRequest().build();
         }
         var encriptdedPassword = new BCryptPasswordEncoder().encode(dados.senha());
-        var usuario = new Usuario(dados.login(),encriptdedPassword,dados.role(),
-                LocalDate.now(),LocalDate.now().plusMonths(3),
-                0,Boolean.FALSE,Boolean.FALSE);
+        var usuario = new Usuario(dados.login(),encriptdedPassword,dados.role());
 
         usuarioRepository.save(usuario);
 
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/validateEmail")
+    public ResponseEntity<?> validarEmail(@RequestBody @Valid RegisterDTO dados){
+        if(usuarioRepository.findByLogin(dados.login())!=null){
+            return ResponseEntity.badRequest().build();
+        }
         return ResponseEntity.ok().build();
     }
 

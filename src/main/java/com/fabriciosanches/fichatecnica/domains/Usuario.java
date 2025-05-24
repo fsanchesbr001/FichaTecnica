@@ -7,7 +7,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDate;
+
 import java.util.Collection;
 import java.util.List;
 
@@ -29,24 +29,11 @@ public class Usuario implements UserDetails {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
-    private LocalDate dataAlteracao;
-    private LocalDate dataExpiracao;
-
-    private Integer tentativas;
-    private Boolean expirado;
-    private Boolean bloqueado;
-
-    public Usuario(String login, String senha, UserRole role,
-                   LocalDate dataAlteracao, LocalDate dataExpiracao,
-                   Integer tentativas, Boolean expirado, Boolean bloqueado) {
+    public Usuario(String login, String senha, UserRole role) {
         this.login = login;
         this.senha = senha;
         this.role = role;
-        this.dataAlteracao = dataAlteracao;
-        this.dataExpiracao = dataExpiracao;
-        this.tentativas = tentativas;
-        this.expirado = expirado;
-        this.bloqueado = bloqueado;
+
     }
 
 

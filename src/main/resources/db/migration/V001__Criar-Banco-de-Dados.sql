@@ -5,35 +5,94 @@ CREATE TABLE `usuarios` (
                             `login` varchar(255) NOT NULL,
                             `senha` varchar(255) NOT NULL,
                             `role` varchar(100) NOT NULL,
-                            `data_alteracao` date NOT NULL,
-                            `data_expiracao` date NOT NULL,
-                            `tentativas` int NOT NULL,
-                            `expirado` tinyint(1) NOT NULL,
-                            `bloqueado` tinyint(1) NOT NULL,
                             PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Tabela com usuários';
 
 INSERT INTO usuarios
-(login, senha, `role`, data_alteracao, data_expiracao, tentativas, expirado, bloqueado)
+(login, senha, `role`)
 VALUES('fsanchesbr001@gmail.com',
        '$2a$10$i42msHOOetd3HmoNwsbwXO3l.RVdpvXVqdvAY/VT3oZUhANMeBXkO',
-       'ADMIN',
-       '2025-03-01',
-       '2025-06-01',
-       0,
-       0,
-       0);
+       'ADMIN');
 
 INSERT INTO usuarios
-(login, senha, `role`, data_alteracao, data_expiracao, tentativas, expirado, bloqueado)
+(login, senha, `role`)
 VALUES('fabricio@fabriciosanches.com',
        '$2a$10$i42msHOOetd3HmoNwsbwXO3l.RVdpvXVqdvAY/VT3oZUhANMeBXkO',
-       'USER',
-       '2025-03-01',
-       '2025-06-01',
-       0,
-       0,
-       0);
+       'USER');
+
+-- fichatecnica.seguranca definição
+CREATE TABLE fichatecnica.seguranca (
+                                        codigo BIGINT auto_increment NOT NULL,
+                                        email varchar(255) NOT NULL,
+                                        data_criacao DATETIME NOT NULL,
+                                        data_expiracao_senha DATETIME NOT NULL,
+                                        qtde_tentativas_login DECIMAL(1) DEFAULT 5 NOT NULL,
+                                        token_seguranca VARCHAR(8) NOT NULL,
+                                        data_expiracao_token DATETIME NOT NULL,
+                                        cpf VARCHAR(11) NOT NULL,
+                                        bloqueio_adm BOOL DEFAULT FALSE NOT NULL,
+                                        bloqueio_tentativas BOOL DEFAULT FALSE NOT NULL,
+                                        bloqueio_expiracao BOOL DEFAULT FALSE NOT NULL,
+                                        primeiro_acesso BOOL DEFAULT FALSE NOT NULL,
+                                        PRIMARY KEY (codigo)
+)
+    ENGINE=InnoDB
+    DEFAULT CHARSET=utf8mb4
+    COLLATE=utf8mb4_0900_ai_ci
+    COMMENT='Informacoes de controle de acesso.';
+
+-- Inserindo dados na tabela seguranca
+INSERT INTO fichatecnica.seguranca (
+    email,
+    data_criacao,
+    data_expiracao_senha,
+    qtde_tentativas_login,
+    token_seguranca,
+    data_expiracao_token,
+    cpf,
+    bloqueio_adm,
+    bloqueio_tentativas,
+    bloqueio_expiracao,
+    primeiro_acesso
+) VALUES (
+             'fsanchesbr001@gmail.com',
+             SYSDATE(),
+             DATE_ADD(SYSDATE(), INTERVAL 3 MONTH),
+             5,
+             'ABCDEFGH',
+             DATE_ADD(SYSDATE(), INTERVAL 2 HOUR),
+             '81127260197',
+             FALSE,
+             FALSE,
+             FALSE,
+             FALSE
+         );
+
+INSERT INTO fichatecnica.seguranca (
+    email,
+    data_criacao,
+    data_expiracao_senha,
+    qtde_tentativas_login,
+    token_seguranca,
+    data_expiracao_token,
+    cpf,
+    bloqueio_adm,
+    bloqueio_tentativas,
+    bloqueio_expiracao,
+    primeiro_acesso
+) VALUES (
+             'fabricio@fabriciosanches.com',
+             SYSDATE(),
+             DATE_ADD(SYSDATE(), INTERVAL 3 MONTH),
+             5,
+             'ABCDEFGH',
+             DATE_ADD(SYSDATE(), INTERVAL 2 HOUR),
+             '81127260197',
+             FALSE,
+             FALSE,
+             FALSE,
+             FALSE
+         );
 
 -- fichatecnica.unidade_medida definição
 
