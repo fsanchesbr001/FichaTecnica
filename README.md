@@ -43,3 +43,4 @@ Este projeto tem como objetivo a criação de uma ficha técnica de um produto, 
 - 09/04/2025 - Versão 1.5.8 - Versão Estável com alterar Item OK
 - 10/04/2025 - Versão 1.5.9 - Versão Estável com deletar item OK
 - 24/05/2025 - Versão 1.6.0 - Criação e populacao da tabela seguranca
+- 29/05/2025 - Versão 1.6.1 - Envio de email de confirmação de token de segurança
