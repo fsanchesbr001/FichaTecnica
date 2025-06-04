@@ -11,9 +11,9 @@ public record SegurancaDTO(String email, String cpf, String tokenSeguranca,
 
     public SegurancaDTO(Seguranca seguranca) {
         this(seguranca.getEmail(), seguranca.getCpf(), seguranca.getTokenSeguranca(),
-                seguranca.getTentativas(), seguranca.getBloqueado_admin(), seguranca.getBloqueado_tentativas(),
-                seguranca.getBloqueado_expiracao(), seguranca.getPrimeiro_acesso(), seguranca.getDataCriacao(),
-                seguranca.getDataExpiracaoSenha(), seguranca.getDataExpiracaoToken());
+             seguranca.getTentativas(), seguranca.getBloqueado_admin(), seguranca.getBloqueado_tentativas(),
+             seguranca.getBloqueado_expiracao(), seguranca.getPrimeiro_acesso(), seguranca.getDataCriacao(),
+             seguranca.getDataExpiracaoSenha(), seguranca.getDataExpiracaoToken());
 
     }
 }

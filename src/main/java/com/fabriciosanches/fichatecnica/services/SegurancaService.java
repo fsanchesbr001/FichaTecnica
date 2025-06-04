@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Random;
 
 @Service
@@ -60,7 +61,12 @@ public class SegurancaService {
         SegurancaDTO segurancaDTO = new SegurancaDTO(seguranca);
         logger.info("Dados de segurança preparados: {}", segurancaDTO);
 
-        EnviarEmailResponse enviarEmailResponse = new EnviarEmailResponse(segurancaDTO);
+
+        // Formatar as datas
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        String dataExpiracaoTokenFormatada = seguranca.getDataExpiracaoToken().format(formatter);
+
+        EnviarEmailResponse enviarEmailResponse = new EnviarEmailResponse(segurancaDTO, dataExpiracaoTokenFormatada);
 
         logger.info("Enviando email de segurança ");
         emailService.sendEmail(enviarEmailResponse);
