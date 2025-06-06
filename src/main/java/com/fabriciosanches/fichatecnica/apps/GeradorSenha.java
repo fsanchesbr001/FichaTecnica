@@ -1,4 +1,4 @@
-package com.fabriciosanches.fichatecnica.util;
+package com.fabriciosanches.fichatecnica.apps;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -9,7 +9,7 @@ public class GeradorSenha {
     }
     public static void main(String[] args) {
         GeradorSenha geradorSenha = new GeradorSenha();
-        String senha = geradorSenha.geraSenha("F@br1c10S@nch3s");
+        String senha = geradorSenha.geraSenha("Bi!250477");
         System.out.println(senha);
     }
 }

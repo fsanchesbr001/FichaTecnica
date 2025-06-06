@@ -45,3 +45,4 @@ Este projeto tem como objetivo a criação de uma ficha técnica de um produto, 
 - 24/05/2025 - Versão 1.6.0 - Criação e populacao da tabela seguranca
 - 29/05/2025 - Versão 1.6.1 - Envio de email de confirmação de ‘token’ de segurança
 - 04/06/2025 - Versão 1.6.2 - Formatação de data e hora na saida do envio do endereço eletrónico
+- 06/06/2025 - Versão 1.6.3 - Troca de senha e login funcionando

@@ -1,6 +1,6 @@
 package com.fabriciosanches.fichatecnica.mail;
 
-import com.fabriciosanches.fichatecnica.dtos.EnviarEmailResponse;
+import com.fabriciosanches.fichatecnica.dtos.EnviarEmailResponseDTO;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.apache.logging.log4j.LogManager;
@@ -37,7 +37,7 @@ public class EmailService {
         this.templateEngine = templateEngine;
     }
 
-    public void sendEmail(EnviarEmailResponse dadosContato) throws MessagingException {
+    public void sendEmail(EnviarEmailResponseDTO dadosContato) throws MessagingException {
         logger.info("Inicio do método sendEmail");
         final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
         final MimeMessageHelper email = new MimeMessageHelper(mimeMessage,true,"UTF-8");
