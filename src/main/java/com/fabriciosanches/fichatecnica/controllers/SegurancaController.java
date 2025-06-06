@@ -1,7 +1,8 @@
 package com.fabriciosanches.fichatecnica.controllers;
 
-import com.fabriciosanches.fichatecnica.dtos.EnviarEmailRequest;
-import com.fabriciosanches.fichatecnica.dtos.EnviarEmailResponse;
+import com.fabriciosanches.fichatecnica.dtos.EnviarEmailRequestDTO;
+import com.fabriciosanches.fichatecnica.dtos.EnviarEmailResponseDTO;
+import com.fabriciosanches.fichatecnica.dtos.TrocarSenhaRequestDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.services.SegurancaService;
 import jakarta.mail.MessagingException;
@@ -28,14 +29,14 @@ public class SegurancaController {
 
     @PostMapping("/enviar-email")
     @Transactional
-    public ResponseEntity<EnviarEmailResponse> enviarEmail(@RequestBody EnviarEmailRequest email) {
+    public ResponseEntity<EnviarEmailResponseDTO> enviarEmail(@RequestBody EnviarEmailRequestDTO email) {
         logger.info("Inicio do método enviarEmail");
         logger.info("Parâmetros de entrada: {}", email);
         try {
-            EnviarEmailResponse enviarEmailResponse = segurancaService.enviarEmailSeguranca(email.email());
+            EnviarEmailResponseDTO enviarEmailResponseDTO = segurancaService.enviarEmailSeguranca(email.email());
             logger.info("Email de segurança enviado com sucesso");
             logger.info("Fim do método enviarEmail");
-            return ResponseEntity.ok(enviarEmailResponse);
+            return ResponseEntity.ok(enviarEmailResponseDTO);
         }
         catch (FichaTecnicaException e){
             logger.error("Erro ao enviar Email de segurança", e);
@@ -43,6 +44,23 @@ public class SegurancaController {
         } catch (MessagingException e) {
             logger.error("Erro de Messaging ", e);
             throw new RuntimeException(e);
+        }
+    }
+
+    @PostMapping("/trocar-senha")
+    @Transactional
+    public ResponseEntity<?> trocarSenha(@RequestBody TrocarSenhaRequestDTO trocarDTO) {
+        logger.info("Inicio do método trocarSenha");
+        logger.info("Parâmetros de entrada: {}", trocarDTO);
+        try {
+            segurancaService.trocarSenhaSeguranca(trocarDTO.email(), trocarDTO.cpf(), trocarDTO.tokenSeguranca(),
+                    trocarDTO.senha(), trocarDTO.confirmacaoSenha());
+            logger.info("Senha trocada com sucesso");
+            logger.info("Fim do método trocarSenha");
+            return ResponseEntity.ok().build();
+        } catch (FichaTecnicaException e) {
+            logger.error("Erro ao trocar senha", e);
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.fabriciosanches.fichatecnica.util;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import java.util.Base64;
 
 public class Utilidades {
     public static Boolean validarCPF(String cpf) {
@@ -53,4 +54,15 @@ public class Utilidades {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         return encoder.encode(senha);
     }
+
+    // Método para converter uma string normal em base64
+    public static String encodeToBase64(String input) {
+        return Base64.getEncoder().encodeToString(input.getBytes());
+    }
+
+    // Método para converter uma string em base64 para uma string normal
+    public static String decodeFromBase64(String base64Input) {
+        return new String(Base64.getDecoder().decode(base64Input));
+    }
+
 }
