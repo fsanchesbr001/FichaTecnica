@@ -1,7 +1,10 @@
 package com.fabriciosanches.fichatecnica.services;
 
+import com.fabriciosanches.fichatecnica.constants.Constants;
 import com.fabriciosanches.fichatecnica.domains.Seguranca;
 import com.fabriciosanches.fichatecnica.domains.Usuario;
+import com.fabriciosanches.fichatecnica.dtos.BloqueiosRequestDTO;
+import com.fabriciosanches.fichatecnica.dtos.BloqueiosResponseDTO;
 import com.fabriciosanches.fichatecnica.dtos.EnviarEmailResponseDTO;
 import com.fabriciosanches.fichatecnica.dtos.SegurancaDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
@@ -174,4 +177,144 @@ public class SegurancaService {
         return true;
     }
 
+    public BloqueiosResponseDTO primeiroAcessoSeguranca(BloqueiosRequestDTO bloqueiosRequestDTO) {
+        logger.info("Iniciando processo de bloqueio de primeiro acesso");
+        String email = bloqueiosRequestDTO.email();
+        Seguranca seguranca = findByEmail(email);
+
+        if (seguranca == null) {
+            logger.warn("Dados de segurança não encontrados para o email: {}", email);
+            return new BloqueiosResponseDTO(Constants.MSG_DADOS_SEGURANCA_NAO_ENCONTRADOS);
+        }
+
+        if (seguranca.getPrimeiro_acesso()) {
+            logger.warn("Usuário já esta bloqueado por primeiro acesso");
+            return new BloqueiosResponseDTO(Constants.MSG_BLOQUEIO_PRIMEIRO_ACESSO_JA_SETADO);
+        }
+
+        seguranca.setPrimeiro_acesso(Boolean.TRUE);
+        seguranca.setBloqueado_admin(Boolean.FALSE);
+        seguranca.setBloqueado_tentativas(Boolean.FALSE);
+        seguranca.setBloqueado_expiracao(Boolean.FALSE);
+        seguranca.setTokenSeguranca(null);
+        seguranca.setDataExpiracaoToken(null); // Limpa a data de expiração do token
+        seguranca.setTentativas(5); // Reseta as tentativas
+        repository.save(seguranca);
+
+        logger.info("Bloqueio de primeiro acesso setado com sucesso para o email: {}", email);
+        return new BloqueiosResponseDTO(Constants.
+                MSG_BLOQUEIO_PRIMEIRO_ACESSO_SETADO);
+
+
+
+    }
+
+    public BloqueiosResponseDTO bloqueioAdmSeguranca(BloqueiosRequestDTO bloqueiosRequestDTO) {
+        logger.info("Iniciando processo de bloqueio administrativo");
+        String email = bloqueiosRequestDTO.email();
+        Seguranca seguranca = findByEmail(email);
+
+        if (seguranca == null) {
+            logger.warn("Dados de segurança não encontrados para o email: {}", email);
+            return new BloqueiosResponseDTO(Constants.MSG_DADOS_SEGURANCA_NAO_ENCONTRADOS);
+        }
+
+        if (seguranca.getBloqueado_admin()) {
+            logger.warn(Constants.MSG_BLOQUEIO_ADM_JA_SETADO);
+            return new BloqueiosResponseDTO(Constants.MSG_BLOQUEIO_ADM_JA_SETADO);
+        }
+
+        seguranca.setPrimeiro_acesso(Boolean.FALSE);
+        seguranca.setBloqueado_admin(Boolean.TRUE);
+        seguranca.setBloqueado_tentativas(Boolean.FALSE);
+        seguranca.setBloqueado_expiracao(Boolean.FALSE);
+        seguranca.setTokenSeguranca(null);
+        seguranca.setDataExpiracaoToken(null); // Limpa a data de expiração do token
+        seguranca.setTentativas(5); // Reseta as tentativas
+        repository.save(seguranca);
+
+        logger.info("Bloqueio administrativo setado com sucesso para o email: {}", email);
+        return new BloqueiosResponseDTO(Constants.
+                MSG_BLOQUEIO_ADM_SETADO);
+
+    }
+
+    public void errouSenha(String email){
+        logger.info("Iniciando processo de erro de senha");
+        Seguranca seguranca = findByEmail(email);
+
+        if (seguranca == null) {
+            logger.warn("Dados de segurança não encontrados para o email: {}", email);
+            throw new FichaTecnicaException(Constants.MSG_DADOS_SEGURANCA_NAO_ENCONTRADOS);
+        }
+
+        seguranca.setTentativas(seguranca.getTentativas() - 1);
+        if (seguranca.getTentativas() <= 0) {
+            seguranca.setBloqueado_tentativas(Boolean.TRUE);
+            seguranca.setBloqueado_admin(Boolean.FALSE);
+            seguranca.setBloqueado_expiracao(Boolean.FALSE);
+            seguranca.setPrimeiro_acesso(Boolean.FALSE);
+            repository.save(seguranca);
+            logger.warn("Usuário bloqueado por tentativas excedidas");
+            throw new FichaTecnicaException("Usuário bloqueado por tentativas excedidas");
+        }
+
+        repository.save(seguranca);
+        logger.info("Tentativa de senha registrada. Tentativas restantes: {}", seguranca.getTentativas());
+    }
+
+    public void resetarTentativas(String email) {
+        logger.info("Iniciando processo de reset de tentativas");
+        Seguranca seguranca = findByEmail(email);
+
+        if (seguranca == null) {
+            logger.warn("Dados de segurança não encontrados para o email: {}", email);
+            throw new FichaTecnicaException(Constants.MSG_DADOS_SEGURANCA_NAO_ENCONTRADOS);
+        }
+
+        seguranca.setTentativas(5); // Reseta as tentativas
+        repository.save(seguranca);
+
+        logger.info("Reset de tentativas realizado com sucesso para o email: {}", email);
+    }
+
+    private void senhaExpirada(Seguranca seguranca) {
+        logger.info("Iniciando processo de verificação de senha expirada");
+        if (seguranca.getDataExpiracaoSenha() != null && LocalDateTime.now().isAfter(seguranca.getDataExpiracaoSenha())) {
+            logger.warn("Senha expirada para o email: {}", seguranca.getEmail());
+            seguranca.setBloqueado_expiracao(Boolean.TRUE);
+            seguranca.setBloqueado_admin(Boolean.FALSE);
+            seguranca.setBloqueado_tentativas(Boolean.FALSE);
+            seguranca.setPrimeiro_acesso(Boolean.FALSE);
+            repository.save(seguranca);
+        }
+        logger.info("Senha não está expirada para o email: {}", seguranca.getEmail());
+    }
+
+    public void validarAcesso(String email) {
+        logger.info("Iniciando processo de validação de acesso");
+        Seguranca seguranca = findByEmail(email);
+
+        if (seguranca == null) {
+            logger.warn("Dados de segurança não encontrados para o email: {}", email);
+            throw new FichaTecnicaException(Constants.MSG_DADOS_SEGURANCA_NAO_ENCONTRADOS);
+        }
+
+        senhaExpirada(seguranca);
+
+        if (seguranca.getBloqueado_admin()) {
+            logger.warn("Usuário bloqueado administrativamente");
+            throw new FichaTecnicaException("Usuário bloqueado administrativamente");
+        } else if (seguranca.getPrimeiro_acesso()) {
+            logger.info("Usuário bloqueado por primeiro acesso");
+        } else if (seguranca.getBloqueado_expiracao()) {
+            logger.warn("Usuário bloqueado por expiração de senha");
+            throw new FichaTecnicaException("Usuário bloqueado por expiração de senha");
+        } else if (seguranca.getBloqueado_tentativas()) {
+            logger.warn("Usuário bloqueado por tentativas excedidas");
+            throw new FichaTecnicaException("Usuário bloqueado por tentativas excedidas");
+        } else {
+            logger.info("Usuário com acesso normal");
+        }
+    }
 }
