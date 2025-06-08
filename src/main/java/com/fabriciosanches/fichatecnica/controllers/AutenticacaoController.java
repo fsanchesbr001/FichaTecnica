@@ -1,14 +1,17 @@
 package com.fabriciosanches.fichatecnica.controllers;
 
 import com.fabriciosanches.fichatecnica.dtos.RegisterDTO;
+import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.repository.UsuarioRepository;
 import com.fabriciosanches.fichatecnica.security.DadosTokenJWT;
 import com.fabriciosanches.fichatecnica.security.TokenService;
 import com.fabriciosanches.fichatecnica.dtos.AutenticacaoDTO;
 import com.fabriciosanches.fichatecnica.domains.Usuario;
+import com.fabriciosanches.fichatecnica.services.SegurancaService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,20 +32,40 @@ public class AutenticacaoController {
 
     private final UsuarioRepository usuarioRepository;
 
+    private final SegurancaService segurancaService;
+
     public AutenticacaoController(AuthenticationManager manager,
                                   TokenService tokenService,
-                                  UsuarioRepository usuarioRepository) {
+                                  UsuarioRepository usuarioRepository,
+                                  SegurancaService segurancaService) {
         this.manager = manager;
         this.tokenService = tokenService;
         this.usuarioRepository = usuarioRepository;
+        this.segurancaService = segurancaService;
     }
 
     @PostMapping("/login")
     public ResponseEntity<DadosTokenJWT> efetuarLogin(@RequestBody @Valid AutenticacaoDTO dados){
-        var userPwd = new UsernamePasswordAuthenticationToken(dados.login(),dados.senha());
-        var authentication = manager.authenticate(userPwd);
-        var token = tokenService.gerarToken((Usuario) authentication.getPrincipal());
-        return ResponseEntity.ok(new DadosTokenJWT(token));
+        if(dados.login() == null || dados.senha() == null){
+            return ResponseEntity.badRequest().build();
+        }
+        try{
+            segurancaService.validarAcesso(dados.login());
+            var userPwd = new UsernamePasswordAuthenticationToken(dados.login(),dados.senha());
+            var authentication = manager.authenticate(userPwd);
+            segurancaService.resetarTentativas(dados.login());
+            var token = tokenService.gerarToken((Usuario) authentication.getPrincipal());
+            return ResponseEntity.ok(new DadosTokenJWT(token));
+        }catch (BadCredentialsException e){
+            segurancaService.errouSenha(dados.login());
+            return ResponseEntity.badRequest().body(new DadosTokenJWT(e.getMessage()));
+        }
+        catch (FichaTecnicaException ex) {
+            return ResponseEntity.badRequest().body(new DadosTokenJWT(ex.getMessage()));
+        }
+        catch (Exception e){
+            return ResponseEntity.internalServerError().body(new DadosTokenJWT(e.getMessage()));
+        }
     }
 
     @PostMapping("/register")

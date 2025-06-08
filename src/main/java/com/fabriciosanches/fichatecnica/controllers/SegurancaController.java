@@ -1,8 +1,7 @@
 package com.fabriciosanches.fichatecnica.controllers;
 
-import com.fabriciosanches.fichatecnica.dtos.EnviarEmailRequestDTO;
-import com.fabriciosanches.fichatecnica.dtos.EnviarEmailResponseDTO;
-import com.fabriciosanches.fichatecnica.dtos.TrocarSenhaRequestDTO;
+import com.fabriciosanches.fichatecnica.constants.Constants;
+import com.fabriciosanches.fichatecnica.dtos.*;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.services.SegurancaService;
 import jakarta.mail.MessagingException;
@@ -61,6 +60,38 @@ public class SegurancaController {
         } catch (FichaTecnicaException e) {
             logger.error("Erro ao trocar senha", e);
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/bloq-primeiro-acesso")
+    @Transactional
+    public ResponseEntity<BloqueiosResponseDTO> bloqueioPrimeiroAcesso(@RequestBody BloqueiosRequestDTO bloqueiosRequestDTO) {
+        logger.info("Inicio do método bloqueioPrimeiroAcesso");
+        logger.info("Parâmetros de entrada: {}", bloqueiosRequestDTO);
+        try {
+            BloqueiosResponseDTO bloqueiosResponseDTO =  segurancaService.primeiroAcessoSeguranca(bloqueiosRequestDTO);
+            logger.info("Primeiro acesso realizado com sucesso");
+            logger.info("Fim do método primeiroAcesso");
+            return ResponseEntity.ok(bloqueiosResponseDTO);
+        } catch (FichaTecnicaException e) {
+            logger.error("Erro ao realizar primeiro acesso", e);
+            return ResponseEntity.badRequest().body(new BloqueiosResponseDTO(Constants.MSG_ERRO_BLOQUEIO));
+        }
+    }
+
+    @PostMapping("/bloq-administrativo")
+    @Transactional
+    public ResponseEntity<BloqueiosResponseDTO> bloqueioAdministrativo(@RequestBody BloqueiosRequestDTO bloqueiosRequestDTO) {
+        logger.info("Inicio do método bloqueioAdministrativo");
+        logger.info("Parâmetros de entrada: {}", bloqueiosRequestDTO);
+        try {
+            BloqueiosResponseDTO bloqueiosResponseDTO =  segurancaService.bloqueioAdmSeguranca(bloqueiosRequestDTO);
+            logger.info("Bloqueio administrativo realizado com sucesso");
+            logger.info("Fim do método bloqueioAdministrativo");
+            return ResponseEntity.ok(bloqueiosResponseDTO);
+        } catch (FichaTecnicaException e) {
+            logger.error("Erro ao realizar Bloqueio Administrativo", e);
+            return ResponseEntity.badRequest().body(new BloqueiosResponseDTO(Constants.MSG_ERRO_BLOQUEIO));
         }
     }
 }
