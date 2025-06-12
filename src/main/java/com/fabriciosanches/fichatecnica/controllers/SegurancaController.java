@@ -63,23 +63,7 @@ public class SegurancaController {
         }
     }
 
-    @PostMapping("/bloq-primeiro-acesso")
-    @Transactional
-    public ResponseEntity<BloqueiosResponseDTO> bloqueioPrimeiroAcesso(@RequestBody BloqueiosRequestDTO bloqueiosRequestDTO) {
-        logger.info("Inicio do método bloqueioPrimeiroAcesso");
-        logger.info("Parâmetros de entrada: {}", bloqueiosRequestDTO);
-        try {
-            BloqueiosResponseDTO bloqueiosResponseDTO =  segurancaService.primeiroAcessoSeguranca(bloqueiosRequestDTO);
-            logger.info("Primeiro acesso realizado com sucesso");
-            logger.info("Fim do método primeiroAcesso");
-            return ResponseEntity.ok(bloqueiosResponseDTO);
-        } catch (FichaTecnicaException e) {
-            logger.error("Erro ao realizar primeiro acesso", e);
-            return ResponseEntity.badRequest().body(new BloqueiosResponseDTO(Constants.MSG_ERRO_BLOQUEIO));
-        }
-    }
-
-    @PostMapping("/bloq-administrativo")
+    @PostMapping("/bloqueio-administrativo")
     @Transactional
     public ResponseEntity<BloqueiosResponseDTO> bloqueioAdministrativo(@RequestBody BloqueiosRequestDTO bloqueiosRequestDTO) {
         logger.info("Inicio do método bloqueioAdministrativo");
@@ -92,6 +76,54 @@ public class SegurancaController {
         } catch (FichaTecnicaException e) {
             logger.error("Erro ao realizar Bloqueio Administrativo", e);
             return ResponseEntity.badRequest().body(new BloqueiosResponseDTO(Constants.MSG_ERRO_BLOQUEIO));
+        }
+    }
+
+    @PostMapping("/desbloqueio-administrativo")
+    @Transactional
+    public ResponseEntity<BloqueiosResponseDTO> desbloqueioAdministrativo(@RequestBody BloqueiosRequestDTO bloqueiosRequestDTO) {
+        logger.info("Inicio do método desbloqueioAdministrativo");
+        logger.info("Parâmetros de entrada: {}", bloqueiosRequestDTO);
+        try {
+            BloqueiosResponseDTO bloqueiosResponseDTO =  segurancaService.desbloqueioAdmSeguranca(bloqueiosRequestDTO);
+            logger.info("Desbloqueio administrativo realizado com sucesso");
+            logger.info("Fim do método desbloqueioAdministrativo");
+            return ResponseEntity.ok(bloqueiosResponseDTO);
+        } catch (FichaTecnicaException e) {
+            logger.error("Erro ao realizar Desbloqueio Administrativo", e);
+            return ResponseEntity.badRequest().body(new BloqueiosResponseDTO(Constants.MSG_ERRO_BLOQUEIO));
+        }
+    }
+
+    @PostMapping("/registrar-usuario")
+    @Transactional
+    public ResponseEntity<?> registrarUsuario(@RequestBody RegisterDTO dados) {
+        logger.info("Inicio do método registrarUsuario");
+        logger.info("Parâmetros de entrada: {}", dados);
+        try {
+            segurancaService.registrarUsuario(dados);
+            logger.info("Usuário registrado com sucesso");
+            logger.info("Fim do método registrarUsuario");
+            return ResponseEntity.ok().build();
+        } catch (FichaTecnicaException e) {
+            logger.error("Erro ao registrar usuário", e);
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    //Testado
+    @PostMapping("/excluir-usuario")
+    @Transactional
+    public ResponseEntity<?> excluirUsuario(@RequestBody BloqueiosRequestDTO dados) {
+        logger.info("Inicio do método excluirUsuario");
+        logger.info("Parâmetros de entrada: {}", dados);
+        try {
+            segurancaService.excluirUsuario(dados.email());
+            logger.info("Usuário excluído com sucesso");
+            logger.info("Fim do método excluirUsuario");
+            return ResponseEntity.ok().build();
+        } catch (FichaTecnicaException e) {
+            logger.error("Erro ao excluir usuário", e);
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }

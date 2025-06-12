@@ -44,6 +44,7 @@ public class AutenticacaoController {
         this.segurancaService = segurancaService;
     }
 
+    //Testado
     @PostMapping("/login")
     public ResponseEntity<DadosTokenJWT> efetuarLogin(@RequestBody @Valid AutenticacaoDTO dados){
         if(dados.login() == null || dados.senha() == null){
@@ -68,25 +69,7 @@ public class AutenticacaoController {
         }
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<?> registrarUsuario(@RequestBody @Valid RegisterDTO dados){
-        if(usuarioRepository.findByLogin(dados.login())!=null){
-            return ResponseEntity.badRequest().build();
-        }
-        var encriptdedPassword = new BCryptPasswordEncoder().encode(dados.senha());
-        var usuario = new Usuario(dados.login(),encriptdedPassword,dados.role());
 
-        usuarioRepository.save(usuario);
 
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/validateEmail")
-    public ResponseEntity<?> validarEmail(@RequestBody @Valid RegisterDTO dados){
-        if(usuarioRepository.findByLogin(dados.login())!=null){
-            return ResponseEntity.badRequest().build();
-        }
-        return ResponseEntity.ok().build();
-    }
 
 }

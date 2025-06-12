@@ -29,11 +29,13 @@ public class Usuario implements UserDetails {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
-    public Usuario(String login, String senha, UserRole role) {
+    private String nome;
+
+    public Usuario(String login, String senha, UserRole role, String nome) {
         this.login = login;
         this.senha = senha;
         this.role = role;
-
+        this.nome = nome;
     }
 
 
