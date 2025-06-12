@@ -3,10 +3,7 @@ package com.fabriciosanches.fichatecnica.services;
 import com.fabriciosanches.fichatecnica.constants.Constants;
 import com.fabriciosanches.fichatecnica.domains.Seguranca;
 import com.fabriciosanches.fichatecnica.domains.Usuario;
-import com.fabriciosanches.fichatecnica.dtos.BloqueiosRequestDTO;
-import com.fabriciosanches.fichatecnica.dtos.BloqueiosResponseDTO;
-import com.fabriciosanches.fichatecnica.dtos.EnviarEmailResponseDTO;
-import com.fabriciosanches.fichatecnica.dtos.SegurancaDTO;
+import com.fabriciosanches.fichatecnica.dtos.*;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.mail.EmailService;
 import com.fabriciosanches.fichatecnica.repository.SegurancaRepository;
@@ -28,11 +25,13 @@ public class SegurancaService {
     private final SegurancaRepository repository;
     private final EmailService emailService;
     private final UsuarioRepository usuarioRepository;
+    private final SegurancaRepository segurancaRepository;
 
-    public SegurancaService(SegurancaRepository repository, EmailService emailService, UsuarioRepository usuarioRepository) {
+    public SegurancaService(SegurancaRepository repository, EmailService emailService, UsuarioRepository usuarioRepository, SegurancaRepository segurancaRepository) {
         this.repository = repository;
         this.emailService = emailService;
         this.usuarioRepository = usuarioRepository;
+        this.segurancaRepository = segurancaRepository;
     }
 
     private String findCPFByEmail(String email) {
@@ -198,7 +197,8 @@ public class SegurancaService {
         seguranca.setBloqueado_expiracao(Boolean.FALSE);
         seguranca.setTokenSeguranca(null);
         seguranca.setDataExpiracaoToken(null); // Limpa a data de expiração do token
-        seguranca.setTentativas(5); // Reseta as tentativas
+        seguranca.setTentativas(null); // Reseta as tentativas
+        seguranca.setDataExpiracaoSenha(null); // Limpa a data de expiração da senha
         repository.save(seguranca);
 
         logger.info("Bloqueio de primeiro acesso setado com sucesso para o email: {}", email);
@@ -224,18 +224,36 @@ public class SegurancaService {
             return new BloqueiosResponseDTO(Constants.MSG_BLOQUEIO_ADM_JA_SETADO);
         }
 
-        seguranca.setPrimeiro_acesso(Boolean.FALSE);
         seguranca.setBloqueado_admin(Boolean.TRUE);
-        seguranca.setBloqueado_tentativas(Boolean.FALSE);
-        seguranca.setBloqueado_expiracao(Boolean.FALSE);
-        seguranca.setTokenSeguranca(null);
-        seguranca.setDataExpiracaoToken(null); // Limpa a data de expiração do token
-        seguranca.setTentativas(5); // Reseta as tentativas
         repository.save(seguranca);
 
         logger.info("Bloqueio administrativo setado com sucesso para o email: {}", email);
         return new BloqueiosResponseDTO(Constants.
                 MSG_BLOQUEIO_ADM_SETADO);
+
+    }
+
+    public BloqueiosResponseDTO desbloqueioAdmSeguranca(BloqueiosRequestDTO bloqueiosRequestDTO) {
+        logger.info("Iniciando processo de desbloqueio administrativo");
+        String email = bloqueiosRequestDTO.email();
+        Seguranca seguranca = findByEmail(email);
+
+        if (seguranca == null) {
+            logger.warn("Dados de segurança não encontrados para o email: {}", email);
+            return new BloqueiosResponseDTO(Constants.MSG_DADOS_SEGURANCA_NAO_ENCONTRADOS);
+        }
+
+        if (!seguranca.getBloqueado_admin()) {
+            logger.warn(Constants.MSG_BLOQUEIO_ADM_DESATIVADO);
+            return new BloqueiosResponseDTO(Constants.MSG_BLOQUEIO_ADM_DESATIVADO);
+        }
+
+        seguranca.setBloqueado_admin(Boolean.FALSE);
+        repository.save(seguranca);
+
+        logger.info("Bloqueio administrativo desativado com sucesso para o email: {}", email);
+        return new BloqueiosResponseDTO(Constants.
+                MSG_BLOQUEIO_ADM_DESATIVADO);
 
     }
 
@@ -278,19 +296,6 @@ public class SegurancaService {
         logger.info("Reset de tentativas realizado com sucesso para o email: {}", email);
     }
 
-    private void senhaExpirada(Seguranca seguranca) {
-        logger.info("Iniciando processo de verificação de senha expirada");
-        if (seguranca.getDataExpiracaoSenha() != null && LocalDateTime.now().isAfter(seguranca.getDataExpiracaoSenha())) {
-            logger.warn("Senha expirada para o email: {}", seguranca.getEmail());
-            seguranca.setBloqueado_expiracao(Boolean.TRUE);
-            seguranca.setBloqueado_admin(Boolean.FALSE);
-            seguranca.setBloqueado_tentativas(Boolean.FALSE);
-            seguranca.setPrimeiro_acesso(Boolean.FALSE);
-            repository.save(seguranca);
-        }
-        logger.info("Senha não está expirada para o email: {}", seguranca.getEmail());
-    }
-
     public void validarAcesso(String email) {
         logger.info("Iniciando processo de validação de acesso");
         Seguranca seguranca = findByEmail(email);
@@ -300,7 +305,7 @@ public class SegurancaService {
             throw new FichaTecnicaException(Constants.MSG_DADOS_SEGURANCA_NAO_ENCONTRADOS);
         }
 
-        senhaExpirada(seguranca);
+        validarSenhaExpirada(seguranca.getEmail());
 
         if (seguranca.getBloqueado_admin()) {
             logger.warn("Usuário bloqueado administrativamente");
@@ -316,5 +321,88 @@ public class SegurancaService {
         } else {
             logger.info("Usuário com acesso normal");
         }
+    }
+
+    public void registrarUsuario(RegisterDTO registerDTO) {
+        logger.info("Iniciando processo de registro de usuário");
+        if (usuarioRepository.findByLogin(registerDTO.login()) != null) {
+            logger.warn("Usuário já existe com o login: {}", registerDTO.login());
+            throw new FichaTecnicaException("Usuário já existe com o login: " + registerDTO.login());
+        }
+
+        Usuario usuario = new Usuario(registerDTO.login(), null, registerDTO.role(),registerDTO.nome());
+
+        usuarioRepository.save(usuario);
+
+        Seguranca seguranca = new Seguranca();
+        seguranca.setEmail(registerDTO.login());
+        seguranca.setDataCriacao(LocalDateTime.now());
+        seguranca.setCpf(registerDTO.cpf());
+        seguranca.setPrimeiro_acesso(Boolean.TRUE);
+        seguranca.setBloqueado_admin(Boolean.FALSE);
+        seguranca.setBloqueado_tentativas(Boolean.FALSE);
+        seguranca.setBloqueado_expiracao(Boolean.FALSE);
+        seguranca.setTentativas(null); // Define o número de tentativas
+        seguranca.setDataExpiracaoSenha(null); // Define a data de expiração da senha
+        seguranca.setDataExpiracaoToken(null); // Limpa a data de expiração do token
+        seguranca.setTokenSeguranca(null); // Limpa o token de segurança
+
+        repository.save(seguranca);
+
+        logger.info("Usuário registrado com sucesso: {}", usuario.getLogin());
+
+    }
+
+    public void excluirUsuario(String email) {
+        logger.info("Iniciando processo de exclusão de usuário");
+
+        Seguranca seguranca = findByEmail(email);
+        if (seguranca == null) {
+            logger.warn("Dados de segurança não encontrados para o email: {}", email);
+            throw new FichaTecnicaException("Dados de segurança não encontrados");
+        }
+
+        segurancaRepository.delete(seguranca);
+
+        Usuario usuario = usuarioRepository.findByLoginUsuario(email);
+        if (usuario == null) {
+            logger.warn("Usuário não encontrado para o email: {}", email);
+            throw new FichaTecnicaException("Usuário não encontrado");
+        }
+        usuarioRepository.delete(usuario);
+        logger.info("Usuário excluído com sucesso: {}", email);
+    }
+
+    public void expirarSenha(String email) {
+        logger.info("Iniciando processo de expiração de senha");
+
+        Seguranca seguranca = findByEmail(email);
+        if (seguranca == null) {
+            logger.warn("Dados de segurança não encontrados para o email: {}", email);
+            throw new FichaTecnicaException("Dados de segurança não encontrados");
+        }
+
+        seguranca.setDataExpiracaoSenha(LocalDateTime.now().minusDays(1));// Define a data de expiração da senha para o passado
+        seguranca.setBloqueado_expiracao(Boolean.TRUE);
+        repository.save(seguranca);
+
+        logger.info("Senha expirada com sucesso para o email: {}", email);
+    }
+
+    public void validarSenhaExpirada(String email) {
+        logger.info("Iniciando processo de validação de senha expirada");
+
+        Seguranca seguranca = findByEmail(email);
+        if (seguranca == null) {
+            logger.warn("Dados de segurança não encontrados para o email: {}", email);
+            throw new FichaTecnicaException("Dados de segurança não encontrados");
+        }
+
+        if(seguranca.getDataExpiracaoSenha() != null && LocalDateTime.now().isAfter(seguranca.getDataExpiracaoSenha())){
+            expirarSenha(seguranca.getEmail());
+        }
+
+
+        logger.info("Senha válida para o email: {}", email);
     }
 }

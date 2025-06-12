@@ -3,32 +3,35 @@
 CREATE TABLE `usuarios` (
                             `id` bigint NOT NULL AUTO_INCREMENT,
                             `login` varchar(255) NOT NULL,
-                            `senha` varchar(255) NOT NULL,
-                            `role` varchar(100) NOT NULL,
+                            `senha` varchar(255) NULL,
+                            `nome` varchar(255) NULL,
+                            `role` varchar(100) NULL,
                             PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Tabela com usuários';
 
 INSERT INTO usuarios
-(login, senha, `role`)
+(login, senha, role, nome)
 VALUES('fsanchesbr001@gmail.com',
        '$2a$10$i42msHOOetd3HmoNwsbwXO3l.RVdpvXVqdvAY/VT3oZUhANMeBXkO',
-       'ADMIN');
+       'ADMIN',
+       'Fabricio Sanches');
 
 INSERT INTO usuarios
-(login, senha, `role`)
+(login, senha, role, nome)
 VALUES('fabricio@fabriciosanches.com',
        '$2a$10$i42msHOOetd3HmoNwsbwXO3l.RVdpvXVqdvAY/VT3oZUhANMeBXkO',
-       'USER');
+       'USER',
+       'Fabricio Sanches 2');
 
 -- fichatecnica.seguranca definição
 CREATE TABLE fichatecnica.seguranca (
                                         codigo BIGINT auto_increment NOT NULL,
                                         email varchar(255) NOT NULL,
-                                        data_criacao DATETIME NOT NULL,
-                                        data_expiracao_senha DATETIME NOT NULL,
-                                        qtde_tentativas_login DECIMAL(1) DEFAULT 5 NOT NULL,
-                                        token_seguranca VARCHAR(8) NOT NULL,
-                                        data_expiracao_token DATETIME NOT NULL,
+                                        data_criacao DATETIME NULL,
+                                        data_expiracao_senha DATETIME NULL,
+                                        qtde_tentativas_login DECIMAL(1) NULL,
+                                        token_seguranca VARCHAR(8) NULL,
+                                        data_expiracao_token DATETIME NULL,
                                         cpf VARCHAR(11) NOT NULL,
                                         bloqueio_adm BOOL DEFAULT FALSE NOT NULL,
                                         bloqueio_tentativas BOOL DEFAULT FALSE NOT NULL,

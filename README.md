@@ -47,3 +47,4 @@ Este projeto tem como objetivo a criação de uma ficha técnica de um produto, 
 - 04/06/2025 - Versão 1.6.2 - Formatação de data e hora na saida do envio do endereço eletrónico
 - 06/06/2025 - Versão 1.6.3 - Troca de senha e login funcionando
 - 07/06/2025 - Versão 1.6.4 - Set e Checagem de Bloqueios e checagens pré login, tratando tentativas de login
+- 12/06/2025 - Versão 1.6.5 - Inicio dos testes de fluxo de segurança
