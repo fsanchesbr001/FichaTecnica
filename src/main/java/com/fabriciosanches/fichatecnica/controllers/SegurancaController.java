@@ -26,6 +26,7 @@ public class SegurancaController {
         this.segurancaService = segurancaService;
     }
 
+    //Testado
     @PostMapping("/enviar-email")
     @Transactional
     public ResponseEntity<EnviarEmailResponseDTO> enviarEmail(@RequestBody EnviarEmailRequestDTO email) {
@@ -46,6 +47,7 @@ public class SegurancaController {
         }
     }
 
+    //Testado
     @PostMapping("/trocar-senha")
     @Transactional
     public ResponseEntity<?> trocarSenha(@RequestBody TrocarSenhaRequestDTO trocarDTO) {
@@ -63,6 +65,7 @@ public class SegurancaController {
         }
     }
 
+    //Testado
     @PostMapping("/bloqueio-administrativo")
     @Transactional
     public ResponseEntity<BloqueiosResponseDTO> bloqueioAdministrativo(@RequestBody BloqueiosRequestDTO bloqueiosRequestDTO) {
@@ -79,6 +82,7 @@ public class SegurancaController {
         }
     }
 
+    //Testado
     @PostMapping("/desbloqueio-administrativo")
     @Transactional
     public ResponseEntity<BloqueiosResponseDTO> desbloqueioAdministrativo(@RequestBody BloqueiosRequestDTO bloqueiosRequestDTO) {
@@ -95,6 +99,7 @@ public class SegurancaController {
         }
     }
 
+    //Testado
     @PostMapping("/registrar-usuario")
     @Transactional
     public ResponseEntity<?> registrarUsuario(@RequestBody RegisterDTO dados) {
@@ -110,6 +115,7 @@ public class SegurancaController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
     //Testado
     @PostMapping("/excluir-usuario")
     @Transactional
@@ -123,6 +129,22 @@ public class SegurancaController {
             return ResponseEntity.ok().build();
         } catch (FichaTecnicaException e) {
             logger.error("Erro ao excluir usuário", e);
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/resetar-senha")
+    @Transactional
+    public ResponseEntity<?> resetarSenhaUsuario(@RequestBody BloqueiosRequestDTO dados) {
+        logger.info("Inicio do método resetarSenhaUsuario");
+        logger.info("Parâmetros de entrada: {}", dados);
+        try {
+            segurancaService.expirarSenha(dados.email());
+            logger.info("Senha do usuário expirada com sucesso");
+            logger.info("Fim do método resetarSenhaUsuario");
+            return ResponseEntity.ok().build();
+        } catch (FichaTecnicaException e) {
+            logger.error("Erro ao resetar senha do usuário", e);
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

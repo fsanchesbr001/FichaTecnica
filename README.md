@@ -1,6 +1,6 @@
 # Projeto Ficha Técnica
 ## Descrição
-Este projeto tem como objetivo a criação de uma ficha técnica de um produto, onde é possível adicionar, editar e excluir produtos, além de visualizar a lista de produtos cadastrados.
+Este projeto visa a criação de uma ficha técnica de um produto, onde é possível adicionar, editar e excluir produtos, além de visualizar a lista de produtos cadastrados.
 ## Tecnologias
 - Java 17
 - Spring Boot 3.4.1
@@ -15,13 +15,15 @@ Este projeto tem como objetivo a criação de uma ficha técnica de um produto, 
 - [Maven](https://maven.apache.org/)
 
 ## Próximos Passos
-- Implementar a funcionalidade de upload de imagens para os produtos.
-- Adicionar a funcionalidade de excluir Item.
+
 - Melhorar a segurança da aplicação, implementando controle de usuário.
+- Implementar o controle de acesso baseado em papéis (roles) para usuários.
+- Criar um usuario de sistema para atividades administrativas.
+- implementar endpoints de lista de usuarios e usuario por login.
 - Adicionar Observabilidade e monitoramento da aplicação.
 - Adicionar testes unitários
 - Adicionar Documentação da API com Swagger.
-- RecriR 
+
 
 ## Controle de Versão
 - 02/03/2025 - Refatoração Completa
@@ -41,10 +43,11 @@ Este projeto tem como objetivo a criação de uma ficha técnica de um produto, 
 - 03/04/2025 - Versão 1.5.6 - Correção de referências Circulares em HistoricoItem
 - 05/04/2025 - Versão 1.5.7 - Correção de chave estrangeira e limpeza de codigo em HistoricoItem
 - 09/04/2025 - Versão 1.5.8 - Versão Estável com alterar ‘Item’ OK
-- 10/04/2025 - Versão 1.5.9 - Versão Estável com deletar item OK
+- 10/04/2025 - Versão 1.5.9 - Versão Estável com deletar “item” OK
 - 24/05/2025 - Versão 1.6.0 - Criação e populacao da tabela seguranca
-- 29/05/2025 - Versão 1.6.1 - Envio de email de confirmação de ‘token’ de segurança
+- 29/05/2025 - Versão 1.6.1 - Envio de endereço eletrónico de confirmação de ‘token’ de segurança
 - 04/06/2025 - Versão 1.6.2 - Formatação de data e hora na saida do envio do endereço eletrónico
-- 06/06/2025 - Versão 1.6.3 - Troca de senha e login funcionando
-- 07/06/2025 - Versão 1.6.4 - Set e Checagem de Bloqueios e checagens pré login, tratando tentativas de login
+- 06/06/2025 - Versão 1.6.3 - Troca de senha e “login” funcionando
+- 07/06/2025 - Versão 1.6.4 - Set e Checagem de Bloqueios e checagens pré-login, tratando tentativas de “login”
 - 12/06/2025 - Versão 1.6.5 - Inicio dos testes de fluxo de segurança
+- 13/06/2025 - Versão 1.6.6 - Testes de fluxo de segurança OK
