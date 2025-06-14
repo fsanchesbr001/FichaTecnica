@@ -19,7 +19,6 @@ Este projeto visa a criação de uma ficha técnica de um produto, onde é poss�
 - Melhorar a segurança da aplicação, implementando controle de usuário.
 - Implementar o controle de acesso baseado em papéis (roles) para usuários.
 - Criar um usuario de sistema para atividades administrativas.
-- implementar endpoints de lista de usuarios e usuario por login.
 - Adicionar Observabilidade e monitoramento da aplicação.
 - Adicionar testes unitários
 - Adicionar Documentação da API com Swagger.
@@ -51,3 +50,4 @@ Este projeto visa a criação de uma ficha técnica de um produto, onde é poss�
 - 07/06/2025 - Versão 1.6.4 - Set e Checagem de Bloqueios e checagens pré-login, tratando tentativas de “login”
 - 12/06/2025 - Versão 1.6.5 - Inicio dos testes de fluxo de segurança
 - 13/06/2025 - Versão 1.6.6 - Testes de fluxo de segurança OK
+- 14/06/2025 - Versão 1.6.7 - Implementados e testados os métodos GET de Segurança OK

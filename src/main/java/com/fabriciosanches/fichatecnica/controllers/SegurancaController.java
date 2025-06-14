@@ -1,6 +1,7 @@
 package com.fabriciosanches.fichatecnica.controllers;
 
 import com.fabriciosanches.fichatecnica.constants.Constants;
+import com.fabriciosanches.fichatecnica.domains.Seguranca;
 import com.fabriciosanches.fichatecnica.dtos.*;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.services.SegurancaService;
@@ -9,10 +10,9 @@ import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("ficha-tecnica")
@@ -132,7 +132,7 @@ public class SegurancaController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
+    //Testado
     @PostMapping("/resetar-senha")
     @Transactional
     public ResponseEntity<?> resetarSenhaUsuario(@RequestBody BloqueiosRequestDTO dados) {
@@ -146,6 +146,48 @@ public class SegurancaController {
         } catch (FichaTecnicaException e) {
             logger.error("Erro ao resetar senha do usuário", e);
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/listar-todos-usuarios")
+
+    public ResponseEntity<List<SegurancaDTO>> listarTodosUsuarios() {
+        logger.info("Inicio do método listarTodosUsuarios");
+        try {
+            List<Seguranca> response = segurancaService.findAll();
+            logger.info("Lista de usuários obtida com sucesso");
+            if(response.isEmpty()) {
+                logger.info("Nenhum usuário encontrado");
+                return ResponseEntity.noContent().build();
+            }
+            List<SegurancaDTO> segurancaDTOList = response.stream()
+                    .map(SegurancaDTO::new)
+                    .toList();
+            logger.info("Fim do método listarTodosUsuarios");
+            return ResponseEntity.ok(segurancaDTOList);
+        } catch (FichaTecnicaException e) {
+            logger.error("Erro ao listar usuários", e);
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/buscar-usuario/{email}")
+    public ResponseEntity<SegurancaDTO> buscarUsuarioPorEmail(@PathVariable String email) {
+        logger.info("Inicio do método buscarUsuarioPorEmail");
+        logger.info("Parâmetro de entrada: {}", email);
+        try {
+            Seguranca seguranca = segurancaService.findByEmail(email);
+            if (seguranca == null) {
+                logger.warn("Usuário não encontrado para o email: {}", email);
+                return ResponseEntity.notFound().build();
+            }
+            SegurancaDTO segurancaDTO = new SegurancaDTO(seguranca);
+            logger.info("Usuário encontrado com sucesso");
+            logger.info("Fim do método buscarUsuarioPorEmail");
+            return ResponseEntity.ok(segurancaDTO);
+        } catch (FichaTecnicaException e) {
+            logger.error("Erro ao buscar usuário por email", e);
+            return ResponseEntity.badRequest().build();
         }
     }
 }
