@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Random;
 
 @Service
@@ -94,7 +95,7 @@ public class SegurancaService {
 
     }
 
-    private Seguranca findByEmail(String email) {
+    public Seguranca findByEmail(String email) {
         logger.info("Buscando dados de segurança por email: {}", email);
         Seguranca seguranca = repository.findByEmail(email);
         if (seguranca == null) {
@@ -131,13 +132,17 @@ public class SegurancaService {
         return senha;
     }
 
-    public Boolean trocarSenhaSeguranca(String email, String cpf, String tokenSeguranca, String senha, String confirmacaoSenha) {
+    public void trocarSenhaSeguranca(String email, String cpf, String tokenSeguranca, String senha, String confirmacaoSenha) {
         logger.info("Iniciando processo de troca de senha de segurança");
         Seguranca seguranca = findByEmail(email);
 
         if (seguranca == null) {
             logger.warn("Dados de segurança não encontrados para o email: {}", email);
             throw new FichaTecnicaException("Dados de segurança não encontrados");
+        }
+        if( !seguranca.getCpf().equals(cpf)) {
+            logger.warn("CPF não corresponde ao email: {}", email);
+            throw new FichaTecnicaException("CPF não corresponde ao email");
         }
 
         if (!validarTokenSeguranca(seguranca, tokenSeguranca)) {
@@ -173,40 +178,6 @@ public class SegurancaService {
         usuarioRepository.save(usuario);
 
         logger.info("Senha de segurança trocada com sucesso para o email: {}", email);
-        return true;
-    }
-
-    public BloqueiosResponseDTO primeiroAcessoSeguranca(BloqueiosRequestDTO bloqueiosRequestDTO) {
-        logger.info("Iniciando processo de bloqueio de primeiro acesso");
-        String email = bloqueiosRequestDTO.email();
-        Seguranca seguranca = findByEmail(email);
-
-        if (seguranca == null) {
-            logger.warn("Dados de segurança não encontrados para o email: {}", email);
-            return new BloqueiosResponseDTO(Constants.MSG_DADOS_SEGURANCA_NAO_ENCONTRADOS);
-        }
-
-        if (seguranca.getPrimeiro_acesso()) {
-            logger.warn("Usuário já esta bloqueado por primeiro acesso");
-            return new BloqueiosResponseDTO(Constants.MSG_BLOQUEIO_PRIMEIRO_ACESSO_JA_SETADO);
-        }
-
-        seguranca.setPrimeiro_acesso(Boolean.TRUE);
-        seguranca.setBloqueado_admin(Boolean.FALSE);
-        seguranca.setBloqueado_tentativas(Boolean.FALSE);
-        seguranca.setBloqueado_expiracao(Boolean.FALSE);
-        seguranca.setTokenSeguranca(null);
-        seguranca.setDataExpiracaoToken(null); // Limpa a data de expiração do token
-        seguranca.setTentativas(null); // Reseta as tentativas
-        seguranca.setDataExpiracaoSenha(null); // Limpa a data de expiração da senha
-        repository.save(seguranca);
-
-        logger.info("Bloqueio de primeiro acesso setado com sucesso para o email: {}", email);
-        return new BloqueiosResponseDTO(Constants.
-                MSG_BLOQUEIO_PRIMEIRO_ACESSO_SETADO);
-
-
-
     }
 
     public BloqueiosResponseDTO bloqueioAdmSeguranca(BloqueiosRequestDTO bloqueiosRequestDTO) {
@@ -404,5 +375,16 @@ public class SegurancaService {
 
 
         logger.info("Senha válida para o email: {}", email);
+    }
+
+    public List<Seguranca> findAll() {
+        logger.info("Buscando todos os dados de segurança");
+        List<Seguranca> dadosSeguranca = repository.findAll();
+        if (dadosSeguranca.isEmpty()) {
+            logger.info("Nenhum dado de segurança encontrado");
+        } else {
+            logger.info("Dados de segurança encontrados: {}", dadosSeguranca.size());
+        }
+        return dadosSeguranca;
     }
 }
