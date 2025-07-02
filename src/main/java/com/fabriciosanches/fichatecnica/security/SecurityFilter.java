@@ -7,11 +7,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Collections;
 
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
@@ -31,9 +33,11 @@ public class SecurityFilter extends OncePerRequestFilter {
         var tokenJWT = recuperarToken(request);
         if(tokenJWT!=null){
             var subject = tokenService.getSubject(tokenJWT);
+            var role = tokenService.getRole(tokenJWT);
+            var authority = new SimpleGrantedAuthority(role);
             var usuario = repository.findByLogin(subject);
-            var authentication = new UsernamePasswordAuthenticationToken(usuario,null,usuario.getAuthorities());
-
+            var authentication = new UsernamePasswordAuthenticationToken(usuario,null,
+                    Collections.singletonList(authority));
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
         }

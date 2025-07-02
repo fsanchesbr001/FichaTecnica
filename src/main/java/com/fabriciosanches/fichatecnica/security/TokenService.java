@@ -30,6 +30,8 @@ public class TokenService {
             return JWT.create()
                     .withIssuer("API Ficha Tecnica")
                     .withSubject(usuario.getLogin())
+                    .withClaim("role", usuario.getRole().getRole())
+                    .withClaim("nome", usuario.getNome())
                     .withExpiresAt(dataExpiracao())
                     .sign(algoritimo);
 
@@ -53,6 +55,20 @@ public class TokenService {
         }
     }
 
+    public String getRole(String tokenJWT){
+        try {
+            logger.info("Inicio do método getRole");
+            var algoritimo = Algorithm.HMAC256(secret);
+            logger.info("Fim do método getRole");
+            return JWT.require(algoritimo)
+                    .withIssuer("API Ficha Tecnica")
+                    .build()
+                    .verify(tokenJWT)
+                    .getClaim("role").asString();
+        } catch (JWTVerificationException exception){
+            throw new RuntimeException("Verificação de Token falhou!!!",exception);
+        }
+    }
     private Instant dataExpiracao() {
         return LocalDateTime.now().plusMinutes(120).toInstant(ZoneOffset.of("-03:00"));
     }

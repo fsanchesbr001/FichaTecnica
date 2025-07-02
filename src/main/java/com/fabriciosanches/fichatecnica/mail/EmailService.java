@@ -49,8 +49,10 @@ public class EmailService {
         final Context ctx = new Context(LocaleContextHolder.getLocale());
         ctx.setVariable("token",dadosContato.tokenSeguranca());
         ctx.setVariable("validadeToken",dadosContato.dataExpiracaoToken());
-        final String htmlContent = this.templateEngine.process(TEMPLATE_EMAIL,ctx);
-        email.setText(htmlContent,true);
+
+        final String htmlContent = this.templateEngine.process(TEMPLATE_EMAIL, ctx);
+        email.setText(htmlContent, true);
+
         try {
             logger.info("Enviando email");
             mailSender.send(mimeMessage);

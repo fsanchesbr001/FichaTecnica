@@ -1,8 +1,12 @@
 package com.fabriciosanches.fichatecnica.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum UserRole {
-    ADMIN("admin"),
-    USER("user");
+    ADMIN("ROLE_ADMIN"),
+    USER("ROLE_USER"),
+    SYSTEM("ROLE_SYSTEM");
 
     private final String role;
 
