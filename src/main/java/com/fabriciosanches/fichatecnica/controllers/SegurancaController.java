@@ -10,6 +10,7 @@ import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,6 +28,7 @@ public class SegurancaController {
     }
 
     //Testado
+    @PreAuthorize("hasAnyRole('SYSTEM', 'ADMIN')")
     @PostMapping("/enviar-email")
     @Transactional
     public ResponseEntity<EnviarEmailResponseDTO> enviarEmail(@RequestBody EnviarEmailRequestDTO email) {
@@ -48,6 +50,7 @@ public class SegurancaController {
     }
 
     //Testado
+    @PreAuthorize("hasAnyRole('SYSTEM', 'ADMIN')")
     @PostMapping("/trocar-senha")
     @Transactional
     public ResponseEntity<?> trocarSenha(@RequestBody TrocarSenhaRequestDTO trocarDTO) {
@@ -66,6 +69,7 @@ public class SegurancaController {
     }
 
     //Testado
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/bloqueio-administrativo")
     @Transactional
     public ResponseEntity<BloqueiosResponseDTO> bloqueioAdministrativo(@RequestBody BloqueiosRequestDTO bloqueiosRequestDTO) {
@@ -83,6 +87,7 @@ public class SegurancaController {
     }
 
     //Testado
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/desbloqueio-administrativo")
     @Transactional
     public ResponseEntity<BloqueiosResponseDTO> desbloqueioAdministrativo(@RequestBody BloqueiosRequestDTO bloqueiosRequestDTO) {
@@ -100,6 +105,7 @@ public class SegurancaController {
     }
 
     //Testado
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/registrar-usuario")
     @Transactional
     public ResponseEntity<?> registrarUsuario(@RequestBody RegisterDTO dados) {
@@ -117,6 +123,7 @@ public class SegurancaController {
     }
 
     //Testado
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/excluir-usuario")
     @Transactional
     public ResponseEntity<?> excluirUsuario(@RequestBody BloqueiosRequestDTO dados) {
@@ -133,6 +140,7 @@ public class SegurancaController {
         }
     }
     //Testado
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/resetar-senha")
     @Transactional
     public ResponseEntity<?> resetarSenhaUsuario(@RequestBody BloqueiosRequestDTO dados) {
@@ -150,7 +158,7 @@ public class SegurancaController {
     }
 
     @GetMapping("/listar-todos-usuarios")
-
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<SegurancaDTO>> listarTodosUsuarios() {
         logger.info("Inicio do método listarTodosUsuarios");
         try {
@@ -171,6 +179,7 @@ public class SegurancaController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/buscar-usuario/{email}")
     public ResponseEntity<SegurancaDTO> buscarUsuarioPorEmail(@PathVariable String email) {
         logger.info("Inicio do método buscarUsuarioPorEmail");
