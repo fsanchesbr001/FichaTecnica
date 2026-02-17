@@ -1,6 +1,5 @@
 package com.fabriciosanches.fichatecnica.controllers;
 
-import com.fabriciosanches.fichatecnica.dtos.RegisterDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.repository.UsuarioRepository;
 import com.fabriciosanches.fichatecnica.security.DadosTokenJWT;
@@ -13,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -56,7 +54,9 @@ public class AutenticacaoController {
             var authentication = manager.authenticate(userPwd);
             segurancaService.resetarTentativas(dados.login());
             var token = tokenService.gerarToken((Usuario) authentication.getPrincipal());
-            return ResponseEntity.ok(new DadosTokenJWT(token));
+            var expirationMinutes = tokenService.getExpirationMinutes();
+            var expiresAt = tokenService.getTokenExpiresAt();
+            return ResponseEntity.ok(new DadosTokenJWT(token, expirationMinutes, expiresAt));
         }catch (BadCredentialsException e){
             segurancaService.errouSenha(dados.login());
             return ResponseEntity.badRequest().body(new DadosTokenJWT(e.getMessage()));

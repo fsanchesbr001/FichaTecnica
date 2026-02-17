@@ -4,21 +4,31 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.fabriciosanches.fichatecnica.domains.Usuario;
+import lombok.Getter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 @Service
 public class TokenService {
 
     @Value("${api.security.token.secret}")
     private String secret;
+
+    @Getter
+    @Value("${api.security.token.expiration-minutes:120}")
+    private long expirationMinutes;
+
+    @Value("${api.security.token.time-zone:America/Sao_Paulo}")
+    private String tokenTimeZone;
 
     private final Logger logger = LogManager.getLogger(TokenService.class);
 
@@ -69,7 +79,37 @@ public class TokenService {
             throw new RuntimeException("Verificação de Token falhou!!!",exception);
         }
     }
+
+    public OffsetDateTime getTokenExpiresAt() {
+        return dataExpiracao().atZone(getTokenZoneId()).toOffsetDateTime();
+    }
+
     private Instant dataExpiracao() {
-        return LocalDateTime.now().plusMinutes(120).toInstant(ZoneOffset.of("-03:00"));
+        return ZonedDateTime.now(getTokenZoneId())
+                .plusMinutes(expirationMinutes)
+                .toInstant();
+    }
+
+    private ZoneId getTokenZoneId() {
+        return ZoneId.of(tokenTimeZone);
+    }
+
+    public boolean validarTokenExpirado(String tokenJWT) {
+        try {
+            logger.info("Validando expiração do token");
+            var algoritimo = Algorithm.HMAC256(secret);
+            JWT.require(algoritimo)
+                    .withIssuer("API Ficha Tecnica")
+                    .build()
+                    .verify(tokenJWT);
+            logger.info("Token válido e não expirado");
+            return true;
+        } catch (TokenExpiredException exception) {
+            logger.warn("Token expirado: {}", exception.getMessage());
+            return false;
+        } catch (JWTVerificationException exception) {
+            logger.warn("Erro ao verificar token: {}", exception.getMessage());
+            return false;
+        }
     }
 }
