@@ -1,6 +1,7 @@
 package com.fabriciosanches.fichatecnica.security;
 
 import com.fabriciosanches.fichatecnica.repository.UsuarioRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,6 +15,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
@@ -32,14 +35,34 @@ public class SecurityFilter extends OncePerRequestFilter {
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
         var tokenJWT = recuperarToken(request);
         if(tokenJWT!=null){
-            var subject = tokenService.getSubject(tokenJWT);
-            var role = tokenService.getRole(tokenJWT);
-            var authority = new SimpleGrantedAuthority(role);
-            var usuario = repository.findByLogin(subject);
-            var authentication = new UsernamePasswordAuthenticationToken(usuario,null,
-                    Collections.singletonList(authority));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            // Validar se o token está expirado
+            if(!tokenService.validarTokenExpirado(tokenJWT)){
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                Map<String, String> errorMap = new HashMap<>();
+                errorMap.put("error", "Token expirado");
+                errorMap.put("message", "Seu token de autenticação expirou. Por favor, faça login novamente.");
+                response.getWriter().write(new ObjectMapper().writeValueAsString(errorMap));
+                return;
+            }
 
+            try {
+                var subject = tokenService.getSubject(tokenJWT);
+                var role = tokenService.getRole(tokenJWT);
+                var authority = new SimpleGrantedAuthority(role);
+                var usuario = repository.findByLogin(subject);
+                var authentication = new UsernamePasswordAuthenticationToken(usuario,null,
+                        Collections.singletonList(authority));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            } catch (Exception e) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                Map<String, String> errorMap = new HashMap<>();
+                errorMap.put("error", "Token inválido");
+                errorMap.put("message", "Seu token de autenticação é inválido. Por favor, faça login novamente.");
+                response.getWriter().write(new ObjectMapper().writeValueAsString(errorMap));
+                return;
+            }
         }
 
         filterChain.doFilter(request,response);
