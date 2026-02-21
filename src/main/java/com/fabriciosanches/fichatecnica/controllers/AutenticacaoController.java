@@ -29,8 +29,6 @@ public class AutenticacaoController {
 
     private final TokenService tokenService;
 
-    private final UsuarioRepository usuarioRepository;
-
     private final SegurancaService segurancaService;
 
     public AutenticacaoController(AuthenticationManager manager,
@@ -39,7 +37,6 @@ public class AutenticacaoController {
                                   SegurancaService segurancaService) {
         this.manager = manager;
         this.tokenService = tokenService;
-        this.usuarioRepository = usuarioRepository;
         this.segurancaService = segurancaService;
     }
 
@@ -56,10 +53,21 @@ public class AutenticacaoController {
             var userPwd = new UsernamePasswordAuthenticationToken(dados.login(),dados.senha());
             var authentication = manager.authenticate(userPwd);
             segurancaService.resetarTentativas(dados.login());
-            var token = tokenService.gerarToken((Usuario) authentication.getPrincipal());
+
+            var usuario = (Usuario) authentication.getPrincipal();
+            var token = tokenService.gerarToken(usuario);
             var expirationMinutes = tokenService.getExpirationMinutes();
             var expiresAt = tokenService.getTokenExpiresAt();
-            return ResponseEntity.ok(new DadosTokenJWT(token, expirationMinutes, expiresAt));
+            var role = usuario.getRole().getRole();
+
+            return ResponseEntity.ok(new DadosTokenJWT(
+                token,
+                expirationMinutes,
+                expiresAt,
+                usuario.getLogin(),
+                usuario.getNome(),
+                role
+            ));
         }catch (BadCredentialsException e){
             segurancaService.errouSenha(dados.login());
             return ResponseEntity.badRequest().body(new DadosTokenJWT(e.getMessage()));
