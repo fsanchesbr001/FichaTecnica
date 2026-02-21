@@ -50,3 +50,4 @@ Este projeto visa a criação de uma ficha técnica de um produto, onde é poss�
 - 14/06/2025 - Versão 1.6.7 - Implementados e testados os métodos GET de Segurança OK
 - 02/07/2025 - Versão 1.6.8 - Implementados segurança por Role e por Permissão e email com logo.
 - 16/02/2026 - Versão 1.6.9 - Implementado tempo e data de expiração do token.
+- 21/02/2026 - Versão 1.7.0 - Correção do Erro de CORS.
