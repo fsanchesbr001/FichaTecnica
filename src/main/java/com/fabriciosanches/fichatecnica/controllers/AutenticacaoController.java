@@ -1,5 +1,6 @@
 package com.fabriciosanches.fichatecnica.controllers;
 
+import com.fabriciosanches.fichatecnica.constants.Constants;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.repository.UsuarioRepository;
 import com.fabriciosanches.fichatecnica.security.DadosTokenJWT;
@@ -70,7 +71,7 @@ public class AutenticacaoController {
             ));
         }catch (BadCredentialsException e){
             segurancaService.errouSenha(dados.login());
-            return ResponseEntity.badRequest().body(new DadosTokenJWT(e.getMessage()));
+            return ResponseEntity.badRequest().body(new DadosTokenJWT(Constants.MSG_DADOS_SEGURANCA_NAO_ENCONTRADOS));
         }
         catch (FichaTecnicaException ex) {
             return ResponseEntity.badRequest().body(new DadosTokenJWT(ex.getMessage()));
