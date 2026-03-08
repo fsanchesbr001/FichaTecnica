@@ -99,10 +99,10 @@ public class SegurancaService {
         logger.info("Buscando dados de segurança por email: {}", email);
         Seguranca seguranca = repository.findByEmail(email);
         if (seguranca == null) {
-            logger.info("Dados de segurança não encontrada para o email: {}", email);
+            logger.info("Dados de segurança não encontrados para o email: {}", email);
             return null;
         }
-        logger.info("Dados de segurança encontrada: {}", seguranca);
+        logger.info("Dados de segurança encontrados: {}", seguranca);
         return seguranca;
     }
 
@@ -127,7 +127,7 @@ public class SegurancaService {
 
     private String gerarSenhaSeguranca(String senhaNormal) {
         logger.info("Gerando senha de segurança");
-        String senha = Utilidades.geraSenha(senhaNormal); // Exemplo de senha segura
+        String senha = Utilidades.encriptaSenha(senhaNormal); // Exemplo de senha segura
         logger.info("Senha de segurança gerada: {}", senha);
         return senha;
     }
@@ -138,7 +138,7 @@ public class SegurancaService {
 
         if (seguranca == null) {
             logger.warn("Dados de segurança não encontrados para o email: {}", email);
-            throw new FichaTecnicaException("Dados de segurança não encontrados");
+            throw new FichaTecnicaException(Constants.MSG_DADOS_SEGURANCA_NAO_ENCONTRADOS);
         }
         if( !seguranca.getCpf().equals(cpf)) {
             logger.warn("CPF não corresponde ao email: {}", email);
@@ -279,16 +279,17 @@ public class SegurancaService {
         validarSenhaExpirada(seguranca.getEmail());
 
         if (seguranca.getBloqueado_admin()) {
-            logger.warn("Usuário bloqueado administrativamente");
-            throw new FichaTecnicaException("Usuário bloqueado administrativamente");
+            logger.warn(Constants.MSG_ERRO_BLOQUEIO_ADM);
+            throw new FichaTecnicaException(Constants.MSG_ERRO_BLOQUEIO_ADM);
         } else if (seguranca.getPrimeiro_acesso()) {
-            logger.info("Usuário bloqueado por primeiro acesso");
+            logger.info(Constants.MSG_ERRO_BLOQUEIO_PRIMEIRO_ACESSO);
+            throw new FichaTecnicaException(Constants.MSG_ERRO_BLOQUEIO_PRIMEIRO_ACESSO);
         } else if (seguranca.getBloqueado_expiracao()) {
-            logger.warn("Usuário bloqueado por expiração de senha");
-            throw new FichaTecnicaException("Usuário bloqueado por expiração de senha");
+            logger.warn(Constants.MSG_ERRO_BLOQUEIO_EXPIRACAO);
+            throw new FichaTecnicaException(Constants.MSG_ERRO_BLOQUEIO_EXPIRACAO);
         } else if (seguranca.getBloqueado_tentativas()) {
-            logger.warn("Usuário bloqueado por tentativas excedidas");
-            throw new FichaTecnicaException("Usuário bloqueado por tentativas excedidas");
+            logger.warn(Constants.MSG_ERRO_BLOQUEIO_TENTATIVAS);
+            throw new FichaTecnicaException(Constants.MSG_ERRO_BLOQUEIO_TENTATIVAS);
         } else {
             logger.info("Usuário com acesso normal");
         }
@@ -330,7 +331,7 @@ public class SegurancaService {
         Seguranca seguranca = findByEmail(email);
         if (seguranca == null) {
             logger.warn("Dados de segurança não encontrados para o email: {}", email);
-            throw new FichaTecnicaException("Dados de segurança não encontrados");
+            throw new FichaTecnicaException(Constants.MSG_DADOS_SEGURANCA_NAO_ENCONTRADOS);
         }
 
         segurancaRepository.delete(seguranca);
@@ -350,7 +351,7 @@ public class SegurancaService {
         Seguranca seguranca = findByEmail(email);
         if (seguranca == null) {
             logger.warn("Dados de segurança não encontrados para o email: {}", email);
-            throw new FichaTecnicaException("Dados de segurança não encontrados");
+            throw new FichaTecnicaException(Constants.MSG_DADOS_SEGURANCA_NAO_ENCONTRADOS);
         }
 
         seguranca.setDataExpiracaoSenha(LocalDateTime.now().minusDays(1));// Define a data de expiração da senha para o passado
@@ -366,7 +367,7 @@ public class SegurancaService {
         Seguranca seguranca = findByEmail(email);
         if (seguranca == null) {
             logger.warn("Dados de segurança não encontrados para o email: {}", email);
-            throw new FichaTecnicaException("Dados de segurança não encontrados");
+            throw new FichaTecnicaException(Constants.MSG_DADOS_SEGURANCA_NAO_ENCONTRADOS);
         }
 
         if(seguranca.getDataExpiracaoSenha() != null && LocalDateTime.now().isAfter(seguranca.getDataExpiracaoSenha())){

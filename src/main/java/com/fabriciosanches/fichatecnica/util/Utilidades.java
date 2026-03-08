@@ -2,6 +2,10 @@ package com.fabriciosanches.fichatecnica.util;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.util.Base64;
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Utilidades {
     public static Boolean validarCPF(String cpf) {
@@ -50,7 +54,7 @@ public class Utilidades {
                 && segundoDigitoVerificador == Character.getNumericValue(cpf.charAt(10));
     }
 
-    public static String geraSenha(String senha){
+    public static String encriptaSenha(String senha){
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         return encoder.encode(senha);
     }
@@ -63,6 +67,66 @@ public class Utilidades {
     // Método para converter uma string em base64 para uma string normal
     public static String decodeFromBase64(String base64Input) {
         return new String(Base64.getDecoder().decode(base64Input));
+    }
+
+    /**
+     * Gera uma senha aleatória de 10 caracteres que respeita as seguintes regras:
+     * 01 - Pode conter caracteres alfanuméricos e caracteres especiais.
+     * 02 - Pelo menos um caractere especial.
+     * 03 - Pelo menos uma letra maiúscula.
+     * 04 - Pelo menos uma letra minúscula.
+     * 05 - Não pode conter espaço.
+     * 06 - Pelo menos um número.
+     * 07 - Tem que começar por letra ou número.
+     *
+     * Observações: O método sempre retorna uma senha com exatamente 10 caracteres e usa SecureRandom
+     * para garantir maior entropia.
+     */
+    public static String gerarSenhaAleatoria() {
+        final int LENGTH = 10;
+        final String UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        final String LOWER = "abcdefghijklmnopqrstuvwxyz";
+        final String DIGITS = "0123456789";
+        final String SPECIAL = "!@#$%^&*()-_+=[]{};:,.<>?/"; // sem espaços
+        final String ALPHANUM = UPPER + LOWER + DIGITS;
+        final String ALL_ALLOWED = ALPHANUM + SPECIAL;
+
+        SecureRandom random = new SecureRandom();
+        char[] password = new char[LENGTH];
+
+        // 1) Garantir que o primeiro caractere seja letra ou número
+        password[0] = ALPHANUM.charAt(random.nextInt(ALPHANUM.length()));
+        boolean hasUpper = Character.isUpperCase(password[0]);
+        boolean hasLower = Character.isLowerCase(password[0]);
+        boolean hasDigit = Character.isDigit(password[0]);
+        boolean hasSpecial = false; // não pode ser special no primeiro
+
+        // 2) Preparar lista de caracteres obrigatórios que faltam
+        List<Character> requiredChars = new ArrayList<>();
+        if (!hasUpper) requiredChars.add(UPPER.charAt(random.nextInt(UPPER.length())));
+        if (!hasLower) requiredChars.add(LOWER.charAt(random.nextInt(LOWER.length())));
+        if (!hasDigit) requiredChars.add(DIGITS.charAt(random.nextInt(DIGITS.length())));
+        if (!hasSpecial) requiredChars.add(SPECIAL.charAt(random.nextInt(SPECIAL.length())));
+
+        int remainingPositions = LENGTH - 1;
+        int requiredCount = requiredChars.size();
+
+        List<Character> pool = new ArrayList<>();
+        // 3) Preencher com caracteres aleatórios (exceto os que já garantimos) até sobrar espaço para os obrigatórios
+        for (int i = 0; i < remainingPositions - requiredCount; i++) {
+            pool.add(ALL_ALLOWED.charAt(random.nextInt(ALL_ALLOWED.length())));
+        }
+        // 4) Adicionar os caracteres obrigatórios
+        pool.addAll(requiredChars);
+
+        // 5) Embaralhar os caracteres que irão para as posições 1..9
+        Collections.shuffle(pool, random);
+
+        for (int i = 0; i < pool.size(); i++) {
+            password[i + 1] = pool.get(i);
+        }
+
+        return new String(password);
     }
 
 }

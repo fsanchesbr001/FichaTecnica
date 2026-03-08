@@ -52,3 +52,4 @@ Este projeto visa a criação de uma ficha técnica de um produto, onde é poss�
 - 16/02/2026 - Versão 1.6.9 - Implementado tempo e data de expiração do token.
 - 21/02/2026 - Versão 1.7.0 - Correção do Erro de CORS.
 - 21/02/2026 - Versão 1.7.1 - Adicionados dados para o frontend como nome do usuario e ROLE.
+- 07/03/2026 - Versão 1.7.2 - Adicionado tratamento de erros e gerador de senhas para o primeiro acesso.
