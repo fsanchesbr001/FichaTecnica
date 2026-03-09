@@ -16,7 +16,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 @Service
@@ -46,7 +48,7 @@ public class SegurancaService {
         return cpf;
     }
 
-    public EnviarEmailResponseDTO enviarEmailSeguranca(String email) throws MessagingException {
+    public EnviarEmailSegurancaResponseDTO enviarEmailSeguranca(String email) throws MessagingException {
         logger.info("Preparando email de segurança para: {}", email);
         String cpf = findCPFByEmail(email);
         if (cpf == null) {
@@ -73,13 +75,31 @@ public class SegurancaService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         String dataExpiracaoTokenFormatada = seguranca.getDataExpiracaoToken().format(formatter);
 
-        EnviarEmailResponseDTO enviarEmailResponseDTO = new EnviarEmailResponseDTO(segurancaDTO, dataExpiracaoTokenFormatada);
+        Map<String,Object> variaveisEmail = new HashMap<>();
+        variaveisEmail.put("token", token);
+        variaveisEmail.put("validadeToken", dataExpiracaoTokenFormatada);
+
+
+        EnviarEmailSegurancaResponseDTO enviarEmailSegurancaResponseDTO = new EnviarEmailSegurancaResponseDTO(segurancaDTO, dataExpiracaoTokenFormatada);
 
         logger.info("Enviando email de segurança ");
-        emailService.sendEmail(enviarEmailResponseDTO);
+        emailService.sendEmail(segurancaDTO.email(), Constants.SUBJECT_EMAIL_RECUPERACAO_SENHA,
+                Constants.TEMPLATE_EMAIL_RECUPERACAO_SENHA, variaveisEmail);
         logger.info("Email enviado com sucesso");
 
-        return enviarEmailResponseDTO;
+        return enviarEmailSegurancaResponseDTO;
+    }
+
+    public void enviarEmailPrimeiroAcesso(EnviarEmailPrimeiroAcessoRequestDTO dados) throws MessagingException {
+        logger.info("Preparando email de primeiro acesso para: {}", dados.email());
+        logger.info("Enviando email de primeiro acesso ");
+        Map<String,Object> variaveisEmail = new HashMap<>();
+        variaveisEmail.put("nomeUsuario", dados.nomeUsuario());
+        variaveisEmail.put("senha", dados.senhaAleatoria());
+        emailService.sendEmail(dados.email(), Constants.SUBJECT_EMAIL_PRIMEIRO_ACESSO,
+                Constants.TEMPLATE_EMAIL_PRIMEIRO_ACESSO, variaveisEmail);
+        logger.info("Email enviado com sucesso");
+
     }
 
     private  String gerarTokenSeguranca() {
@@ -162,9 +182,10 @@ public class SegurancaService {
         seguranca.setBloqueado_admin(Boolean.FALSE);
         seguranca.setBloqueado_tentativas(Boolean.FALSE);
         seguranca.setBloqueado_expiracao(Boolean.FALSE);
-        seguranca.setTentativas(5); // Define a nova senha criptografada
+        seguranca.setTentativas(5);
         repository.save(seguranca);
 
+        // Define a nova senha criptografada
         String senhaNormmal = Utilidades.decodeFromBase64(senha);
 
         String senhaCriptografada = gerarSenhaSeguranca(senhaNormmal);
@@ -295,14 +316,16 @@ public class SegurancaService {
         }
     }
 
-    public void registrarUsuario(RegisterDTO registerDTO) {
+    public void registrarUsuario(RegisterDTO registerDTO) throws MessagingException {
         logger.info("Iniciando processo de registro de usuário");
         if (usuarioRepository.findByLogin(registerDTO.login()) != null) {
             logger.warn("Usuário já existe com o login: {}", registerDTO.login());
             throw new FichaTecnicaException("Usuário já existe com o login: " + registerDTO.login());
         }
+        var senhaAleatoria = Utilidades.gerarSenhaAleatoria();
+        var senhaGerada = Utilidades.encriptaSenha(senhaAleatoria);
 
-        Usuario usuario = new Usuario(registerDTO.login(), null, registerDTO.role(),registerDTO.nome());
+        Usuario usuario = new Usuario(registerDTO.login(), senhaGerada, registerDTO.role(),registerDTO.nome());
 
         usuarioRepository.save(usuario);
 
@@ -314,7 +337,7 @@ public class SegurancaService {
         seguranca.setBloqueado_admin(Boolean.FALSE);
         seguranca.setBloqueado_tentativas(Boolean.FALSE);
         seguranca.setBloqueado_expiracao(Boolean.FALSE);
-        seguranca.setTentativas(null); // Define o número de tentativas
+        seguranca.setTentativas(5); // Define o número de tentativas
         seguranca.setDataExpiracaoSenha(null); // Define a data de expiração da senha
         seguranca.setDataExpiracaoToken(null); // Limpa a data de expiração do token
         seguranca.setTokenSeguranca(null); // Limpa o token de segurança
@@ -323,6 +346,9 @@ public class SegurancaService {
 
         logger.info("Usuário registrado com sucesso: {}", usuario.getLogin());
 
+        // TODO: Enviar email com a senha gerada para o usuário
+        EnviarEmailPrimeiroAcessoRequestDTO emailDTO = new EnviarEmailPrimeiroAcessoRequestDTO(registerDTO.login(), registerDTO.nome(), senhaAleatoria);
+        this.enviarEmailPrimeiroAcesso(emailDTO);
     }
 
     public void excluirUsuario(String email) {
