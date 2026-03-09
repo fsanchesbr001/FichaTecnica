@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Ollivander Café</title>
+</head>
+<body>
+<!-- Adiciona a imagem no topo -->
+<div style="text-align: center;">
+    <img src="https://fabriciosanches.com/assets/img/logos/LogoTransp.png" alt="Logo Ollivander Café" style="max-width: 200px;max-height: 200px;">
+</div>
+<h1>Primeiro Acesso</h1>
+    <section>
+        <h2><b><b th:text="${nomeUsuario}">nomeUsuario</b></b></h2>
+        <p>Seja muito bem vindo(a) ao sistema de Ficha Técnica Ollivander. Este e-mail traz informações importantes.<br></p>
+        <p>siga as instruções abaixo:</p>
+        <p>01-Na tela de login do sistema de Ficha Técnica Ollivander, informe seu e-mail cadastrado.</p>
+        <p>02-Informe a Senha <b th:text="${senha}">senha</b></p>
+        <p>03-Clique em <b>Acessar</b></p>
+        <p>Esta senha está expirada e você será guiado no processo para cadastrar uma nova senha.</p>
+        <p>Um abraço</p>
+        <p>Equipe Ollivander Café</p>
+    </section>
+</body>
+</html>

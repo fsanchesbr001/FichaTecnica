@@ -1,7 +1,5 @@
 package com.fabriciosanches.fichatecnica.controllers;
 
-import com.fabriciosanches.fichatecnica.constants.Constants;
-import com.fabriciosanches.fichatecnica.domains.Seguranca;
 import com.fabriciosanches.fichatecnica.dtos.*;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.services.SegurancaService;
@@ -12,8 +10,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("ficha-tecnica")
@@ -27,15 +23,15 @@ public class SegurancaController {
         this.segurancaService = segurancaService;
     }
 
-    //Testado
+    // Segurança: endpoints relacionados a envio de email de segurança e troca de senha
     @PreAuthorize("hasAnyRole('SYSTEM', 'ADMIN')")
-    @PostMapping("/enviar-email")
+    @PostMapping("/enviar-email-seguranca")
     @Transactional
-    public ResponseEntity<EnviarEmailResponseDTO> enviarEmail(@RequestBody EnviarEmailRequestDTO email) {
+    public ResponseEntity<EnviarEmailSegurancaResponseDTO> enviarEmailSeguranca(@RequestBody EnviarEmailRequestDTO email) {
         logger.info("Inicio do método enviarEmail");
         logger.info("Parâmetros de entrada: {}", email);
         try {
-            EnviarEmailResponseDTO enviarEmailResponseDTO = segurancaService.enviarEmailSeguranca(email.email());
+            EnviarEmailSegurancaResponseDTO enviarEmailResponseDTO = segurancaService.enviarEmailSeguranca(email.email());
             logger.info("Email de segurança enviado com sucesso");
             logger.info("Fim do método enviarEmail");
             return ResponseEntity.ok(enviarEmailResponseDTO);
@@ -49,7 +45,27 @@ public class SegurancaController {
         }
     }
 
-    //Testado
+    @PreAuthorize("hasAnyRole('SYSTEM', 'ADMIN')")
+    @PostMapping("/enviar-email-primeiro-acesso")
+    @Transactional
+    public ResponseEntity<Void> enviarEmailPrimeiroAcesso(@RequestBody EnviarEmailPrimeiroAcessoRequestDTO dados) {
+        logger.info("Inicio do método enviarEmailPrimeiroAcesso");
+        logger.info("Parâmetros de entrada: {}", dados);
+        try {
+            segurancaService.enviarEmailPrimeiroAcesso(dados);
+            logger.info("Email de primeiro acesso enviado com sucesso");
+            logger.info("Fim do método enviarEmailPrimeiroAcesso");
+            return ResponseEntity.ok().build();
+        }
+        catch (FichaTecnicaException e){
+            logger.error("Erro ao enviar Email de primeiro acesso", e);
+            return ResponseEntity.badRequest().build();
+        } catch (MessagingException e) {
+            logger.error("Erro de Messaging ", e);
+            throw new RuntimeException(e);
+        }
+    }
+
     @PreAuthorize("hasAnyRole('SYSTEM', 'ADMIN')")
     @PostMapping("/trocar-senha")
     @Transactional
@@ -68,135 +84,4 @@ public class SegurancaController {
         }
     }
 
-    //Testado
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/bloqueio-administrativo")
-    @Transactional
-    public ResponseEntity<BloqueiosResponseDTO> bloqueioAdministrativo(@RequestBody BloqueiosRequestDTO bloqueiosRequestDTO) {
-        logger.info("Inicio do método bloqueioAdministrativo");
-        logger.info("Parâmetros de entrada: {}", bloqueiosRequestDTO);
-        try {
-            BloqueiosResponseDTO bloqueiosResponseDTO =  segurancaService.bloqueioAdmSeguranca(bloqueiosRequestDTO);
-            logger.info("Bloqueio administrativo realizado com sucesso");
-            logger.info("Fim do método bloqueioAdministrativo");
-            return ResponseEntity.ok(bloqueiosResponseDTO);
-        } catch (FichaTecnicaException e) {
-            logger.error("Erro ao realizar Bloqueio Administrativo", e);
-            return ResponseEntity.badRequest().body(new BloqueiosResponseDTO(Constants.MSG_ERRO_BLOQUEIO));
-        }
-    }
-
-    //Testado
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/desbloqueio-administrativo")
-    @Transactional
-    public ResponseEntity<BloqueiosResponseDTO> desbloqueioAdministrativo(@RequestBody BloqueiosRequestDTO bloqueiosRequestDTO) {
-        logger.info("Inicio do método desbloqueioAdministrativo");
-        logger.info("Parâmetros de entrada: {}", bloqueiosRequestDTO);
-        try {
-            BloqueiosResponseDTO bloqueiosResponseDTO =  segurancaService.desbloqueioAdmSeguranca(bloqueiosRequestDTO);
-            logger.info("Desbloqueio administrativo realizado com sucesso");
-            logger.info("Fim do método desbloqueioAdministrativo");
-            return ResponseEntity.ok(bloqueiosResponseDTO);
-        } catch (FichaTecnicaException e) {
-            logger.error("Erro ao realizar Desbloqueio Administrativo", e);
-            return ResponseEntity.badRequest().body(new BloqueiosResponseDTO(Constants.MSG_ERRO_BLOQUEIO));
-        }
-    }
-
-    //Testado
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/registrar-usuario")
-    @Transactional
-    public ResponseEntity<?> registrarUsuario(@RequestBody RegisterDTO dados) {
-        logger.info("Inicio do método registrarUsuario");
-        logger.info("Parâmetros de entrada: {}", dados);
-        try {
-            segurancaService.registrarUsuario(dados);
-            logger.info("Usuário registrado com sucesso");
-            logger.info("Fim do método registrarUsuario");
-            return ResponseEntity.ok().build();
-        } catch (FichaTecnicaException e) {
-            logger.error("Erro ao registrar usuário", e);
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    //Testado
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/excluir-usuario")
-    @Transactional
-    public ResponseEntity<?> excluirUsuario(@RequestBody BloqueiosRequestDTO dados) {
-        logger.info("Inicio do método excluirUsuario");
-        logger.info("Parâmetros de entrada: {}", dados);
-        try {
-            segurancaService.excluirUsuario(dados.email());
-            logger.info("Usuário excluído com sucesso");
-            logger.info("Fim do método excluirUsuario");
-            return ResponseEntity.ok().build();
-        } catch (FichaTecnicaException e) {
-            logger.error("Erro ao excluir usuário", e);
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-    //Testado
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/resetar-senha")
-    @Transactional
-    public ResponseEntity<?> resetarSenhaUsuario(@RequestBody BloqueiosRequestDTO dados) {
-        logger.info("Inicio do método resetarSenhaUsuario");
-        logger.info("Parâmetros de entrada: {}", dados);
-        try {
-            segurancaService.expirarSenha(dados.email());
-            logger.info("Senha do usuário expirada com sucesso");
-            logger.info("Fim do método resetarSenhaUsuario");
-            return ResponseEntity.ok().build();
-        } catch (FichaTecnicaException e) {
-            logger.error("Erro ao resetar senha do usuário", e);
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    @GetMapping("/listar-todos-usuarios")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<SegurancaDTO>> listarTodosUsuarios() {
-        logger.info("Inicio do método listarTodosUsuarios");
-        try {
-            List<Seguranca> response = segurancaService.findAll();
-            logger.info("Lista de usuários obtida com sucesso");
-            if(response.isEmpty()) {
-                logger.info("Nenhum usuário encontrado");
-                return ResponseEntity.noContent().build();
-            }
-            List<SegurancaDTO> segurancaDTOList = response.stream()
-                    .map(SegurancaDTO::new)
-                    .toList();
-            logger.info("Fim do método listarTodosUsuarios");
-            return ResponseEntity.ok(segurancaDTOList);
-        } catch (FichaTecnicaException e) {
-            logger.error("Erro ao listar usuários", e);
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/buscar-usuario/{email}")
-    public ResponseEntity<SegurancaDTO> buscarUsuarioPorEmail(@PathVariable String email) {
-        logger.info("Inicio do método buscarUsuarioPorEmail");
-        logger.info("Parâmetro de entrada: {}", email);
-        try {
-            Seguranca seguranca = segurancaService.findByEmail(email);
-            if (seguranca == null) {
-                logger.warn("Usuário não encontrado para o email: {}", email);
-                return ResponseEntity.notFound().build();
-            }
-            SegurancaDTO segurancaDTO = new SegurancaDTO(seguranca);
-            logger.info("Usuário encontrado com sucesso");
-            logger.info("Fim do método buscarUsuarioPorEmail");
-            return ResponseEntity.ok(segurancaDTO);
-        } catch (FichaTecnicaException e) {
-            logger.error("Erro ao buscar usuário por email", e);
-            return ResponseEntity.badRequest().build();
-        }
-    }
 }

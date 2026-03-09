@@ -1,6 +1,5 @@
 package com.fabriciosanches.fichatecnica.mail;
 
-import com.fabriciosanches.fichatecnica.dtos.EnviarEmailResponseDTO;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.apache.logging.log4j.LogManager;
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -20,9 +20,6 @@ public class EmailService {
 
     private static final Logger logger = LogManager.getLogger(EmailService.class);
 
-    private static final String TEMPLATE_EMAIL="trocasenha";
-
-    private static final String EMAIL_SUBJECT="Recuperação de senha - Ficha Técnica - Ollivander Café";
 
     private final Environment environment;
 
@@ -37,20 +34,19 @@ public class EmailService {
         this.templateEngine = templateEngine;
     }
 
-    public void sendEmail(EnviarEmailResponseDTO dadosContato) throws MessagingException {
+    public void sendEmail(String emailAddress, String subjectEmail, String templateEmail,
+                          Map<String,Object> variaveisEmail) throws MessagingException {
         logger.info("Inicio do método sendEmail");
         final MimeMessage mimeMessage = this.mailSender.createMimeMessage();
         final MimeMessageHelper email = new MimeMessageHelper(mimeMessage,true,"UTF-8");
 
-        email.setTo(dadosContato.email());
-        email.setSubject(EMAIL_SUBJECT);
+        email.setTo(emailAddress);
+        email.setSubject(subjectEmail);
         email.setFrom(Objects.requireNonNull(environment.getProperty("ficha-tecnica.mail.from")));
 
-        final Context ctx = new Context(LocaleContextHolder.getLocale());
-        ctx.setVariable("token",dadosContato.tokenSeguranca());
-        ctx.setVariable("validadeToken",dadosContato.dataExpiracaoToken());
+        final Context ctx = new Context(LocaleContextHolder.getLocale(), variaveisEmail);
 
-        final String htmlContent = this.templateEngine.process(TEMPLATE_EMAIL, ctx);
+        final String htmlContent = this.templateEngine.process(templateEmail, ctx);
         email.setText(htmlContent, true);
 
         try {

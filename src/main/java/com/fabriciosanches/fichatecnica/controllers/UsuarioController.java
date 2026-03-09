@@ -1,0 +1,206 @@
+package com.fabriciosanches.fichatecnica.controllers;
+
+import com.fabriciosanches.fichatecnica.constants.Constants;
+import com.fabriciosanches.fichatecnica.domains.Seguranca;
+import com.fabriciosanches.fichatecnica.dtos.BloqueiosRequestDTO;
+import com.fabriciosanches.fichatecnica.dtos.BloqueiosResponseDTO;
+import com.fabriciosanches.fichatecnica.dtos.SegurancaDTO;
+import com.fabriciosanches.fichatecnica.dtos.RegisterDTO;
+import com.fabriciosanches.fichatecnica.dtos.UserRolesDTO;
+import com.fabriciosanches.fichatecnica.dtos.RoleOptionDTO;
+import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.services.SegurancaService;
+import com.fabriciosanches.fichatecnica.enums.UserRole;
+import jakarta.mail.MessagingException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import jakarta.transaction.Transactional;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+@RestController
+@RequestMapping("ficha-tecnica/usuarios")
+public class UsuarioController {
+
+    private static final Logger logger = LogManager.getLogger(UsuarioController.class);
+
+    private final SegurancaService segurancaService;
+
+    public UsuarioController(SegurancaService segurancaService) {
+        this.segurancaService = segurancaService;
+    }
+
+    /**
+     * Retorna a lista de roles disponíveis como objetos { value, label, labelKey }.
+     * - value: nome da enum (ex: ADMIN)
+     * - label: label amigável em pt-BR (ex: Administrador)
+     * - labelKey: chave para i18n (ex: role.ADMIN)
+     * A lista é ordenada alfabeticamente pelo atributo label.
+     */
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/roles")
+    public ResponseEntity<UserRolesDTO> listarRoles() {
+        logger.info("Inicio do método listarRoles - UsuarioController");
+        try {
+            // Mapeamento default de label em pt-BR; frontend pode usar labelKey para i18n
+            Map<UserRole, String> defaultLabels = Map.of(
+                    UserRole.ADMIN, "Administrador",
+                    UserRole.USER, "Usuário",
+                    UserRole.SYSTEM, "Sistema"
+            );
+
+            List<RoleOptionDTO> options = Stream.of(UserRole.values())
+                    .map(r -> new RoleOptionDTO(r.name(), defaultLabels.getOrDefault(r, r.name()), "role." + r.name()))
+                    .sorted((a, b) -> a.label().compareToIgnoreCase(b.label()))
+                    .collect(Collectors.toList());
+
+            UserRolesDTO dto = new UserRolesDTO(options);
+            logger.info("Fim do método listarRoles - UsuarioController");
+            return ResponseEntity.ok(dto);
+        } catch (Exception e) {
+            logger.error("Erro ao listar roles", e);
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    //Testado
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/registrar-usuario")
+    @Transactional
+    public ResponseEntity<?> registrarUsuario(@RequestBody RegisterDTO dados) {
+        logger.info("Inicio do método registrarUsuario - UsuarioController");
+        logger.info("Parâmetros de entrada: {}", dados);
+        try {
+            segurancaService.registrarUsuario(dados);
+            logger.info("Usuário registrado com sucesso");
+            logger.info("Fim do método registrarUsuario");
+            return ResponseEntity.ok().build();
+        } catch (FichaTecnicaException e) {
+            logger.error("Erro ao registrar usuário", e);
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    //Testado
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/excluir-usuario")
+    @Transactional
+    public ResponseEntity<?> excluirUsuario(@RequestBody BloqueiosRequestDTO dados) {
+        logger.info("Inicio do método excluirUsuario - UsuarioController");
+        logger.info("Parâmetros de entrada: {}", dados);
+        try {
+            segurancaService.excluirUsuario(dados.email());
+            logger.info("Usuário excluído com sucesso");
+            logger.info("Fim do método excluirUsuario");
+            return ResponseEntity.ok().build();
+        } catch (FichaTecnicaException e) {
+            logger.error("Erro ao excluir usuário", e);
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    //Testado
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/resetar-senha")
+    @Transactional
+    public ResponseEntity<?> resetarSenhaUsuario(@RequestBody BloqueiosRequestDTO dados) {
+        logger.info("Inicio do método resetarSenhaUsuario - UsuarioController");
+        logger.info("Parâmetros de entrada: {}", dados);
+        try {
+            segurancaService.expirarSenha(dados.email());
+            logger.info("Senha do usuário expirada com sucesso");
+            logger.info("Fim do método resetarSenhaUsuario");
+            return ResponseEntity.ok().build();
+        } catch (FichaTecnicaException e) {
+            logger.error("Erro ao resetar senha do usuário", e);
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    //Testado
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/bloqueio-administrativo")
+    @Transactional
+    public ResponseEntity<BloqueiosResponseDTO> bloqueioAdministrativo(@RequestBody BloqueiosRequestDTO bloqueiosRequestDTO) {
+        logger.info("Inicio do método bloqueioAdministrativo - UsuarioController");
+        logger.info("Parâmetros de entrada: {}", bloqueiosRequestDTO);
+        try {
+            BloqueiosResponseDTO bloqueiosResponseDTO =  segurancaService.bloqueioAdmSeguranca(bloqueiosRequestDTO);
+            logger.info("Bloqueio administrativo realizado com sucesso");
+            logger.info("Fim do método bloqueioAdministrativo");
+            return ResponseEntity.ok(bloqueiosResponseDTO);
+        } catch (FichaTecnicaException e) {
+            logger.error("Erro ao realizar Bloqueio Administrativo", e);
+            return ResponseEntity.badRequest().body(new BloqueiosResponseDTO(Constants.MSG_ERRO_BLOQUEIO));
+        }
+    }
+
+    //Testado
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/desbloqueio-administrativo")
+    @Transactional
+    public ResponseEntity<BloqueiosResponseDTO> desbloqueioAdministrativo(@RequestBody BloqueiosRequestDTO bloqueiosRequestDTO) {
+        logger.info("Inicio do método desbloqueioAdministrativo - UsuarioController");
+        logger.info("Parâmetros de entrada: {}", bloqueiosRequestDTO);
+        try {
+            BloqueiosResponseDTO bloqueiosResponseDTO =  segurancaService.desbloqueioAdmSeguranca(bloqueiosRequestDTO);
+            logger.info("Desbloqueio administrativo realizado com sucesso");
+            logger.info("Fim do método desbloqueioAdministrativo");
+            return ResponseEntity.ok(bloqueiosResponseDTO);
+        } catch (FichaTecnicaException e) {
+            logger.error("Erro ao realizar Desbloqueio Administrativo", e);
+            return ResponseEntity.badRequest().body(new BloqueiosResponseDTO(Constants.MSG_ERRO_BLOQUEIO));
+        }
+    }
+
+    @GetMapping("/listar-todos-usuarios")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<SegurancaDTO>> listarTodosUsuarios() {
+        logger.info("Inicio do método listarTodosUsuarios - UsuarioController");
+        try {
+            List<Seguranca> response = segurancaService.findAll();
+            logger.info("Lista de usuários obtida com sucesso");
+            if(response.isEmpty()) {
+                logger.info("Nenhum usuário encontrado");
+                return ResponseEntity.noContent().build();
+            }
+            List<SegurancaDTO> segurancaDTOList = response.stream()
+                    .map(SegurancaDTO::new)
+                    .toList();
+            logger.info("Fim do método listarTodosUsuarios");
+            return ResponseEntity.ok(segurancaDTOList);
+        } catch (FichaTecnicaException e) {
+            logger.error("Erro ao listar usuários", e);
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/buscar-usuario/{email}")
+    public ResponseEntity<SegurancaDTO> buscarUsuarioPorEmail(@PathVariable String email) {
+        logger.info("Inicio do método buscarUsuarioPorEmail - UsuarioController");
+        logger.info("Parâmetro de entrada: {}", email);
+        try {
+            Seguranca seguranca = segurancaService.findByEmail(email);
+            if (seguranca == null) {
+                logger.warn("Usuário não encontrado para o email: {}", email);
+                return ResponseEntity.notFound().build();
+            }
+            SegurancaDTO segurancaDTO = new SegurancaDTO(seguranca);
+            logger.info("Usuário encontrado com sucesso");
+            logger.info("Fim do método buscarUsuarioPorEmail");
+            return ResponseEntity.ok(segurancaDTO);
+        } catch (FichaTecnicaException e) {
+            logger.error("Erro ao buscar usuário por email", e);
+            return ResponseEntity.badRequest().build();
+        }
+    }
+}
