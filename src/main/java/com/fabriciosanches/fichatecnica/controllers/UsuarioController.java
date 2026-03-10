@@ -1,13 +1,12 @@
 package com.fabriciosanches.fichatecnica.controllers;
 
 import com.fabriciosanches.fichatecnica.constants.Constants;
-import com.fabriciosanches.fichatecnica.domains.Seguranca;
 import com.fabriciosanches.fichatecnica.dtos.BloqueiosRequestDTO;
 import com.fabriciosanches.fichatecnica.dtos.BloqueiosResponseDTO;
-import com.fabriciosanches.fichatecnica.dtos.SegurancaDTO;
 import com.fabriciosanches.fichatecnica.dtos.RegisterDTO;
 import com.fabriciosanches.fichatecnica.dtos.UserRolesDTO;
 import com.fabriciosanches.fichatecnica.dtos.RoleOptionDTO;
+import com.fabriciosanches.fichatecnica.dtos.UsuarioListagemDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.services.SegurancaService;
 import com.fabriciosanches.fichatecnica.enums.UserRole;
@@ -163,20 +162,17 @@ public class UsuarioController {
 
     @GetMapping("/listar-todos-usuarios")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<SegurancaDTO>> listarTodosUsuarios() {
+    public ResponseEntity<List<UsuarioListagemDTO>> listarTodosUsuarios() {
         logger.info("Inicio do método listarTodosUsuarios - UsuarioController");
         try {
-            List<Seguranca> response = segurancaService.findAll();
+            List<UsuarioListagemDTO> response = segurancaService.findAllComDadosUsuario();
             logger.info("Lista de usuários obtida com sucesso");
-            if(response.isEmpty()) {
+            if (response.isEmpty()) {
                 logger.info("Nenhum usuário encontrado");
                 return ResponseEntity.noContent().build();
             }
-            List<SegurancaDTO> segurancaDTOList = response.stream()
-                    .map(SegurancaDTO::new)
-                    .toList();
             logger.info("Fim do método listarTodosUsuarios");
-            return ResponseEntity.ok(segurancaDTOList);
+            return ResponseEntity.ok(response);
         } catch (FichaTecnicaException e) {
             logger.error("Erro ao listar usuários", e);
             return ResponseEntity.badRequest().build();
@@ -185,19 +181,18 @@ public class UsuarioController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/buscar-usuario/{email}")
-    public ResponseEntity<SegurancaDTO> buscarUsuarioPorEmail(@PathVariable String email) {
+    public ResponseEntity<UsuarioListagemDTO> buscarUsuarioPorEmail(@PathVariable String email) {
         logger.info("Inicio do método buscarUsuarioPorEmail - UsuarioController");
         logger.info("Parâmetro de entrada: {}", email);
         try {
-            Seguranca seguranca = segurancaService.findByEmail(email);
-            if (seguranca == null) {
+            UsuarioListagemDTO usuarioListagemDTO = segurancaService.findByEmailComDadosUsuario(email);
+            if (usuarioListagemDTO == null) {
                 logger.warn("Usuário não encontrado para o email: {}", email);
                 return ResponseEntity.notFound().build();
             }
-            SegurancaDTO segurancaDTO = new SegurancaDTO(seguranca);
             logger.info("Usuário encontrado com sucesso");
             logger.info("Fim do método buscarUsuarioPorEmail");
-            return ResponseEntity.ok(segurancaDTO);
+            return ResponseEntity.ok(usuarioListagemDTO);
         } catch (FichaTecnicaException e) {
             logger.error("Erro ao buscar usuário por email", e);
             return ResponseEntity.badRequest().build();

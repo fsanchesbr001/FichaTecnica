@@ -414,4 +414,52 @@ public class SegurancaService {
         }
         return dadosSeguranca;
     }
+
+    /**
+     * Retorna o registro de segurança de um único usuário enriquecido com
+     * os campos {@code nome} e {@code role} provenientes da tabela {@code usuarios}.
+     * A junção é feita pelo campo {@code email} (seguranca) = {@code login} (usuarios).
+     *
+     * @param email e-mail do usuário a ser buscado
+     * @return {@link UsuarioListagemDTO} com dados combinados, ou {@code null} se não encontrado.
+     */
+    public UsuarioListagemDTO findByEmailComDadosUsuario(String email) {
+        logger.info("Buscando usuário com dados de segurança e perfil para o email: {}", email);
+        Seguranca seguranca = repository.findByEmail(email);
+        if (seguranca == null) {
+            logger.warn("Dados de segurança não encontrados para o email: {}", email);
+            return null;
+        }
+        Usuario usuario = usuarioRepository.findByLoginUsuario(email);
+        if (usuario == null) {
+            logger.warn("Usuário não encontrado na tabela usuarios para o email: {}", email);
+        }
+        return new UsuarioListagemDTO(seguranca, usuario);
+    }
+
+    /**
+     * Retorna a lista de todos os registros de segurança enriquecidos com
+     * os campos {@code nome} e {@code role} provenientes da tabela {@code usuarios}.
+     * A junção é feita pelo campo {@code email} (seguranca) = {@code login} (usuarios).
+     *
+     * @return lista de {@link UsuarioListagemDTO} com dados combinados das duas tabelas.
+     */
+    public List<UsuarioListagemDTO> findAllComDadosUsuario() {
+        logger.info("Buscando todos os usuários com dados de segurança e perfil");
+        List<Seguranca> dadosSeguranca = repository.findAll();
+        if (dadosSeguranca.isEmpty()) {
+            logger.info("Nenhum dado de segurança encontrado");
+            return List.of();
+        }
+        logger.info("Total de registros de segurança encontrados: {}", dadosSeguranca.size());
+        return dadosSeguranca.stream()
+                .map(seguranca -> {
+                    Usuario usuario = usuarioRepository.findByLoginUsuario(seguranca.getEmail());
+                    if (usuario == null) {
+                        logger.warn("Usuário não encontrado na tabela usuarios para o email: {}", seguranca.getEmail());
+                    }
+                    return new UsuarioListagemDTO(seguranca, usuario);
+                })
+                .toList();
+    }
 }

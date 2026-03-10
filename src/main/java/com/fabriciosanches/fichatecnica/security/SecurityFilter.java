@@ -30,9 +30,15 @@ public class SecurityFilter extends OncePerRequestFilter {
     }
 
     @Override
-
     protected void doFilterInternal(@NonNull HttpServletRequest  request, @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
+
+        // Preflight OPTIONS: deixar passar sem validar token para que o CORS funcione
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         var tokenJWT = recuperarToken(request);
         if(tokenJWT!=null){
             // Validar se o token está expirado
