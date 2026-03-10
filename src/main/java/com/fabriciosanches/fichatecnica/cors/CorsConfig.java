@@ -16,6 +16,7 @@ public class CorsConfig implements WebMvcConfigurer {
     @Value("${site.origin.allowed:http://localhost:4200,http://localhost:3000}")
     private String ALLOWED_ORIGINS;
 
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         String[] origins = ALLOWED_ORIGINS.split(",");
