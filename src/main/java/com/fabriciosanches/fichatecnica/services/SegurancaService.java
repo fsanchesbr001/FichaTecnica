@@ -438,6 +438,45 @@ public class SegurancaService {
     }
 
     /**
+     * Atualiza os campos de controle de acesso na tabela {@code seguranca} e os campos
+     * {@code nome} e {@code role} na tabela {@code usuarios} para o email informado.
+     *
+     * @param email  e-mail do usuário a ser atualizado
+     * @param dados  DTO com os novos valores
+     * @return {@link UsuarioListagemDTO} com os dados atualizados
+     */
+    public UsuarioListagemDTO atualizarUsuario(String email, AtualizarUsuarioRequestDTO dados) {
+        logger.info("Iniciando atualização do usuário: {}", email);
+
+        Seguranca seguranca = repository.findByEmail(email);
+        if (seguranca == null) {
+            logger.warn("Dados de segurança não encontrados para o email: {}", email);
+            throw new FichaTecnicaException("Usuário não encontrado: " + email);
+        }
+
+        Usuario usuario = usuarioRepository.findByLoginUsuario(email);
+        if (usuario == null) {
+            logger.warn("Usuário não encontrado na tabela usuarios para o email: {}", email);
+            throw new FichaTecnicaException("Usuário não encontrado na tabela usuarios: " + email);
+        }
+
+        // Atualiza tabela seguranca
+        if (dados.bloqueado_admin() != null)      seguranca.setBloqueado_admin(dados.bloqueado_admin());
+        if (dados.bloqueado_tentativas() != null)  seguranca.setBloqueado_tentativas(dados.bloqueado_tentativas());
+        if (dados.bloqueado_expiracao() != null)   seguranca.setBloqueado_expiracao(dados.bloqueado_expiracao());
+        if (dados.primeiro_acesso() != null)       seguranca.setPrimeiro_acesso(dados.primeiro_acesso());
+        repository.save(seguranca);
+
+        // Atualiza tabela usuarios
+        if (dados.nome() != null && !dados.nome().isBlank()) usuario.setNome(dados.nome());
+        if (dados.role() != null)                             usuario.setRole(dados.role());
+        usuarioRepository.save(usuario);
+
+        logger.info("Usuário atualizado com sucesso: {}", email);
+        return new UsuarioListagemDTO(seguranca, usuario);
+    }
+
+    /**
      * Retorna a lista de todos os registros de segurança enriquecidos com
      * os campos {@code nome} e {@code role} provenientes da tabela {@code usuarios}.
      * A junção é feita pelo campo {@code email} (seguranca) = {@code login} (usuarios).

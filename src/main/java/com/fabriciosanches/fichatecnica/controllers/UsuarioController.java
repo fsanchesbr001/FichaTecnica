@@ -1,6 +1,7 @@
 package com.fabriciosanches.fichatecnica.controllers;
 
 import com.fabriciosanches.fichatecnica.constants.Constants;
+import com.fabriciosanches.fichatecnica.dtos.AtualizarUsuarioRequestDTO;
 import com.fabriciosanches.fichatecnica.dtos.BloqueiosRequestDTO;
 import com.fabriciosanches.fichatecnica.dtos.BloqueiosResponseDTO;
 import com.fabriciosanches.fichatecnica.dtos.RegisterDTO;
@@ -157,6 +158,25 @@ public class UsuarioController {
         } catch (FichaTecnicaException e) {
             logger.error("Erro ao realizar Desbloqueio Administrativo", e);
             return ResponseEntity.badRequest().body(new BloqueiosResponseDTO(Constants.MSG_ERRO_BLOQUEIO));
+        }
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/atualizar-usuario/{email}")
+    @Transactional
+    public ResponseEntity<UsuarioListagemDTO> atualizarUsuario(@PathVariable String email,
+                                                               @RequestBody AtualizarUsuarioRequestDTO dados) {
+        logger.info("Inicio do método atualizarUsuario - UsuarioController");
+        logger.info("Parâmetro de entrada - email: {}", email);
+        logger.info("Parâmetros de entrada - body: {}", dados);
+        try {
+            UsuarioListagemDTO atualizado = segurancaService.atualizarUsuario(email, dados);
+            logger.info("Usuário atualizado com sucesso");
+            logger.info("Fim do método atualizarUsuario");
+            return ResponseEntity.ok(atualizado);
+        } catch (FichaTecnicaException e) {
+            logger.error("Erro ao atualizar usuário", e);
+            return ResponseEntity.badRequest().build();
         }
     }
 

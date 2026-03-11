@@ -55,3 +55,4 @@ Este projeto visa a criação de uma ficha técnica de um produto, onde é poss�
 - 07/03/2026 - Versão 1.7.2 - Adicionado tratamento de erros e gerador de senhas para o primeiro acesso.
 - 09/03/2026 - Versão 1.8.0 - Enviando o email de primeiro acesso, após a criação do usuário.
 - 10/03/2026 - Versão 1.8.1 - Adicionado informações de Segurança e melhorando o CORS para chamadas com Authorization.
+- 11/03/2026 - Versão 1.8.2 - Fluxo de Usuario 95% completo (front+backend).
