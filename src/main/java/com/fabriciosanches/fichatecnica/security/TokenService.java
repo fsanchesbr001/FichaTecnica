@@ -94,6 +94,26 @@ public class TokenService {
         return ZoneId.of(tokenTimeZone);
     }
 
+    /**
+     * Extrai o instante de expiração de um token JWT já emitido.
+     *
+     * @param tokenJWT token JWT
+     * @return instante de expiração ou {@code null} se não for possível extrair
+     */
+    public Instant getExpiration(String tokenJWT) {
+        try {
+            var algoritimo = Algorithm.HMAC256(secret);
+            var decoded = JWT.require(algoritimo)
+                    .withIssuer("API Ficha Tecnica")
+                    .build()
+                    .verify(tokenJWT);
+            return decoded.getExpiresAtAsInstant();
+        } catch (JWTVerificationException exception) {
+            logger.warn("Não foi possível extrair expiração do token: {}", exception.getMessage());
+            return null;
+        }
+    }
+
     public boolean validarTokenExpirado(String tokenJWT) {
         try {
             logger.info("Validando expiração do token");
