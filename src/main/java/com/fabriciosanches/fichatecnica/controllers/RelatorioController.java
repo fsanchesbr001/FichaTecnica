@@ -47,7 +47,10 @@ public class RelatorioController {
      *     "nome":  "Nome do Usuário",
      *     "email": "E-mail",
      *     "role":  "Perfil"
-     *   }
+         *   },
+         *   "tipoRelatorio": "LISTA",
+         *   "orientacao": "RETRATO",
+         *   "alternarCores": false
      * }
      * }</pre>
      *
@@ -57,7 +60,7 @@ public class RelatorioController {
      * @param request {@link RelatorioRequestDTO} com os parâmetros do relatório
      * @return PDF como array de bytes com Content-Disposition para download
      */
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'SYSTEM')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/gerar-pdf")
     public ResponseEntity<byte[]> gerarPDF(@RequestBody RelatorioRequestDTO request) {
         logger.info("Início do método gerarPDF – RelatorioController");
