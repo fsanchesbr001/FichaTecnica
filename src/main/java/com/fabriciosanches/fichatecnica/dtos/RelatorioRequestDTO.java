@@ -1,5 +1,8 @@
 package com.fabriciosanches.fichatecnica.dtos;
 
+import com.fabriciosanches.fichatecnica.enums.OrientacaoRelatorio;
+import com.fabriciosanches.fichatecnica.enums.TipoRelatorio;
+
 import java.util.Map;
 
 /**
@@ -15,12 +18,18 @@ import java.util.Map;
  * @param colunas   Mapa <b>ordenado</b> (LinkedHashMap recomendado) que relaciona
  *                  o nome do atributo no JSON ao nome da coluna exibida no relatório.
  *                  Exemplo: {@code { "nome": "Nome do Usuário", "email": "E-mail", "role": "Perfil" }}.
+ * @param tipoRelatorio Tipo do relatório: LISTA ou DETALHE (default LISTA quando null).
+ * @param orientacao Orientacao do relatório: RETRATO ou PAISAGEM (default RETRATO quando null).
+ * @param alternarCores Indica se deve alternar cores nas linhas da LISTA (default false quando null).
  */
 public record RelatorioRequestDTO(
         String jsonData,
         String listPath,
         String titulo,
-        Map<String, String> colunas
+        Map<String, String> colunas,
+        TipoRelatorio tipoRelatorio,
+        OrientacaoRelatorio orientacao,
+        Boolean alternarCores
 ) {
 }
 

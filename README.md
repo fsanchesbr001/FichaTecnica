@@ -58,3 +58,4 @@ Este projeto visa a criação de uma ficha técnica de um produto, onde é poss�
 - 11/03/2026 - Versão 1.8.2 - Fluxo de Usuario 95% completo (front+backend).
 - 12/03/2026 - Versão 1.8.3 - Logout funcionando e tratamento de erros de token expirado.
 - 13/03/2026 - Versão 1.8.4 - Relatorio de usuários funcionando e gerando PDF
+- 14/03/2026 - Versão 1.8.5 - Melhorias no layout do relatório, e Usuario 100% funcional.
