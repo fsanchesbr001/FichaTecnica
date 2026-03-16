@@ -338,7 +338,7 @@ public class SegurancaService {
         seguranca.setBloqueado_tentativas(Boolean.FALSE);
         seguranca.setBloqueado_expiracao(Boolean.FALSE);
         seguranca.setTentativas(5); // Define o número de tentativas
-        seguranca.setDataExpiracaoSenha(null); // Define a data de expiração da senha
+        seguranca.setDataExpiracaoSenha(LocalDateTime.now().plusHours(2)); // Define a data de expiração da senha
         seguranca.setDataExpiracaoToken(null); // Limpa a data de expiração do token
         seguranca.setTokenSeguranca(null); // Limpa o token de segurança
 
@@ -369,6 +369,38 @@ public class SegurancaService {
         }
         usuarioRepository.delete(usuario);
         logger.info("Usuário excluído com sucesso: {}", email);
+    }
+
+    public void primeiroAcesso(String email) throws MessagingException {
+        logger.info("Iniciando fluxo de primeiro acesso para o email: {}", email);
+
+        Seguranca seguranca = findByEmail(email);
+        if (seguranca == null) {
+            logger.warn("Dados de segurança não encontrados para o email: {}", email);
+            throw new FichaTecnicaException(Constants.MSG_DADOS_SEGURANCA_NAO_ENCONTRADOS);
+        }
+
+        Usuario usuario = usuarioRepository.findByLoginUsuario(email);
+        if (usuario == null) {
+            logger.warn("Usuário não encontrado para o email: {}", email);
+            throw new FichaTecnicaException("Usuário não encontrado");
+        }
+
+        String nome = usuario.getNome();
+        String cpfSemPontuacao = seguranca.getCpf() != null
+                ? seguranca.getCpf().replaceAll("\\D", "")
+                : null;
+
+        if (cpfSemPontuacao == null || cpfSemPontuacao.isBlank()) {
+            throw new FichaTecnicaException("CPF inválido para o usuário: " + email);
+        }
+
+        RegisterDTO registerDTO = new RegisterDTO(email, null, usuario.getRole(), nome, cpfSemPontuacao);
+
+        excluirUsuario(email);
+        registrarUsuario(registerDTO);
+
+        logger.info("Fluxo de primeiro acesso concluído para o email: {}", email);
     }
 
     public void expirarSenha(String email) {
