@@ -107,6 +107,25 @@ public class UsuarioController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/primeiro-acesso/{email}")
+    @Transactional
+    public ResponseEntity<?> primeiroAcesso(@PathVariable String email) {
+        logger.info("Inicio do método primeiroAcesso - UsuarioController");
+        logger.info("Parâmetro de entrada - email: {}", email);
+        try {
+            segurancaService.primeiroAcesso(email);
+            logger.info("Fluxo de primeiro acesso executado com sucesso");
+            logger.info("Fim do método primeiroAcesso");
+            return ResponseEntity.ok().build();
+        } catch (FichaTecnicaException e) {
+            logger.error("Erro ao executar primeiro acesso", e);
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     //Testado
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/resetar-senha")
