@@ -218,7 +218,7 @@ public class UsuarioController {
         }
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SYSTEM')")
     @GetMapping("/buscar-usuario/{email}")
     public ResponseEntity<UsuarioListagemDTO> buscarUsuarioPorEmail(@PathVariable String email) {
         logger.info("Inicio do método buscarUsuarioPorEmail - UsuarioController");
