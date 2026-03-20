@@ -63,7 +63,7 @@ public class SegurancaService {
 
         Seguranca seguranca = repository.findByEmail(email);
         seguranca.setTokenSeguranca(token);
-        seguranca.setDataExpiracaoToken(LocalDateTime.now().plusMinutes(90));
+        seguranca.setDataExpiracaoToken(LocalDateTime.now().plusHours(24));
         logger.info("Token de segurança gerado: {}", token);
         repository.save(seguranca);
 

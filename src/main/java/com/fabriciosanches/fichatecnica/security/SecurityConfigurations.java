@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -25,17 +26,35 @@ public class SecurityConfigurations {
     }
 
 
-    private SecurityFilter securityFilter;
+    private final SecurityFilter securityFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
-        return http.csrf(csrf->csrf.disable())
+        return http.csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(ar->ar
+                .exceptionHandling(ex -> ex
+                        // 401 quando não há autenticação (token ausente / inválido)
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(401);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write(
+                                    "{\"error\":\"Não autenticado\",\"message\":\"Token JWT ausente ou inválido. Faça login.\"}");
+                        })
+                        // 403 quando há autenticação mas role insuficiente
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(403);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write(
+                                    "{\"error\":\"Acesso negado\",\"message\":\"Seu perfil não tem permissão para este recurso.\"}");
+                        })
+                )
+                .authorizeHttpRequests(ar -> ar
+                        .requestMatchers("/error").permitAll()
                         .requestMatchers("/images/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS,"/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/ficha-tecnica/login-recuperacao-senha").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

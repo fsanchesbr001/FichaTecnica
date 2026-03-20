@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 public class FichaTecnicaProperty {
     private String originAllowed;
     private  final Mail mail = new Mail();
+    private final SystemUser system = new SystemUser();
 
     @Getter
     @Setter
@@ -21,5 +22,12 @@ public class FichaTecnicaProperty {
         private String username;
         private String password;
         private String from;
+    }
+
+    @Getter
+    @Setter
+    public static class SystemUser{
+        private String username;
+        private String password;
     }
 }
