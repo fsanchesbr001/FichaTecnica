@@ -6,7 +6,9 @@ import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.repository.UnidadeMedidaRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
@@ -52,14 +54,21 @@ public class UnidadeMedidaService {
         return repository.countByName(nome);
     }
 
+    public long findBySigla(String sigla) {
+        return repository.countBySigla(sigla);
+    }
+
     public UnidadeMedidaDTO atualizarUnidade(Long id, UnidadeMedidaDTO novosDados) {
         Optional<UnidadeMedida> unidadeExistente = repository.findById(id);
         if (unidadeExistente.isPresent()) {
             UnidadeMedida unidade = unidadeExistente.get();
+
+            if (repository.countBySiglaAndCodigoNot(novosDados.sigla(), id) > 0) {
+                throw new FichaTecnicaException("Já existe uma unidade de medida com a sigla '" + novosDados.sigla() + "'.");
+            }
+
             unidade.setNome(novosDados.nome());
             unidade.setSigla(novosDados.sigla());
-
-            // Atualize outros campos conforme necessário
             repository.save(unidade);
             return new UnidadeMedidaDTO(unidade);
         } else {
@@ -72,15 +81,22 @@ public class UnidadeMedidaService {
         Objects.requireNonNull(unidade.nome(), "Nome da unidade de medida não pode ser nulo");
         Objects.requireNonNull(unidade.sigla(), "Sigla da unidade de medida não pode ser nula");
 
-        if (findByName(unidade.nome()) > 0) {
-            throw new FichaTecnicaException("Unidade de medida já cadastrada");
+        if (findBySigla(unidade.sigla()) > 0) {
+            throw new FichaTecnicaException("Já existe uma unidade de medida com a sigla '" + unidade.sigla() + "'.");
         }
 
         UnidadeMedida unidadeMedida = new UnidadeMedida(unidade);
         return new UnidadeMedidaDTO(repository.save(unidadeMedida));
     }
 
+    @Transactional
     public void deletarUnidade(Long id) {
-        repository.deleteById(id);
+        try {
+            repository.deleteById(id);
+            repository.flush();
+        } catch (DataIntegrityViolationException e) {
+            logger.error("Violação de FK ao deletar unidade de medida id {}: {}", id, e.getMessage());
+            throw new FichaTecnicaException("FKC-Registro não pode ser deletado. Existem Conversões vinculadas.");
+        }
     }
 }
