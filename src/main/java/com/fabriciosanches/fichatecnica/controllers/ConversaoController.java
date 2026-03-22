@@ -9,6 +9,9 @@ import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.services.ConversaoService;
 import com.fabriciosanches.fichatecnica.services.RelatorioService;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializer;
 import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,10 +21,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 
@@ -29,6 +35,16 @@ import java.util.Map;
 @RequestMapping("ficha-tecnica")
 public class ConversaoController {
     private static final Logger logger = LogManager.getLogger(ConversaoController.class);
+
+    /** Gson com formatação de BigDecimal no padrão brasileiro (ex.: 1.234,56). */
+    private static final Gson GSON_BR = new GsonBuilder()
+            .registerTypeAdapter(BigDecimal.class, (JsonSerializer<BigDecimal>) (src, typeOfSrc, ctx) -> {
+                NumberFormat fmt = NumberFormat.getNumberInstance(new Locale("pt", "BR"));
+                fmt.setMinimumFractionDigits(2);
+                fmt.setMaximumFractionDigits(2);
+                return new JsonPrimitive(fmt.format(src));
+            })
+            .create();
 
     final ConversaoService conversaoService;
     final RelatorioService relatorioService;
@@ -39,11 +55,11 @@ public class ConversaoController {
     }
 
     @GetMapping("/conversoes")
-    public ResponseEntity<List<ConversaoDTO>> buscarLista(){
+    public ResponseEntity<List<ConversaoRelatorioDTO>> buscarLista(){
         logger.info("Inicio do método buscarLista");
         logger.info("Buscando lista de conversões");
         try {
-            List<ConversaoDTO> conversoes = conversaoService.listar();
+            List<ConversaoRelatorioDTO> conversoes = conversaoService.listarParaPdf();
             if (conversoes.isEmpty()) {
                 logger.error("Lista de conversoes não encontrada");
                 return ResponseEntity.noContent().build();
@@ -75,7 +91,6 @@ public class ConversaoController {
     }
 
     @DeleteMapping("/conversoes/{id:[0-9]+}")
-    @Transactional
     public ResponseEntity<Void> apagar(@PathVariable Long id) {
         logger.info("Inicio do método apagar");
         logger.info("Apagando conversoes por id: {}", id);
@@ -142,7 +157,7 @@ public class ConversaoController {
                 return ResponseEntity.noContent().build();
             }
 
-            String jsonData = new Gson().toJson(lista);
+            String jsonData = GSON_BR.toJson(lista);
 
             Map<String, String> colunas = new LinkedHashMap<>();
             colunas.put("unidadeDe",   "De");
@@ -192,11 +207,11 @@ public class ConversaoController {
         try {
             ConversaoRelatorioDTO conversao = conversaoService.buscarPorIdParaPdf(id);
 
-            String jsonData = new Gson().toJson(List.of(conversao));
+            String jsonData = GSON_BR.toJson(List.of(conversao));
 
             Map<String, String> colunas = new LinkedHashMap<>();
-            colunas.put("unidadeDe",   "De");
-            colunas.put("unidadePara", "Para");
+            colunas.put("unidadeDe",   "Unidade De");
+            colunas.put("unidadePara", "Unidade Para");
             colunas.put("operacao",    "Operação");
             colunas.put("valor",       "Valor");
 
