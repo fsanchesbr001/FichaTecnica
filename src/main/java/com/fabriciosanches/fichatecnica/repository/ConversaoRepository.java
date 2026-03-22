@@ -17,21 +17,21 @@ public interface ConversaoRepository extends JpaRepository<Conversao,Long> {
 
     @Query("""
             SELECT new com.fabriciosanches.fichatecnica.dtos.ConversaoRelatorioDTO(
-                ud.nome, up.nome, c.operacao, c.valor)
-            FROM Conversao c
-            JOIN UnidadeMedida ud ON ud.codigo = c.unidadeDe
-            JOIN UnidadeMedida up ON up.codigo = c.unidadePara
+                c.codigo, ud.nome, up.nome, c.operacao, c.valor)
+            FROM Conversao c, UnidadeMedida ud, UnidadeMedida up
+            WHERE ud.codigo = c.unidadeDe
+              AND up.codigo = c.unidadePara
             ORDER BY ud.nome
             """)
     List<ConversaoRelatorioDTO> findAllComNomes();
 
     @Query("""
             SELECT new com.fabriciosanches.fichatecnica.dtos.ConversaoRelatorioDTO(
-                ud.nome, up.nome, c.operacao, c.valor)
-            FROM Conversao c
-            JOIN UnidadeMedida ud ON ud.codigo = c.unidadeDe
-            JOIN UnidadeMedida up ON up.codigo = c.unidadePara
-            WHERE c.codigo = :id
+                c.codigo, ud.nome, up.nome, c.operacao, c.valor)
+            FROM Conversao c, UnidadeMedida ud, UnidadeMedida up
+            WHERE ud.codigo = c.unidadeDe
+              AND up.codigo = c.unidadePara
+              AND c.codigo = :id
             """)
     Optional<ConversaoRelatorioDTO> findByIdComNomes(@Param("id") Long id);
 }

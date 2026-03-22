@@ -517,9 +517,8 @@ public class RelatorioService {
                     float colWidth   = contentWidth / numCols;
 
                     for (int i = 0; i < numCols; i++) {
-                        String label      = columnLabels.get(i);
-                        float  labelWidth = fontBold.getWidth(label, FONT_BODY);
-                        float  labelX     = leftX + i * colWidth + (colWidth - labelWidth) / 2f;
+                        String label  = columnLabels.get(i);
+                        float  labelX = leftX + i * colWidth + CELL_PADDING;
                         canvas.beginText()
                                 .setFontAndSize(fontBold, FONT_BODY)
                                 .moveText(labelX, colHeaderY)

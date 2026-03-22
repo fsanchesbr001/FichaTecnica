@@ -8,6 +8,7 @@ import com.fabriciosanches.fichatecnica.dtos.ConversaoValoresDTO;
 import com.fabriciosanches.fichatecnica.dtos.ItemDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.repository.ConversaoRepository;
+import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -97,6 +98,7 @@ public class ConversaoService {
         return new ConversaoDTO(repository.save(novaConversao));
     }
 
+    @Transactional
     public void deletarConversao(Long id) {
         repository.deleteById(id);
     }
