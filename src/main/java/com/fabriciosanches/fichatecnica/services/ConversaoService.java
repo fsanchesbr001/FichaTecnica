@@ -3,6 +3,7 @@ package com.fabriciosanches.fichatecnica.services;
 import com.fabriciosanches.fichatecnica.domains.Conversao;
 import com.fabriciosanches.fichatecnica.domains.Item;
 import com.fabriciosanches.fichatecnica.dtos.ConversaoDTO;
+import com.fabriciosanches.fichatecnica.dtos.ConversaoRelatorioDTO;
 import com.fabriciosanches.fichatecnica.dtos.ConversaoValoresDTO;
 import com.fabriciosanches.fichatecnica.dtos.ItemDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
@@ -45,6 +46,23 @@ public class ConversaoService {
     public ConversaoDTO buscarPorId(Long id) {
         return repository.findById(id)
                 .map(ConversaoDTO::new)
+                .orElseThrow(() -> new FichaTecnicaException("Conversão com ID " + id + " não encontrada"));
+    }
+
+    /**
+     * Retorna todas as conversões com os nomes das unidades de medida resolvidos via JPQL JOIN.
+     * Usado exclusivamente na geração de relatórios PDF.
+     */
+    public List<ConversaoRelatorioDTO> listarParaPdf() {
+        return repository.findAllComNomes();
+    }
+
+    /**
+     * Retorna uma conversão com os nomes das unidades de medida resolvidos via JPQL JOIN.
+     * Usado exclusivamente na geração de relatórios PDF.
+     */
+    public ConversaoRelatorioDTO buscarPorIdParaPdf(Long id) {
+        return repository.findByIdComNomes(id)
                 .orElseThrow(() -> new FichaTecnicaException("Conversão com ID " + id + " não encontrada"));
     }
 

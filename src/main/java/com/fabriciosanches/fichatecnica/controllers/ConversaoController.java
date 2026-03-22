@@ -1,15 +1,28 @@
 package com.fabriciosanches.fichatecnica.controllers;
 
 import com.fabriciosanches.fichatecnica.dtos.ConversaoDTO;
+import com.fabriciosanches.fichatecnica.dtos.ConversaoRelatorioDTO;
+import com.fabriciosanches.fichatecnica.dtos.RelatorioRequestDTO;
+import com.fabriciosanches.fichatecnica.enums.OrientacaoRelatorio;
+import com.fabriciosanches.fichatecnica.enums.TipoRelatorio;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.services.ConversaoService;
+import com.fabriciosanches.fichatecnica.services.RelatorioService;
+import com.google.gson.Gson;
 import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -18,9 +31,11 @@ public class ConversaoController {
     private static final Logger logger = LogManager.getLogger(ConversaoController.class);
 
     final ConversaoService conversaoService;
+    final RelatorioService relatorioService;
 
-    public ConversaoController(ConversaoService conversaoService) {
-        this.conversaoService =conversaoService;
+    public ConversaoController(ConversaoService conversaoService, RelatorioService relatorioService) {
+        this.conversaoService = conversaoService;
+        this.relatorioService = relatorioService;
     }
 
     @GetMapping("/conversoes")
@@ -43,7 +58,7 @@ public class ConversaoController {
         }
     }
 
-    @GetMapping("/conversoes/{id}")
+    @GetMapping("/conversoes/{id:[0-9]+}")
     public ResponseEntity<ConversaoDTO> buscarPorId(@PathVariable Long id){
         logger.info("Inicio do método buscarPorId");
         logger.info("Buscando conversoes por id: {}", id);
@@ -59,7 +74,7 @@ public class ConversaoController {
         }
     }
 
-    @DeleteMapping("/conversoes/{id}")
+    @DeleteMapping("/conversoes/{id:[0-9]+}")
     @Transactional
     public ResponseEntity<Void> apagar(@PathVariable Long id) {
         logger.info("Inicio do método apagar");
@@ -76,7 +91,7 @@ public class ConversaoController {
         }
     }
 
-    @PutMapping("/conversoes/{id}")
+    @PutMapping("/conversoes/{id:[0-9]+}")
     @Transactional
     public ResponseEntity<ConversaoDTO> atualizarConversao(@PathVariable Long id, @RequestBody ConversaoDTO conversao) {
         logger.info("Inicio do método atualizarConversao");
@@ -110,4 +125,109 @@ public class ConversaoController {
         }
     }
 
+    /**
+     * Gera um PDF com a lista completa de Conversões ordenadas por Unidade De.
+     * Os nomes das unidades são resolvidos via JPQL JOIN (sem chamadas extras ao serviço).
+     * Colunas exibidas: Unidade De, Unidade Para, Operação e Valor.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/conversoes/gerar-pdf-lista")
+    public ResponseEntity<byte[]> gerarPdfLista() {
+        logger.info("Início do método gerarPdfLista – ConversaoController");
+        try {
+            List<ConversaoRelatorioDTO> lista = conversaoService.listarParaPdf();
+
+            if (lista.isEmpty()) {
+                logger.warn("Nenhuma conversão encontrada para gerar o relatório");
+                return ResponseEntity.noContent().build();
+            }
+
+            String jsonData = new Gson().toJson(lista);
+
+            Map<String, String> colunas = new LinkedHashMap<>();
+            colunas.put("unidadeDe",   "De");
+            colunas.put("unidadePara", "Para");
+            colunas.put("operacao",    "Operação");
+            colunas.put("valor",       "Valor");
+
+            RelatorioRequestDTO request = new RelatorioRequestDTO(
+                    jsonData, "",
+                    "Lista de Conversões",
+                    colunas,
+                    TipoRelatorio.LISTA,
+                    OrientacaoRelatorio.RETRATO,
+                    true
+            );
+
+            byte[] pdfBytes = relatorioService.gerarRelatorioPDF(request);
+
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss"));
+            String filename = "Lista-Conversoes-" + timestamp + ".pdf";
+
+            logger.info("PDF de lista de Conversões gerado com sucesso – arquivo: '{}'", filename);
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(pdfBytes);
+
+        } catch (IllegalArgumentException e) {
+            logger.error("Parâmetros inválidos para geração do PDF de lista: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            logger.error("Erro inesperado ao gerar PDF de lista de Conversões", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * Gera um PDF detalhado para uma Conversão específica, identificada por {id}.
+     * Os nomes das unidades são resolvidos via JPQL JOIN (sem chamadas extras ao serviço).
+     * O relatório exibe todos os campos no formato de ficha (DETALHE / PAISAGEM).
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/conversoes/gerar-pdf-detalhe/{id:[0-9]+}")
+    public ResponseEntity<byte[]> gerarPdfDetalhe(@PathVariable Long id) {
+        logger.info("Início do método gerarPdfDetalhe – ConversaoController – id: {}", id);
+        try {
+            ConversaoRelatorioDTO conversao = conversaoService.buscarPorIdParaPdf(id);
+
+            String jsonData = new Gson().toJson(List.of(conversao));
+
+            Map<String, String> colunas = new LinkedHashMap<>();
+            colunas.put("unidadeDe",   "De");
+            colunas.put("unidadePara", "Para");
+            colunas.put("operacao",    "Operação");
+            colunas.put("valor",       "Valor");
+
+            RelatorioRequestDTO request = new RelatorioRequestDTO(
+                    jsonData, "", "Detalhe da Conversão", colunas,
+                    TipoRelatorio.DETALHE,
+                    OrientacaoRelatorio.PAISAGEM,
+                    false
+            );
+
+            byte[] pdfBytes = relatorioService.gerarRelatorioPDF(request);
+
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss"));
+            String filename = "Detalhe-Conversao-" + id + "-" + timestamp + ".pdf";
+
+            logger.info("PDF de detalhe de Conversão gerado com sucesso – arquivo: '{}'", filename);
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(pdfBytes);
+
+        } catch (FichaTecnicaException e) {
+            logger.error("Conversão não encontrada para id {}: {}", id, e.getMessage());
+            return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            logger.error("Parâmetros inválidos para geração do PDF de detalhe: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            logger.error("Erro inesperado ao gerar PDF de detalhe de Conversão", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 }

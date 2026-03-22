@@ -9,4 +9,9 @@ public interface UnidadeMedidaRepository extends JpaRepository<UnidadeMedida,Lon
     @Query("SELECT COUNT(u) FROM UnidadeMedida u WHERE u.nome = :nome")
     long countByName(@Param("nome") String nome);
 
+    @Query("SELECT COUNT(u) FROM UnidadeMedida u WHERE u.sigla = :sigla")
+    long countBySigla(@Param("sigla") String sigla);
+
+    @Query("SELECT COUNT(u) FROM UnidadeMedida u WHERE u.sigla = :sigla AND u.codigo <> :codigo")
+    long countBySiglaAndCodigoNot(@Param("sigla") String sigla, @Param("codigo") Long codigo);
 }
