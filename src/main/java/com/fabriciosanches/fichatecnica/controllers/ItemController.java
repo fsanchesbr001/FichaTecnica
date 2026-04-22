@@ -187,4 +187,57 @@ public class ItemController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    /**
+     * Gera um PDF detalhado para um Item específico, identificado por {id}.
+     * O relatório exibe todos os campos do item no formato de ficha (DETALHE / PAISAGEM).
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/itens/gerar-pdf-detalhe/{id:[0-9]+}")
+    public ResponseEntity<byte[]> gerarPdfDetalhe(@PathVariable Long id) {
+        logger.info("Início do método gerarPdfDetalhe – ItemController – id: {}", id);
+        try {
+            ItemDTO item = itemService.buscarPorId(id);
+
+            String jsonData = new Gson().toJson(List.of(item));
+
+            Map<String, String> colunas = new LinkedHashMap<>();
+            colunas.put("nome",          "Nome");
+            colunas.put("unidadeMedida", "Unidade de Medida");
+            colunas.put("valor",         "Valor");
+
+            RelatorioRequestDTO request = new RelatorioRequestDTO(
+                    jsonData,
+                    "",
+                    "Detalhe do Item",
+                    colunas,
+                    TipoRelatorio.DETALHE,
+                    OrientacaoRelatorio.PAISAGEM,
+                    false
+            );
+
+            byte[] pdfBytes = relatorioService.gerarRelatorioPDF(request);
+
+            String timestamp = LocalDateTime.now()
+                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss"));
+            String filename = "Detalhe-Item-" + id + "-" + timestamp + ".pdf";
+
+            logger.info("PDF de detalhe de Item gerado com sucesso – arquivo: '{}'", filename);
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(pdfBytes);
+
+        } catch (FichaTecnicaException e) {
+            logger.error("Item não encontrado para id {}: {}", id, e.getMessage());
+            return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            logger.error("Parâmetros inválidos para geração do PDF de detalhe de Item: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            logger.error("Erro inesperado ao gerar PDF de detalhe de Item", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 }
