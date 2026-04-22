@@ -62,4 +62,5 @@ Este projeto visa a criação de uma ficha técnica de um produto, onde é poss�
 - 16/03/2026 - Versão 1.8.6 - Melhorar primeiro acesso e Vulnerabilidades.
 - 19/03/2026 - Versão 1.8.7 - Melhorias no primeiro acesso e tratamento de erros.
 - 21/03/2026 - Versão 1.8.8 - Gerar PDF Unidade de Medida e Conversão.
-- 22/03/2026 - Versão 1.8.9 - Unidade de Medida e Conversão funcionando e gerando PDF.
+- 22/03/2026 - Versão 1.8.9 - Melhorias no layout do PDF e correção de erros de conversão.
+- 21/04/2026 - Versão 1.9.0 - Adicionado chamada de backend pata Itens.
