@@ -300,6 +300,19 @@ public class RelatorioService {
             return val.getAsBoolean() ? "Sim" : "Não";
         }
 
+        // Objetos aninhados (ex.: UnidadeMedida): tenta extrair campo "nome", senão "sigla", senão toString compacto
+        if (val.isJsonObject()) {
+            JsonObject nested = val.getAsJsonObject();
+            if (nested.has("nome") && !nested.get("nome").isJsonNull()) {
+                return nested.get("nome").getAsString();
+            }
+            if (nested.has("sigla") && !nested.get("sigla").isJsonNull()) {
+                return nested.get("sigla").getAsString();
+            }
+            // fallback: representação compacta do objeto
+            return val.toString();
+        }
+
         String raw = val.getAsString();
         if (raw == null || raw.isBlank()) {
             return "";

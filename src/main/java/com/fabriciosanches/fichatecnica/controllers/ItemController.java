@@ -1,15 +1,27 @@
 package com.fabriciosanches.fichatecnica.controllers;
 
 import com.fabriciosanches.fichatecnica.dtos.ItemDTO;
+import com.fabriciosanches.fichatecnica.dtos.RelatorioRequestDTO;
+import com.fabriciosanches.fichatecnica.enums.OrientacaoRelatorio;
+import com.fabriciosanches.fichatecnica.enums.TipoRelatorio;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.services.ItemService;
+import com.fabriciosanches.fichatecnica.services.RelatorioService;
+import com.google.gson.Gson;
 import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("ficha-tecnica")
@@ -18,9 +30,11 @@ public class ItemController {
     private static final Logger logger = LogManager.getLogger(ItemController.class);
 
     final ItemService itemService;
+    final RelatorioService relatorioService;
 
-    public ItemController(ItemService itemService) {
+    public ItemController(ItemService itemService, RelatorioService relatorioService) {
         this.itemService = itemService;
+        this.relatorioService = relatorioService;
     }
 
     @GetMapping("/itens")
@@ -116,6 +130,61 @@ public class ItemController {
         catch (FichaTecnicaException e){
             logger.error("Erro ao cadastrar item", e);
             return ResponseEntity.badRequest().build();
+        }
+    }
+
+    /**
+     * Gera um PDF com a lista completa de Itens ordenados por nome.
+     * Colunas exibidas: Nome, Unidade de Medida e Valor.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/itens/gerar-pdf-lista")
+    public ResponseEntity<byte[]> gerarPdfLista() {
+        logger.info("Início do método gerarPdfLista – ItemController");
+        try {
+            List<ItemDTO> lista = itemService.listar();
+
+            if (lista.isEmpty()) {
+                logger.warn("Nenhum item encontrado para gerar o relatório");
+                return ResponseEntity.noContent().build();
+            }
+
+            String jsonData = new Gson().toJson(lista);
+
+            Map<String, String> colunas = new LinkedHashMap<>();
+            colunas.put("nome",          "Nome");
+            colunas.put("unidadeMedida", "Unidade de Medida");
+            colunas.put("valor",         "Valor");
+
+            RelatorioRequestDTO request = new RelatorioRequestDTO(
+                    jsonData,
+                    "",
+                    "Lista de Itens",
+                    colunas,
+                    TipoRelatorio.LISTA,
+                    OrientacaoRelatorio.RETRATO,
+                    true
+            );
+
+            byte[] pdfBytes = relatorioService.gerarRelatorioPDF(request);
+
+            String timestamp = LocalDateTime.now()
+                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss"));
+            String filename = "Lista-Itens-" + timestamp + ".pdf";
+
+            logger.info("PDF de lista de Itens gerado com sucesso – arquivo: '{}'", filename);
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(pdfBytes);
+
+        } catch (IllegalArgumentException e) {
+            logger.error("Parâmetros inválidos para geração do PDF de lista de Itens: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            logger.error("Erro inesperado ao gerar PDF de lista de Itens", e);
+            return ResponseEntity.internalServerError().build();
         }
     }
 }
