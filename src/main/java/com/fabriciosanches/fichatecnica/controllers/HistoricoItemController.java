@@ -1,11 +1,13 @@
 package com.fabriciosanches.fichatecnica.controllers;
 
+import com.fabriciosanches.fichatecnica.dtos.GraficoPrecoItemDTO;
 import com.fabriciosanches.fichatecnica.dtos.HistoricoItemDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.services.HistoricoItemService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -73,5 +75,30 @@ public class HistoricoItemController {
         }
     }
 
-
+    /**
+     * Retorna os dados de variação de preços de um item no formato Chart.js (ng2-charts).
+     * <p>
+     * Recebe o <b>código do Item</b> (campo {@code cdItem} no histórico) e retorna todos os
+     * registros daquele item ordenados por data, com variação percentual entre pontos consecutivos.
+     * </p>
+     *
+     * @param codigoItem código do Item (não o id da linha de histórico)
+     * @return {@link GraficoPrecoItemDTO} com os dados do gráfico
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/historico-itens/grafico-precos/{codigoItem}")
+    public ResponseEntity<GraficoPrecoItemDTO> gerarGraficoPrecos(@PathVariable Long codigoItem) {
+        logger.info("Início do método gerarGraficoPrecos – codigoItem={}", codigoItem);
+        try {
+            GraficoPrecoItemDTO grafico = historicoItemService.gerarGraficoPreco(codigoItem);
+            logger.info("Gráfico de preços gerado com sucesso para codigoItem={}", codigoItem);
+            return ResponseEntity.ok(grafico);
+        } catch (FichaTecnicaException e) {
+            logger.warn("Nenhum histórico encontrado para codigoItem={}: {}", codigoItem, e.getMessage());
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            logger.error("Erro inesperado ao gerar gráfico de preços para codigoItem={}", codigoItem, e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 }
