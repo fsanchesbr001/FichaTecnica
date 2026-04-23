@@ -13,4 +13,6 @@ public interface HistoricoItemRepository extends JpaRepository<HistoricoItem, Lo
     void deleteHistoricoItemByCdItem(Long codigoItem);
 
     List<HistoricoItem> findByCdItem(Long codigoItem);
+
+    List<HistoricoItem> findByCdItemOrderByDataInicioAsc(Long codigoItem);
 }
