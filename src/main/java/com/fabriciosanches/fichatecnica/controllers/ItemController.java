@@ -1,10 +1,14 @@
 package com.fabriciosanches.fichatecnica.controllers;
 
+import com.fabriciosanches.fichatecnica.dtos.GraficoPrecoItemDTO;
 import com.fabriciosanches.fichatecnica.dtos.ItemDTO;
 import com.fabriciosanches.fichatecnica.dtos.RelatorioRequestDTO;
+import com.fabriciosanches.fichatecnica.enums.ImagemPosicao;
 import com.fabriciosanches.fichatecnica.enums.OrientacaoRelatorio;
 import com.fabriciosanches.fichatecnica.enums.TipoRelatorio;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.services.GraficoService;
+import com.fabriciosanches.fichatecnica.services.HistoricoItemService;
 import com.fabriciosanches.fichatecnica.services.ItemService;
 import com.fabriciosanches.fichatecnica.services.RelatorioService;
 import com.google.gson.Gson;
@@ -31,10 +35,15 @@ public class ItemController {
 
     final ItemService itemService;
     final RelatorioService relatorioService;
+    final HistoricoItemService historicoItemService;
+    final GraficoService graficoService;
 
-    public ItemController(ItemService itemService, RelatorioService relatorioService) {
+    public ItemController(ItemService itemService, RelatorioService relatorioService,
+                          HistoricoItemService historicoItemService, GraficoService graficoService) {
         this.itemService = itemService;
         this.relatorioService = relatorioService;
+        this.historicoItemService = historicoItemService;
+        this.graficoService = graficoService;
     }
 
     @GetMapping("/itens")
@@ -191,6 +200,9 @@ public class ItemController {
     /**
      * Gera um PDF detalhado para um Item específico, identificado por {id}.
      * O relatório exibe todos os campos do item no formato de ficha (DETALHE / PAISAGEM).
+     * Caso existam registros de histórico de preços, um gráfico de variação de preços
+     * (JFreeChart – linha azul, pontos vermelhos) é adicionado ao final do relatório,
+     * antes do rodapé.
      */
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/itens/gerar-pdf-detalhe/{id:[0-9]+}")
@@ -206,15 +218,43 @@ public class ItemController {
             colunas.put("unidadeMedida", "Unidade de Medida");
             colunas.put("valor",         "Valor");
 
-            RelatorioRequestDTO request = new RelatorioRequestDTO(
-                    jsonData,
-                    "",
-                    "Detalhe do Item",
-                    colunas,
-                    TipoRelatorio.DETALHE,
-                    OrientacaoRelatorio.PAISAGEM,
-                    false
-            );
+            // Tenta gerar o gráfico de variação de preços (opcional – ignora se não houver histórico)
+            byte[] graficoPng = null;
+            try {
+                GraficoPrecoItemDTO graficoDTO = historicoItemService.gerarGraficoPreco(id);
+                if (graficoDTO != null && !graficoDTO.labels().isEmpty()) {
+                    graficoPng = graficoService.gerarGraficoPNG(graficoDTO);
+                    logger.info("Gráfico de preços gerado para inclusão no PDF – item id={}", id);
+                }
+            } catch (FichaTecnicaException ex) {
+                logger.info("Sem histórico de preços para o item id={} – PDF será gerado sem gráfico", id);
+            }
+
+            RelatorioRequestDTO request;
+            if (graficoPng != null) {
+                request = new RelatorioRequestDTO(
+                        jsonData,
+                        "",
+                        "Detalhe do Item",
+                        colunas,
+                        TipoRelatorio.DETALHE,
+                        OrientacaoRelatorio.PAISAGEM,
+                        false,
+                        true,
+                        graficoPng,
+                        ImagemPosicao.FIM
+                );
+            } else {
+                request = new RelatorioRequestDTO(
+                        jsonData,
+                        "",
+                        "Detalhe do Item",
+                        colunas,
+                        TipoRelatorio.DETALHE,
+                        OrientacaoRelatorio.PAISAGEM,
+                        false
+                );
+            }
 
             byte[] pdfBytes = relatorioService.gerarRelatorioPDF(request);
 

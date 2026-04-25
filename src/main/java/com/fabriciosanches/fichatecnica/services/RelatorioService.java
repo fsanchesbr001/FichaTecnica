@@ -1,6 +1,7 @@
 package com.fabriciosanches.fichatecnica.services;
 
 import com.fabriciosanches.fichatecnica.dtos.RelatorioRequestDTO;
+import com.fabriciosanches.fichatecnica.enums.ImagemPosicao;
 import com.fabriciosanches.fichatecnica.enums.OrientacaoRelatorio;
 import com.fabriciosanches.fichatecnica.enums.TipoRelatorio;
 import com.google.gson.JsonArray;
@@ -8,6 +9,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.itextpdf.io.font.constants.StandardFonts;
+import com.itextpdf.io.image.ImageData;
+import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.colors.DeviceRgb;
 import com.itextpdf.kernel.events.Event;
 import com.itextpdf.kernel.events.IEventHandler;
@@ -22,8 +25,10 @@ import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.properties.HorizontalAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -124,6 +129,19 @@ public class RelatorioService {
             orient = OrientacaoRelatorio.PAISAGEM;
         }
 
+        // Validações de imagem
+        boolean comImagem = Boolean.TRUE.equals(request.usarImagem());
+        if (comImagem) {
+            if (request.imagem() == null || request.imagem().length == 0) {
+                throw new IllegalArgumentException(
+                        "usarImagem=true exige que o campo 'imagem' seja informado.");
+            }
+            if (request.imagemPosicao() == null) {
+                throw new IllegalArgumentException(
+                        "usarImagem=true exige que o campo 'imagemPosicao' seja informado (INICIO ou FIM).");
+            }
+        }
+
         // 1. Extrair a lista de registros do JSON
         List<Map<String, String>> registros = extrairLista(request.jsonData(), request.listPath());
         logger.info("Total de registros encontrados: {}", registros.size());
@@ -171,6 +189,11 @@ public class RelatorioService {
         );
 
         if (tipo == TipoRelatorio.LISTA) {
+            // Imagem no INICIO (antes da tabela)
+            if (comImagem && request.imagemPosicao() == ImagemPosicao.INICIO) {
+                document.add(criarImagemCentralizada(request.imagem(), pageSize));
+            }
+
             // 5. Montar tabela de dados (sem linha de cabeçalho – fica no evento de página)
             int numCols = colunas.size();
             float[] colWidths = new float[numCols];
@@ -206,6 +229,11 @@ public class RelatorioService {
             }
 
             document.add(table);
+
+            // Imagem no FIM (após a tabela)
+            if (comImagem && request.imagemPosicao() == ImagemPosicao.FIM) {
+                document.add(criarImagemCentralizada(request.imagem(), pageSize));
+            }
         } else {
             Map<String, String> base = registros.get(0);
             if (registros.size() > 1) {
@@ -225,13 +253,53 @@ public class RelatorioService {
                 }
             }
 
+            // Imagem no INICIO (antes da ficha de detalhe)
+            if (comImagem && request.imagemPosicao() == ImagemPosicao.INICIO) {
+                document.add(criarImagemCentralizada(request.imagem(), pageSize));
+            }
+
             Table detailTable = montarTabelaDetalhe(camposDetalhe, fontNormal, fontBold, pageSize);
             document.add(detailTable);
+
+            // Imagem no FIM (após a ficha de detalhe)
+            if (comImagem && request.imagemPosicao() == ImagemPosicao.FIM) {
+                document.add(criarImagemCentralizada(request.imagem(), pageSize));
+            }
         }
         document.close(); // também fecha pdfDoc e writer
 
         logger.info("PDF gerado com sucesso – tamanho: {} bytes", baos.size());
         return baos.toByteArray();
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    //  Imagem
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Cria um elemento {@link Image} centralizado horizontalmente.
+     * A largura máxima é limitada à área útil da página (descontando as margens).
+     * A altura é ajustada proporcionalmente para manter o aspect-ratio original.
+     *
+     * @param imageBytes bytes da imagem (PNG, JPEG etc.)
+     * @param pageSize   tamanho da página atual
+     * @return elemento {@link Image} pronto para ser adicionado ao {@link Document}
+     */
+    private Image criarImagemCentralizada(byte[] imageBytes, PageSize pageSize) throws IOException {
+        float maxWidth = pageSize.getWidth() - (MARGIN_HORIZ * 2f);
+        ImageData imageData = ImageDataFactory.create(imageBytes);
+        Image img = new Image(imageData);
+
+        // Reduz a imagem se for maior que a área útil, mantendo proporção
+        if (img.getImageWidth() > maxWidth) {
+            img.setWidth(maxWidth);
+        }
+
+        img.setHorizontalAlignment(HorizontalAlignment.CENTER);
+        img.setMarginTop(8f);
+        img.setMarginBottom(8f);
+        logger.debug("Imagem adicionada ao relatório – largura: {}pt", img.getImageScaledWidth());
+        return img;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
