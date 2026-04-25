@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.fabriciosanches</groupId>
 	<artifactId>fichaTecnica</artifactId>
-	<version>1.9.2</version>
+	<version>1.9.3</version>
 	<name>fichaTecnica</name>
 	<description>fichaTecnica</description>
 	<url/>
@@ -152,6 +152,13 @@
 			<groupId>org.eclipse.angus</groupId>
 			<artifactId>jakarta.mail</artifactId>
 			<version>2.0.4</version>
+		</dependency>
+
+		<!-- JFreeChart – geração de gráficos -->
+		<dependency>
+			<groupId>org.jfree</groupId>
+			<artifactId>jfreechart</artifactId>
+			<version>1.5.4</version>
 		</dependency>
 
 		<!-- iText 7 – geração de PDF -->
