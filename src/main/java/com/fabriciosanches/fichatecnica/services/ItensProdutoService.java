@@ -12,8 +12,11 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Service
@@ -128,6 +131,83 @@ public class ItensProdutoService {
         var produto = getProduto(idProduto);
         produto.setValorItens(quantidadeValorDTO.valorTotal());
         produtoRepository.save(produto);
+    }
+
+    // ── Paleta de cores para o gráfico de pizza (Chart.js) ───────────────────
+    private static final List<String> PIZZA_COLORS = List.of(
+            "#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF",
+            "#FF9F40", "#C9CBCF", "#E7E9ED", "#71B37C", "#F7464A",
+            "#46BFBD", "#FDB45C", "#949FB1", "#4D5360", "#AC64AD"
+    );
+
+    /**
+     * Gera o DTO de gráfico de pizza com a composição percentual de custo de cada
+     * item de um produto. Cada fatia contém porcentagem, valor do item, valor total
+     * e cor para exibição no tooltip do Chart.js / ng2-charts.
+     *
+     * @param idProduto código do Produto
+     * @return {@link GraficoPizzaDTO} pronto para consumo pelo frontend Angular
+     */
+    public GraficoPizzaDTO gerarGraficoPizza(Long idProduto) {
+        logger.info("Gerando gráfico de pizza para o produto id={}", idProduto);
+
+        Produto produto = getProduto(idProduto);
+        List<ItemProduto> itensProduto = itemProdutoRepository.findByProdutoCodigo(idProduto);
+
+        if (itensProduto.isEmpty()) {
+            throw new FichaTecnicaException("Nenhum item encontrado para o produto id=" + idProduto);
+        }
+
+        NumberFormat brl = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
+
+        // Calcula o valor total somando todos os itens
+        BigDecimal total = itensProduto.stream()
+                .map(ItemProduto::getValor)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        String valorTotalFormatado = brl.format(total);
+
+        List<GraficoPizzaFatiaDTO> fatias   = new ArrayList<>();
+        List<String>               labels   = new ArrayList<>();
+        List<Double>               valores  = new ArrayList<>();
+        List<String>               cores    = new ArrayList<>();
+
+        int colorIndex = 0;
+        for (ItemProduto ip : itensProduto) {
+            BigDecimal valorItem = ip.getValor() != null ? ip.getValor() : BigDecimal.ZERO;
+            String nomeItem      = ip.getItem().getNome();
+            Long   idItem        = ip.getItem().getCodigo();
+            String cor           = PIZZA_COLORS.get(colorIndex % PIZZA_COLORS.size());
+
+            // Percentual desta fatia = (valorItem / total) * 100
+            double pct = total.compareTo(BigDecimal.ZERO) == 0 ? 0.0
+                    : valorItem.divide(total, 6, RoundingMode.HALF_UP)
+                                .multiply(BigDecimal.valueOf(100))
+                                .doubleValue();
+
+            String pctFormatada = String.format("%,.1f%%", pct).replace(".", ",");
+
+            fatias.add(new GraficoPizzaFatiaDTO(
+                    nomeItem,
+                    idItem,
+                    Math.round(pct * 100.0) / 100.0,
+                    pctFormatada,
+                    brl.format(valorItem),
+                    valorItem,
+                    valorTotalFormatado,
+                    cor
+            ));
+
+            labels.add(nomeItem);
+            valores.add(Math.round(pct * 100.0) / 100.0);
+            cores.add(cor);
+
+            colorIndex++;
+        }
+
+        logger.info("Gráfico de pizza gerado com {} fatias para o produto id={}", fatias.size(), idProduto);
+
+        return new GraficoPizzaDTO(produto.getNome(), valorTotalFormatado, fatias, labels, valores, cores);
     }
 
     public void atualizarQuantidadeItemProduto(Long idProduto, Long idItem, Double novaQuantidade) {
