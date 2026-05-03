@@ -63,9 +63,9 @@ public class ItensProdutoService {
 
 
 
-            produtoCompletoList.add(new ProdutoCompletoDTO(produto.getNome(),itemEntity.getNome(),
-                    item.qtdItem(), item.cdUnidadeMedida(),
-                    item.vlrItem()));
+            produtoCompletoList.add(new ProdutoCompletoDTO(produto.getNome(), itemEntity.getNome(),
+                    itemEntity.getCodigo(), item.qtdItem(), item.cdUnidadeMedida(),
+                    conversaoValoresDTO.valor()));
         }
 
         QuantidadeValorDTO quantidadeValorDTO = calcularQuantidadeEValorTotal(produto.getCodigo());
@@ -79,10 +79,10 @@ public class ItensProdutoService {
         logger.info("Inicio do método listarItensProduto");
         Produto produto = getProduto(idProduto);
 
-        return produto.getProdutosList().stream().map(ip-> new ProdutoCompletoDTO(
+        return produto.getProdutosList().stream().map(ip -> new ProdutoCompletoDTO(
                 ip.getProduto().getNome(),
-                ip.getItem().getNome(),ip.getQuantidade(),
-                ip.getUnidadePara().getCodigo(),ip.getValor())
+                ip.getItem().getNome(), ip.getItem().getCodigo(), ip.getQuantidade(),
+                ip.getUnidadePara().getCodigo(), ip.getValor())
         ).collect(Collectors.toList());
     }
 
