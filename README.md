@@ -67,3 +67,4 @@ Este projeto visa a criação de uma ficha técnica de um produto, onde é poss�
 - 22/04/2026 - Versão 1.9.1 - PDF de detalhe de Itens.
 - 23/04/2026 - Versão 1.9.2 - Grafico de historico de Itens Gerado.
 - 24/04/2026 - Versão 1.9.3 - Melhorias no layout do gráfico e correção de erros de Itens.
+- 03/05/2026 - Versão 1.9.4 - Melhorias em ProdutoCompletoDTO.
