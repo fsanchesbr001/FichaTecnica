@@ -52,6 +52,7 @@ public class SecurityConfigurations {
                 .authorizeHttpRequests(ar -> ar
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/images/**").permitAll()
+                        .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/ficha-tecnica/login-recuperacao-senha").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
