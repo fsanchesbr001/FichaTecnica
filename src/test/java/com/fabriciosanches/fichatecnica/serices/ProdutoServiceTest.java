@@ -1,8 +1,8 @@
 package com.fabriciosanches.fichatecnica.serices;
 
-import com.fabriciosanches.fichatecnica.dtos.ProdutoDTO;
 import com.fabriciosanches.fichatecnica.domains.Produto;
-
+import com.fabriciosanches.fichatecnica.dtos.ProdutoDTO;
+import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.repository.ProdutoRepository;
 import com.fabriciosanches.fichatecnica.services.ProdutoService;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,41 +30,88 @@ class ProdutoServiceTest {
     private ProdutoService service;
 
     private Produto produto;
+    private Produto produtoSecundario;
     private ProdutoDTO produtoDTO;
 
     @BeforeEach
     void setUp() {
         produtoDTO = new ProdutoDTO(1L, "Produto Teste", "Descrição Teste",
-                "teste1.jpg",new BigDecimal(BigInteger.TEN),
-                new BigDecimal(BigInteger.TEN));
+                "teste1.jpg", new BigDecimal(BigInteger.TEN), new BigDecimal(BigInteger.TEN));
         produto = new Produto(produtoDTO);
+        produtoSecundario = new Produto(2L, "Açúcar", "Descrição Açúcar",
+                "acucar.jpg", new BigDecimal("12.50"), BigDecimal.ZERO, List.of());
     }
 
     @Test
-    void listar_DeveRetornarListaDeProdutos() {
-        when(repository.findAll()).thenReturn(List.of(produto));
+    void listar_DeveRetornarListaDeProdutosOrdenada() {
+        when(repository.findAll()).thenReturn(List.of(produto, produtoSecundario));
 
         List<ProdutoDTO> result = service.listar();
 
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("Produto Teste", result.get(0).nome());
-        verify(repository, times(1)).findAll();
+        assertEquals(2, result.size());
+        assertEquals("Açúcar", result.get(0).nome());
+        assertEquals("Produto Teste", result.get(1).nome());
+        verify(repository).findAll();
     }
 
+    @Test
+    void buscarPorId_DeveRetornarProdutoQuandoEncontrado() {
+        when(repository.findAll()).thenReturn(List.of(produtoSecundario, produto));
 
+        ProdutoDTO result = service.buscarPorId(1L);
 
+        assertEquals(1L, result.codigo());
+        assertEquals("Produto Teste", result.nome());
+    }
 
+    @Test
+    void buscarPorId_DeveLancarExcecaoQuandoNaoEncontrado() {
+        when(repository.findAll()).thenReturn(List.of(produtoSecundario));
+
+        FichaTecnicaException exception = assertThrows(FichaTecnicaException.class,
+                () -> service.buscarPorId(99L));
+
+        assertEquals("Produto não encontrada", exception.getMessage());
+    }
+
+    @Test
+    void findByName_DeveDelegarParaRepository() {
+        when(repository.countByName("Produto Teste")).thenReturn(3L);
+
+        assertEquals(3L, service.findByName("Produto Teste"));
+    }
 
     @Test
     void cadastrarProduto_DeveSalvarNovoProduto() {
+        when(repository.countByName("Produto Teste")).thenReturn(0L);
         when(repository.save(any(Produto.class))).thenReturn(produto);
 
         ProdutoDTO result = service.cadastrarProduto(produtoDTO);
 
         assertNotNull(result);
         assertEquals("Produto Teste", result.nome());
-        verify(repository, times(1)).save(any(Produto.class));
+        verify(repository).countByName("Produto Teste");
+        verify(repository).save(any(Produto.class));
+    }
+
+    @Test
+    void cadastrarProduto_DeveLancarExcecaoQuandoDuplicado() {
+        when(repository.countByName("Produto Teste")).thenReturn(1L);
+
+        FichaTecnicaException exception = assertThrows(FichaTecnicaException.class,
+                () -> service.cadastrarProduto(produtoDTO));
+
+        assertEquals("Produto já cadastrado", exception.getMessage());
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void cadastrarProduto_DeveLancarExcecaoQuandoProdutoForNulo() {
+        NullPointerException exception = assertThrows(NullPointerException.class,
+                () -> service.cadastrarProduto(null));
+
+        assertEquals("Produto não pode ser nulo", exception.getMessage());
     }
 
     @Test
@@ -73,16 +120,28 @@ class ProdutoServiceTest {
         when(repository.save(any(Produto.class))).thenReturn(produto);
 
         ProdutoDTO novosDados = new ProdutoDTO(1L, "Produto Atualizado", "Descrição Atualizada",
-                "imagem2.jpg",new BigDecimal(5),new BigDecimal(5));
+                "imagem2.jpg", new BigDecimal(5), new BigDecimal(5));
 
         ProdutoDTO result = service.atualizarProduto(1L, novosDados);
 
         assertNotNull(result);
         assertEquals("Produto Atualizado", result.nome());
-        verify(repository, times(1)).findById(1L);
-        verify(repository, times(1)).save(any(Produto.class));
+        verify(repository).findById(1L);
+        verify(repository).save(any(Produto.class));
     }
 
+    @Test
+    void atualizarProduto_DeveLancarExcecaoQuandoNaoEncontrado() {
+        when(repository.findById(1L)).thenReturn(Optional.empty());
+
+        ProdutoDTO novosDados = new ProdutoDTO(1L, "Produto Atualizado", "Descrição Atualizada",
+                "imagem2.jpg", new BigDecimal(5), new BigDecimal(5));
+
+        FichaTecnicaException exception = assertThrows(FichaTecnicaException.class,
+                () -> service.atualizarProduto(1L, novosDados));
+
+        assertEquals("Produto com ID 1 não encontrada", exception.getMessage());
+    }
 
     @Test
     void deletarProduto_DeveDeletarProduto() {
@@ -90,6 +149,6 @@ class ProdutoServiceTest {
 
         assertDoesNotThrow(() -> service.deletarProduto(1L));
 
-        verify(repository, times(1)).deleteById(1L);
+        verify(repository).deleteById(1L);
     }
 }

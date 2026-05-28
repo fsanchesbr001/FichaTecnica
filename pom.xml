@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.fabriciosanches</groupId>
 	<artifactId>fichaTecnica</artifactId>
-	<version>1.9.6</version>
+	<version>1.9.7</version>
 	<name>fichaTecnica</name>
 	<description>fichaTecnica</description>
 	<url/>
@@ -263,7 +263,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.8</version>
+				<version>0.8.12</version>
 				<executions>
 					<execution>
 						<goals>
@@ -276,6 +276,52 @@
 						<goals>
 							<goal>report</goal>
 						</goals>
+					</execution>
+					<execution>
+						<id>check</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<rule>
+									<element>CLASS</element>
+									<includes>
+										<include>com.fabriciosanches.fichatecnica.services.UnidadeMedidaService</include>
+										<include>com.fabriciosanches.fichatecnica.services.ConversaoService</include>
+										<include>com.fabriciosanches.fichatecnica.services.ProdutoService</include>
+										<include>com.fabriciosanches.fichatecnica.services.ItemService</include>
+										<include>com.fabriciosanches.fichatecnica.services.SegurancaService</include>
+										<include>com.fabriciosanches.fichatecnica.services.FileStorageService</include>
+										<include>com.fabriciosanches.fichatecnica.services.GraficoService</include>
+										<include>com.fabriciosanches.fichatecnica.services.HistoricoItemService</include>
+										<include>com.fabriciosanches.fichatecnica.services.ProdutoImagemUploadService</include>
+										<include>com.fabriciosanches.fichatecnica.services.RelatorioService</include>
+									</includes>
+									<limits>
+										<limit>
+											<counter>INSTRUCTION</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>0.90</minimum>
+										</limit>
+									</limits>
+								</rule>
+								<rule>
+									<element>CLASS</element>
+									<includes>
+										<include>com.fabriciosanches.fichatecnica.controllers.*</include>
+									</includes>
+									<limits>
+										<limit>
+											<counter>INSTRUCTION</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>0.40</minimum>
+										</limit>
+									</limits>
+								</rule>
+							</rules>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
