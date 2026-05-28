@@ -70,3 +70,4 @@ Este projeto visa a criação de uma ficha técnica de um produto, onde é poss�
 - 03/05/2026 - Versão 1.9.4 - Melhorias em ProdutoCompletoDTO.
 - 03/05/2026 - Versão 1.9.5 - Adicionado Grafico de Valores dos Itens
 - 21/05/2026 - Versão 1.9.6 - Adição de imagem ao produto.
+- 28/05/2026 - Versão 1.9.7 - Testes Unitarios.
