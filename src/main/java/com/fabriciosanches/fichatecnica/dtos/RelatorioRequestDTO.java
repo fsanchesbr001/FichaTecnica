@@ -23,6 +23,8 @@ import java.util.Map;
  * @param imagemPosicao  Posição da imagem: {@link ImagemPosicao#INICIO} (antes do conteúdo) ou
  *                       {@link ImagemPosicao#FIM} (após o conteúdo, antes do rodapé).
  *                       Obrigatório se {@code usarImagem = true}.
+ * @param imagemSecundaria        Bytes de uma segunda imagem opcional (ex.: gráfico adicional).
+ * @param imagemSecundariaPosicao Posição da segunda imagem opcional.
  */
 public record RelatorioRequestDTO(
         String jsonData,
@@ -34,7 +36,9 @@ public record RelatorioRequestDTO(
         Boolean alternarCores,
         Boolean usarImagem,
         byte[] imagem,
-        ImagemPosicao imagemPosicao
+        ImagemPosicao imagemPosicao,
+        byte[] imagemSecundaria,
+        ImagemPosicao imagemSecundariaPosicao
 ) {
     /**
      * Construtor de compatibilidade retroativa para chamadas que não utilizam imagem.
@@ -45,6 +49,17 @@ public record RelatorioRequestDTO(
                                 Map<String, String> colunas, TipoRelatorio tipoRelatorio,
                                 OrientacaoRelatorio orientacao, Boolean alternarCores) {
         this(jsonData, listPath, titulo, colunas, tipoRelatorio, orientacao,
-                alternarCores, false, null, null);
+                alternarCores, false, null, null, null, null);
+    }
+
+    /**
+     * Construtor de compatibilidade para chamadas com uma única imagem.
+     */
+    public RelatorioRequestDTO(String jsonData, String listPath, String titulo,
+                               Map<String, String> colunas, TipoRelatorio tipoRelatorio,
+                               OrientacaoRelatorio orientacao, Boolean alternarCores,
+                               Boolean usarImagem, byte[] imagem, ImagemPosicao imagemPosicao) {
+        this(jsonData, listPath, titulo, colunas, tipoRelatorio, orientacao,
+                alternarCores, usarImagem, imagem, imagemPosicao, null, null);
     }
 }

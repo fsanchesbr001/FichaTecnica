@@ -15,8 +15,10 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -87,6 +89,37 @@ public class ItensProdutoService {
                 ip.getItem().getNome(), ip.getItem().getCodigo(), ip.getQuantidade(),
                 ip.getUnidadePara().getCodigo(), ip.getValor())
         ).collect(Collectors.toList());
+    }
+
+    /**
+     * Resolve as descrições de unidade para exibição no relatório.
+     * Formato preferencial: "Nome (sigla)".
+     */
+    public Map<Long, String> obterDescricoesUnidade(List<Long> codigosUnidade) {
+        if (codigosUnidade == null || codigosUnidade.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        return unidadeMedidaRepository.findAllById(codigosUnidade)
+                .stream()
+                .collect(Collectors.toMap(
+                        UnidadeMedida::getCodigo,
+                        unidade -> {
+                            String nome = unidade.getNome();
+                            String sigla = unidade.getSigla();
+                            if (nome != null && !nome.isBlank() && sigla != null && !sigla.isBlank()) {
+                                return nome + " (" + sigla + ")";
+                            }
+                            if (nome != null && !nome.isBlank()) {
+                                return nome;
+                            }
+                            if (sigla != null && !sigla.isBlank()) {
+                                return sigla;
+                            }
+                            return "-";
+                        },
+                        (atual, ignorar) -> atual
+                ));
     }
 
     public QuantidadeValorDTO calcularQuantidadeEValorTotal(Long idProduto) {
