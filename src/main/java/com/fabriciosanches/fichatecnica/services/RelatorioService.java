@@ -29,6 +29,7 @@ import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.HorizontalAlignment;
+import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -82,6 +83,10 @@ public class RelatorioService {
     private static final float DETAIL_MIN_FIELD_WIDTH = 240f;
     /** Limite maximo de campos por linha no DETALHE para manter legibilidade. */
     private static final int DETAIL_MAX_FIELDS_PER_ROW = 3;
+    /** Altura máxima da imagem no relatório (pt). Garante escala proporcional sem prejudicar o layout. */
+    private static final float MAX_IMAGE_HEIGHT = 200f;
+    /** Cor de fundo do cabeçalho de tabelas auxiliares no DETALHE. */
+    private static final DeviceRgb DETAIL_AUX_HEADER_COLOR = new DeviceRgb(240, 240, 240);
 
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -142,6 +147,17 @@ public class RelatorioService {
             }
         }
 
+        boolean comImagemSecundaria = request.imagemSecundaria() != null;
+        if (comImagemSecundaria) {
+            if (request.imagemSecundaria().length == 0) {
+                throw new IllegalArgumentException("'imagemSecundaria' foi informada, mas está vazia.");
+            }
+            if (request.imagemSecundariaPosicao() == null) {
+                throw new IllegalArgumentException(
+                        "'imagemSecundaria' exige que 'imagemSecundariaPosicao' seja informada (INICIO ou FIM).");
+            }
+        }
+
         // 1. Extrair a lista de registros do JSON
         List<Map<String, String>> registros = extrairLista(request.jsonData(), request.listPath());
         logger.info("Total de registros encontrados: {}", registros.size());
@@ -190,9 +206,7 @@ public class RelatorioService {
 
         if (tipo == TipoRelatorio.LISTA) {
             // Imagem no INICIO (antes da tabela)
-            if (comImagem && request.imagemPosicao() == ImagemPosicao.INICIO) {
-                document.add(criarImagemCentralizada(request.imagem(), pageSize));
-            }
+            adicionarImagensNaPosicao(document, request, pageSize, ImagemPosicao.INICIO, comImagem, comImagemSecundaria);
 
             // 5. Montar tabela de dados (sem linha de cabeçalho – fica no evento de página)
             int numCols = colunas.size();
@@ -231,14 +245,14 @@ public class RelatorioService {
             document.add(table);
 
             // Imagem no FIM (após a tabela)
-            if (comImagem && request.imagemPosicao() == ImagemPosicao.FIM) {
-                document.add(criarImagemCentralizada(request.imagem(), pageSize));
-            }
+            adicionarImagensNaPosicao(document, request, pageSize, ImagemPosicao.FIM, comImagem, comImagemSecundaria);
         } else {
             Map<String, String> base = registros.get(0);
             if (registros.size() > 1) {
                 logger.warn("Relatorio DETALHE recebeu {} registros; usando o primeiro.", registros.size());
             }
+
+            String itensComposicaoTabelaJson = base.get("itensComposicaoTabelaJson");
 
             Map<String, String> camposDetalhe = new LinkedHashMap<>();
             if (!colunas.isEmpty()) {
@@ -254,17 +268,23 @@ public class RelatorioService {
             }
 
             // Imagem no INICIO (antes da ficha de detalhe)
-            if (comImagem && request.imagemPosicao() == ImagemPosicao.INICIO) {
-                document.add(criarImagemCentralizada(request.imagem(), pageSize));
-            }
+            adicionarImagensNaPosicao(document, request, pageSize, ImagemPosicao.INICIO, comImagem, comImagemSecundaria);
 
             Table detailTable = montarTabelaDetalhe(camposDetalhe, fontNormal, fontBold, pageSize);
             document.add(detailTable);
 
-            // Imagem no FIM (após a ficha de detalhe)
-            if (comImagem && request.imagemPosicao() == ImagemPosicao.FIM) {
-                document.add(criarImagemCentralizada(request.imagem(), pageSize));
+            Table itensComposicaoTable = montarTabelaItensComposicao(itensComposicaoTabelaJson, fontNormal, fontBold);
+            if (itensComposicaoTable != null) {
+                document.add(new Paragraph("Itens do Produto")
+                        .setFont(fontBold)
+                        .setFontSize(FONT_BODY)
+                        .setMarginTop(12f)
+                        .setMarginBottom(6f));
+                document.add(itensComposicaoTable);
             }
+
+            // Imagem no FIM (após a ficha de detalhe)
+            adicionarImagensNaPosicao(document, request, pageSize, ImagemPosicao.FIM, comImagem, comImagemSecundaria);
         }
         document.close(); // também fecha pdfDoc e writer
 
@@ -278,8 +298,9 @@ public class RelatorioService {
 
     /**
      * Cria um elemento {@link Image} centralizado horizontalmente.
-     * A largura máxima é limitada à área útil da página (descontando as margens).
-     * A altura é ajustada proporcionalmente para manter o aspect-ratio original.
+     * A imagem é redimensionada proporcionalmente para caber na largura útil da página
+     * e não ultrapassar {@link #MAX_IMAGE_HEIGHT} pontos de altura,
+     * preservando o aspect-ratio original.
      *
      * @param imageBytes bytes da imagem (PNG, JPEG etc.)
      * @param pageSize   tamanho da página atual
@@ -290,16 +311,29 @@ public class RelatorioService {
         ImageData imageData = ImageDataFactory.create(imageBytes);
         Image img = new Image(imageData);
 
-        // Reduz a imagem se for maior que a área útil, mantendo proporção
-        if (img.getImageWidth() > maxWidth) {
-            img.setWidth(maxWidth);
-        }
+        // scaleToFit redimensiona proporcionalmente para caber na caixa maxWidth × MAX_IMAGE_HEIGHT
+        img.scaleToFit(maxWidth, MAX_IMAGE_HEIGHT);
 
         img.setHorizontalAlignment(HorizontalAlignment.CENTER);
         img.setMarginTop(8f);
         img.setMarginBottom(8f);
-        logger.debug("Imagem adicionada ao relatório – largura: {}pt", img.getImageScaledWidth());
+        logger.debug("Imagem adicionada ao relatório – largura: {}pt, altura: {}pt",
+                img.getImageScaledWidth(), img.getImageScaledHeight());
         return img;
+    }
+
+    private void adicionarImagensNaPosicao(Document document,
+                                           RelatorioRequestDTO request,
+                                           PageSize pageSize,
+                                           ImagemPosicao posicao,
+                                           boolean comImagem,
+                                           boolean comImagemSecundaria) throws IOException {
+        if (comImagem && request.imagemPosicao() == posicao) {
+            document.add(criarImagemCentralizada(request.imagem(), pageSize));
+        }
+        if (comImagemSecundaria && request.imagemSecundariaPosicao() == posicao) {
+            document.add(criarImagemCentralizada(request.imagemSecundaria(), pageSize));
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -505,6 +539,67 @@ public class RelatorioService {
             return 2;
         }
         return Math.min(calc, DETAIL_MAX_FIELDS_PER_ROW);
+    }
+
+    private Table montarTabelaItensComposicao(String itensJson,
+                                              PdfFont fontNormal,
+                                              PdfFont fontBold) {
+        if (itensJson == null || itensJson.isBlank() || "[]".equals(itensJson.trim())) {
+            return null;
+        }
+
+        try {
+            JsonElement root = JsonParser.parseString(itensJson);
+            if (!root.isJsonArray() || root.getAsJsonArray().isEmpty()) {
+                return null;
+            }
+
+            Table tabela = new Table(UnitValue.createPercentArray(new float[]{3f, 1.5f, 1.5f, 1.5f}));
+            tabela.setWidth(UnitValue.createPercentValue(100));
+
+            tabela.addHeaderCell(criarCabecalhoTabelaAuxiliar("Item", fontBold));
+            tabela.addHeaderCell(criarCabecalhoTabelaAuxiliar("Quantidade", fontBold));
+            tabela.addHeaderCell(criarCabecalhoTabelaAuxiliar("Medida", fontBold));
+            tabela.addHeaderCell(criarCabecalhoTabelaAuxiliar("Valor", fontBold));
+
+            JsonArray itens = root.getAsJsonArray();
+            for (JsonElement el : itens) {
+                if (!el.isJsonObject()) {
+                    continue;
+                }
+                JsonObject obj = el.getAsJsonObject();
+                tabela.addCell(criarCelulaTabelaAuxiliar(valorTexto(obj, "item"), fontNormal, TextAlignment.LEFT));
+                tabela.addCell(criarCelulaTabelaAuxiliar(valorTexto(obj, "quantidade"), fontNormal, TextAlignment.CENTER));
+                tabela.addCell(criarCelulaTabelaAuxiliar(valorTexto(obj, "medida"), fontNormal, TextAlignment.CENTER));
+                tabela.addCell(criarCelulaTabelaAuxiliar(valorTexto(obj, "valor"), fontNormal, TextAlignment.RIGHT));
+            }
+            return tabela;
+        } catch (Exception e) {
+            logger.warn("Não foi possível montar tabela de itens de composição: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    private Cell criarCabecalhoTabelaAuxiliar(String texto, PdfFont fontBold) {
+        return new Cell()
+                .add(new Paragraph(texto).setFont(fontBold).setFontSize(FONT_BODY))
+                .setBackgroundColor(DETAIL_AUX_HEADER_COLOR)
+                .setPadding(CELL_PADDING);
+    }
+
+    private Cell criarCelulaTabelaAuxiliar(String texto, PdfFont fontNormal, TextAlignment alinhamento) {
+        return new Cell()
+                .add(new Paragraph(texto).setFont(fontNormal).setFontSize(FONT_BODY))
+                .setTextAlignment(alinhamento)
+                .setPadding(CELL_PADDING);
+    }
+
+    private String valorTexto(JsonObject obj, String key) {
+        JsonElement value = obj.get(key);
+        if (value == null || value.isJsonNull()) {
+            return "";
+        }
+        return value.getAsString();
     }
 
     // ─────────────────────────────────────────────────────────────────────────

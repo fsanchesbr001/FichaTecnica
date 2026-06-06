@@ -1,5 +1,6 @@
 package com.fabriciosanches.fichatecnica.services;
 
+import com.fabriciosanches.fichatecnica.dtos.GraficoPizzaDTO;
 import com.fabriciosanches.fichatecnica.dtos.GraficoPrecoItemDTO;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,9 +12,11 @@ import org.jfree.chart.axis.CategoryLabelPositions;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.chart.title.TextTitle;
 import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.general.DefaultPieDataset;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
@@ -140,6 +143,55 @@ public class GraficoService {
         byte[] pngBytes = baos.toByteArray();
 
         logger.info("Gráfico PNG gerado com sucesso – {} bytes, {} pontos", pngBytes.length, labels.size());
+        return pngBytes;
+    }
+
+    /**
+     * Gera um gráfico de pizza (composição de custo de produto) e retorna os bytes PNG.
+     */
+    public byte[] gerarGraficoPizzaPNG(GraficoPizzaDTO dto) throws IOException {
+        logger.info("Gerando gráfico de pizza PNG para produto '{}'", dto.nomeProduto());
+
+        DefaultPieDataset<String> dataset = new DefaultPieDataset<>();
+        List<String> labels = dto.labels() != null ? dto.labels() : List.of();
+        List<Double> valores = dto.valores() != null ? dto.valores() : List.of();
+
+        for (int i = 0; i < labels.size(); i++) {
+            Double valor = i < valores.size() && valores.get(i) != null ? valores.get(i) : 0d;
+            dataset.setValue(labels.get(i), valor);
+        }
+
+        JFreeChart chart = ChartFactory.createPieChart(
+                "Composição de Custo - " + dto.nomeProduto(),
+                dataset,
+                true,
+                true,
+                false
+        );
+
+        chart.setBackgroundPaint(Color.WHITE);
+        chart.getTitle().setFont(new Font("SansSerif", Font.BOLD, 14));
+        chart.addSubtitle(new TextTitle("Total de Itens: " + dto.valorTotal(), new Font("SansSerif", Font.PLAIN, 11)));
+
+        PiePlot<?> plot = (PiePlot<?>) chart.getPlot();
+        plot.setBackgroundPaint(Color.WHITE);
+        plot.setOutlineVisible(false);
+        plot.setLabelFont(new Font("SansSerif", Font.PLAIN, 10));
+        plot.setLabelGap(0.02);
+        plot.setSimpleLabels(true);
+
+        List<String> cores = dto.cores() != null ? dto.cores() : List.of();
+        for (int i = 0; i < labels.size(); i++) {
+            if (i < cores.size() && cores.get(i) != null) {
+                plot.setSectionPaint(labels.get(i), Color.decode(cores.get(i)));
+            }
+        }
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ChartUtils.writeChartAsPNG(baos, chart, CHART_WIDTH, CHART_HEIGHT);
+        byte[] pngBytes = baos.toByteArray();
+
+        logger.info("Gráfico de pizza PNG gerado com sucesso – {} bytes, {} fatias", pngBytes.length, labels.size());
         return pngBytes;
     }
 }
