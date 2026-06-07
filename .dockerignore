@@ -1,0 +1,10 @@
+target/
+.git/
+.idea/
+*.iml
+Documentacao/
+Documentação/
+README.md
+.env
+docker/secrets/*.txt
+

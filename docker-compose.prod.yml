@@ -1,0 +1,42 @@
+services:
+
+  mysql:
+    environment:
+      MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u${MYSQL_USER} -p$$(cat /run/secrets/mysql_password) --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    secrets:
+      - mysql_password
+      - mysql_root_password
+
+  backend:
+    environment:
+      APP_PROFILE: production
+      DB_PWD_FILE: /run/secrets/mysql_password
+      JWT_SECRET_FILE: /run/secrets/jwt_secret
+      MAIL_PWD_FILE: /run/secrets/mail_pwd
+      SYSTEM_PWD_FILE: /run/secrets/system_pwd
+    restart: always
+    secrets:
+      - mysql_password
+      - jwt_secret
+      - mail_pwd
+      - system_pwd
+
+secrets:
+  mysql_password:
+    file: ${MYSQL_PASSWORD_FILE:-./docker/secrets/mysql_password.txt.example}
+  mysql_root_password:
+    file: ${MYSQL_ROOT_PASSWORD_FILE:-./docker/secrets/mysql_root_password.txt.example}
+  jwt_secret:
+    file: ${JWT_SECRET_FILE:-./docker/secrets/jwt_secret.txt.example}
+  mail_pwd:
+    file: ${MAIL_PWD_FILE:-./docker/secrets/mail_pwd.txt.example}
+  system_pwd:
+    file: ${SYSTEM_PWD_FILE:-./docker/secrets/system_pwd.txt.example}
+
