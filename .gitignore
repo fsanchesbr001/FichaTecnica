@@ -31,3 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Docker env local (segredos)
+.env
+.env.prod
+docker/secrets/*.txt
+
