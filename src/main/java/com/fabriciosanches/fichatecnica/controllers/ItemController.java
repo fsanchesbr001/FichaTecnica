@@ -13,6 +13,11 @@ import com.fabriciosanches.fichatecnica.services.ItemService;
 import com.fabriciosanches.fichatecnica.services.RelatorioService;
 import com.google.gson.Gson;
 import jakarta.transaction.Transactional;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpHeaders;
@@ -29,6 +34,8 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("ficha-tecnica")
+@Tag(name = "Itens", description = "Cadastro, consulta, atualização, exclusão e relatórios de itens")
+@SecurityRequirement(name = "bearerAuth")
 public class ItemController {
 
     private static final Logger logger = LogManager.getLogger(ItemController.class);
@@ -47,6 +54,12 @@ public class ItemController {
     }
 
     @GetMapping("/itens")
+    @Operation(summary = "Lista itens", description = "Retorna todos os itens cadastrados.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso"),
+            @ApiResponse(responseCode = "204", description = "Nenhum item encontrado"),
+            @ApiResponse(responseCode = "404", description = "Erro ao buscar itens")
+    })
     public ResponseEntity<List<ItemDTO>> buscarLista(){
         logger.info("Inicio do método buscarLista");
         logger.info("Buscando lista de itens");
@@ -68,6 +81,12 @@ public class ItemController {
     }
 
     @GetMapping("/itens/{id}")
+    @Operation(summary = "Busca item por ID", description = "Retorna os dados de um item específico.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Item encontrado"),
+            @ApiResponse(responseCode = "204", description = "Item não encontrado"),
+            @ApiResponse(responseCode = "404", description = "Erro ao buscar item")
+    })
     public ResponseEntity<ItemDTO> buscarPorId(@PathVariable Long id){
         logger.info("Inicio do método buscarPorId");
         logger.info("Buscando item por id: {}", id);
@@ -89,6 +108,12 @@ public class ItemController {
 
     @DeleteMapping("/itens/{id}")
     @Transactional
+    @Operation(summary = "Remove item", description = "Exclui um item existente pelo ID.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Item removido com sucesso"),
+            @ApiResponse(responseCode = "422", description = "Existem históricos vinculados ao item"),
+            @ApiResponse(responseCode = "404", description = "Item não encontrado")
+    })
     public ResponseEntity<Void> apagar(@PathVariable Long id) {
         logger.info("Inicio do método apagar");
         logger.info("Apagando item por id: {}", id);
@@ -110,6 +135,11 @@ public class ItemController {
 
     @PutMapping("/itens/{id}")
     @Transactional
+    @Operation(summary = "Atualiza item", description = "Altera os dados de um item existente.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Item atualizado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Item não encontrado")
+    })
     public ResponseEntity<ItemDTO> atualizarItem(@PathVariable Long id, @RequestBody ItemDTO itemDTO) {
         logger.info("Inicio do método atualizarItem");
         logger.info("Atualizando item por id: {}", id);
@@ -127,6 +157,11 @@ public class ItemController {
 
     @PostMapping("/itens")
     @Transactional
+    @Operation(summary = "Cadastra item", description = "Cria um novo item na base de dados.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Item cadastrado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos para cadastro")
+    })
     public ResponseEntity<ItemDTO> cadastrarItem(@RequestBody ItemDTO itemDTO) {
         logger.info("Inicio do método cadastrarItem");
         logger.info("Cadastrando Item: {}", itemDTO);
@@ -148,6 +183,13 @@ public class ItemController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/itens/gerar-pdf-lista")
+     @Operation(summary = "Gera PDF da lista de itens", description = "Exporta a lista completa de itens em PDF.")
+     @ApiResponses({
+             @ApiResponse(responseCode = "200", description = "PDF gerado com sucesso"),
+             @ApiResponse(responseCode = "204", description = "Nenhum item encontrado para o relatório"),
+             @ApiResponse(responseCode = "400", description = "Parâmetros inválidos para geração do PDF"),
+             @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o relatório")
+     })
     public ResponseEntity<byte[]> gerarPdfLista() {
         logger.info("Início do método gerarPdfLista – ItemController");
         try {
@@ -206,6 +248,13 @@ public class ItemController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/itens/gerar-pdf-detalhe/{id:[0-9]+}")
+     @Operation(summary = "Gera PDF detalhado do item", description = "Exporta a ficha detalhada de um item específico em PDF.")
+     @ApiResponses({
+             @ApiResponse(responseCode = "200", description = "PDF gerado com sucesso"),
+             @ApiResponse(responseCode = "404", description = "Item não encontrado"),
+             @ApiResponse(responseCode = "400", description = "Parâmetros inválidos para geração do PDF"),
+             @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o relatório")
+     })
     public ResponseEntity<byte[]> gerarPdfDetalhe(@PathVariable Long id) {
         logger.info("Início do método gerarPdfDetalhe – ItemController – id: {}", id);
         try {

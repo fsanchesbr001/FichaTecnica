@@ -5,7 +5,6 @@ import com.fabriciosanches.fichatecnica.controllers.AutenticacaoController;
 import com.fabriciosanches.fichatecnica.domains.Usuario;
 import com.fabriciosanches.fichatecnica.enums.UserRole;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
-import com.fabriciosanches.fichatecnica.repository.UsuarioRepository;
 import com.fabriciosanches.fichatecnica.security.TokenBlacklistService;
 import com.fabriciosanches.fichatecnica.security.TokenService;
 import com.fabriciosanches.fichatecnica.services.SegurancaService;
@@ -46,14 +45,12 @@ class AutenticacaoControllerTest {
     void setUp() {
         manager = Mockito.mock(AuthenticationManager.class);
         tokenService = Mockito.mock(TokenService.class);
-        UsuarioRepository usuarioRepository = Mockito.mock(UsuarioRepository.class);
         segurancaService = Mockito.mock(SegurancaService.class);
         tokenBlacklistService = Mockito.mock(TokenBlacklistService.class);
 
         AutenticacaoController controller = new AutenticacaoController(
                 manager,
                 tokenService,
-                usuarioRepository,
                 segurancaService,
                 tokenBlacklistService
         );

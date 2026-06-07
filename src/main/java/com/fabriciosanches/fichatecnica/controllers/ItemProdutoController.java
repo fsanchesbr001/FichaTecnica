@@ -7,6 +7,11 @@ import com.fabriciosanches.fichatecnica.dtos.ProdutosPorItemDTO;
 import com.fabriciosanches.fichatecnica.dtos.QuantidadeValorDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.services.ItensProdutoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +21,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("ficha-tecnica")
+@Tag(name = "Itens de Produto", description = "Associação entre itens e produtos, valores totais e gráfico de composição")
+@SecurityRequirement(name = "bearerAuth")
 public class ItemProdutoController {
 
     private static final Logger logger = LogManager.getLogger(ItemProdutoController.class);
@@ -27,6 +34,11 @@ public class ItemProdutoController {
     }
 
     @PostMapping("/produtos/{idProduto}/itens")
+    @Operation(summary = "Salva itens do produto", description = "Associa uma lista de itens a um produto informado.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Itens vinculados com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Erro ao salvar itens do produto")
+    })
     public ResponseEntity<List<ProdutoCompletoDTO>> salvarItemProduto(@PathVariable("idProduto") Long idProduto,
                                                                       @RequestBody List<ItemProdutoDTO> itemProduto) {
         logger.info("Inicio do método salvarItemProduto");
@@ -41,6 +53,11 @@ public class ItemProdutoController {
     }
 
     @GetMapping("/produtos/{idProduto}/itens")
+    @Operation(summary = "Lista itens de um produto", description = "Retorna a composição completa de um produto.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Composição retornada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Erro ao buscar itens do produto")
+    })
     public ResponseEntity<List<ProdutoCompletoDTO>> buscarItensProduto(@PathVariable("idProduto") Long idProduto) {
         logger.info("Inicio do método buscarItensProduto");
         try {
@@ -54,6 +71,11 @@ public class ItemProdutoController {
     }
 
     @GetMapping("/produtos/{idProduto}/valores")
+    @Operation(summary = "Calcula valores do produto", description = "Retorna a quantidade total e o valor total dos itens do produto.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Valores calculados com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Erro ao calcular valores")
+    })
     public ResponseEntity<QuantidadeValorDTO> obterValoresItens(@PathVariable("idProduto") Long idProduto) {
         logger.info("Inicio do método obterValoresItens");
         try {
@@ -67,6 +89,11 @@ public class ItemProdutoController {
     }
 
     @GetMapping("/itens/{idItem}/produtos")
+    @Operation(summary = "Lista produtos por item", description = "Retorna todos os produtos vinculados a um item.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Produtos retornados com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Erro ao obter produtos")
+    })
     public ResponseEntity<List<ProdutosPorItemDTO>> ListarProdutosPorItem(@PathVariable("idItem") Long idItem) {
         logger.info("Inicio do método ListarProdutosPorItem");
         try {
@@ -80,6 +107,11 @@ public class ItemProdutoController {
     }
 
     @DeleteMapping("/produtos/{idProduto}/itens/{idItem}")
+    @Operation(summary = "Remove item do produto", description = "Desfaz a associação entre um item e um produto.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Associação removida com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Erro ao deletar item do produto")
+    })
     public ResponseEntity<Void> deletarItemProduto(@PathVariable("idProduto") Long idProduto,
                                                     @PathVariable("idItem") Long idItem) {
         logger.info("Inicio do método deletarItemProduto");
@@ -94,6 +126,10 @@ public class ItemProdutoController {
     }
 
     @PutMapping("/{idProduto}/{idItem}/quantidade")
+    @Operation(summary = "Atualiza quantidade do item no produto", description = "Altera a quantidade de um item em um produto específico.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Quantidade atualizada com sucesso")
+    })
     public ResponseEntity<Void> atualizarQuantidadeItemProduto(
             @PathVariable Long idProduto,
             @PathVariable Long idItem,
@@ -114,6 +150,12 @@ public class ItemProdutoController {
      * @return {@link GraficoPizzaDTO} pronto para consumo pelo Angular (ng2-charts)
      */
     @GetMapping("/produtos/{idProduto}/grafico-pizza")
+    @Operation(summary = "Gera gráfico de pizza", description = "Retorna os dados da composição percentual de custo do produto.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Gráfico gerado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Dados insuficientes para gerar o gráfico"),
+            @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o gráfico")
+    })
     public ResponseEntity<GraficoPizzaDTO> gerarGraficoPizza(@PathVariable Long idProduto) {
         logger.info("Início do método gerarGraficoPizza – idProduto={}", idProduto);
         try {

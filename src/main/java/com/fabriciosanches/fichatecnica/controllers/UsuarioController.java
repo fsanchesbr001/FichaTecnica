@@ -12,6 +12,11 @@ import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.services.SegurancaService;
 import com.fabriciosanches.fichatecnica.enums.UserRole;
 import jakarta.mail.MessagingException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +31,8 @@ import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("ficha-tecnica/usuarios")
+@Tag(name = "Usuários", description = "Administração de usuários, permissões e bloqueios")
+@SecurityRequirement(name = "bearerAuth")
 public class UsuarioController {
 
     private static final Logger logger = LogManager.getLogger(UsuarioController.class);
@@ -45,6 +52,11 @@ public class UsuarioController {
      */
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/roles")
+    @Operation(summary = "Lista roles disponíveis", description = "Retorna as roles do sistema para uso em cadastros e filtros.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Roles retornadas com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Erro ao listar roles")
+    })
     public ResponseEntity<UserRolesDTO> listarRoles() {
         logger.info("Inicio do método listarRoles - UsuarioController");
         try {
@@ -73,6 +85,11 @@ public class UsuarioController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/registrar-usuario")
     @Transactional
+    @Operation(summary = "Registra usuário", description = "Cria um novo usuário no sistema.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Usuário registrado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos para registro")
+    })
     public ResponseEntity<?> registrarUsuario(@RequestBody RegisterDTO dados) {
         logger.info("Inicio do método registrarUsuario - UsuarioController");
         logger.info("Parâmetros de entrada: {}", dados);
@@ -93,6 +110,11 @@ public class UsuarioController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/excluir-usuario")
     @Transactional
+    @Operation(summary = "Exclui usuário", description = "Remove um usuário do sistema pelo e-mail informado.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Usuário excluído com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Erro ao excluir usuário")
+    })
     public ResponseEntity<?> excluirUsuario(@RequestBody BloqueiosRequestDTO dados) {
         logger.info("Inicio do método excluirUsuario - UsuarioController");
         logger.info("Parâmetros de entrada: {}", dados);
@@ -110,6 +132,11 @@ public class UsuarioController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/primeiro-acesso/{email}")
     @Transactional
+    @Operation(summary = "Executa primeiro acesso", description = "Dispara o fluxo de primeiro acesso para o e-mail informado.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Fluxo executado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Erro ao executar o primeiro acesso")
+    })
     public ResponseEntity<?> primeiroAcesso(@PathVariable String email) {
         logger.info("Inicio do método primeiroAcesso - UsuarioController");
         logger.info("Parâmetro de entrada - email: {}", email);
@@ -130,6 +157,11 @@ public class UsuarioController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/resetar-senha")
     @Transactional
+    @Operation(summary = "Reseta senha", description = "Expira a senha do usuário para forçar a redefinição no próximo login.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Senha resetada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Erro ao resetar senha")
+    })
     public ResponseEntity<?> resetarSenhaUsuario(@RequestBody BloqueiosRequestDTO dados) {
         logger.info("Inicio do método resetarSenhaUsuario - UsuarioController");
         logger.info("Parâmetros de entrada: {}", dados);
@@ -148,6 +180,11 @@ public class UsuarioController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/bloqueio-administrativo")
     @Transactional
+    @Operation(summary = "Bloqueia usuário", description = "Executa o bloqueio administrativo de um usuário.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Usuário bloqueado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Erro ao bloquear usuário")
+    })
     public ResponseEntity<BloqueiosResponseDTO> bloqueioAdministrativo(@RequestBody BloqueiosRequestDTO bloqueiosRequestDTO) {
         logger.info("Inicio do método bloqueioAdministrativo - UsuarioController");
         logger.info("Parâmetros de entrada: {}", bloqueiosRequestDTO);
@@ -166,6 +203,11 @@ public class UsuarioController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/desbloqueio-administrativo")
     @Transactional
+    @Operation(summary = "Desbloqueia usuário", description = "Remove o bloqueio administrativo de um usuário.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Usuário desbloqueado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Erro ao desbloquear usuário")
+    })
     public ResponseEntity<BloqueiosResponseDTO> desbloqueioAdministrativo(@RequestBody BloqueiosRequestDTO bloqueiosRequestDTO) {
         logger.info("Inicio do método desbloqueioAdministrativo - UsuarioController");
         logger.info("Parâmetros de entrada: {}", bloqueiosRequestDTO);
@@ -183,6 +225,11 @@ public class UsuarioController {
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/atualizar-usuario/{email}")
     @Transactional
+    @Operation(summary = "Atualiza usuário", description = "Altera os dados de um usuário identificado pelo e-mail.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Usuário atualizado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Erro ao atualizar usuário")
+    })
     public ResponseEntity<UsuarioListagemDTO> atualizarUsuario(@PathVariable String email,
                                                                @RequestBody AtualizarUsuarioRequestDTO dados) {
         logger.info("Inicio do método atualizarUsuario - UsuarioController");
@@ -201,6 +248,12 @@ public class UsuarioController {
 
     @GetMapping("/listar-todos-usuarios")
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Lista usuários", description = "Retorna todos os usuários cadastrados no sistema.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Usuários retornados com sucesso"),
+            @ApiResponse(responseCode = "204", description = "Nenhum usuário encontrado"),
+            @ApiResponse(responseCode = "400", description = "Erro ao listar usuários")
+    })
     public ResponseEntity<List<UsuarioListagemDTO>> listarTodosUsuarios() {
         logger.info("Inicio do método listarTodosUsuarios - UsuarioController");
         try {
@@ -220,6 +273,12 @@ public class UsuarioController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'SYSTEM')")
     @GetMapping("/buscar-usuario/{email}")
+    @Operation(summary = "Busca usuário por e-mail", description = "Retorna os dados de um usuário específico a partir do e-mail.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Usuário encontrado"),
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado"),
+            @ApiResponse(responseCode = "400", description = "Erro ao buscar usuário")
+    })
     public ResponseEntity<UsuarioListagemDTO> buscarUsuarioPorEmail(@PathVariable String email) {
         logger.info("Inicio do método buscarUsuarioPorEmail - UsuarioController");
         logger.info("Parâmetro de entrada: {}", email);

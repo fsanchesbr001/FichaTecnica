@@ -80,6 +80,16 @@ Depois, ajuste os valores dos arquivos `*.txt` e da `.env.prod`.
 - `DB_USER=${MYSQL_USER}`
 - `DB_PWD=${MYSQL_PASSWORD}`
 
+## Swagger / OpenAPI
+
+A documentação automática da API fica disponível em:
+
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- JSON OpenAPI: `http://localhost:8080/v3/api-docs`
+- Atalho amigável: `http://localhost:8080/swagger` ou `http://localhost:8080/docs`
+
+Se o backend estiver em outro host/porta, ajuste a URL conforme o ambiente.
+
 ## Documentação
 - [Spring Boot](https://spring.io/projects/spring-boot)
 - [Spring Data JPA](https://spring.io/projects/spring-data-jpa)
@@ -143,3 +153,4 @@ Depois, ajuste os valores dos arquivos `*.txt` e da `.env.prod`.
 - 21/05/2026 - Versão 1.9.6 - Adição de imagem ao produto.
 - 28/05/2026 - Versão 1.9.7 - Testes Unitarios.
 - 06/06/2026 - Versão 1.9.8 - Migração preparatória para PRODUÇÃO
+- 07/06/2026 - Versão 1.9.9 - Novos testes e docker e documentação.
