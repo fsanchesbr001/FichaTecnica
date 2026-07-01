@@ -154,3 +154,4 @@ Se o backend estiver em outro host/porta, ajuste a URL conforme o ambiente.
 - 28/05/2026 - Versão 1.9.7 - Testes Unitarios.
 - 06/06/2026 - Versão 1.9.8 - Migração preparatória para PRODUÇÃO
 - 07/06/2026 - Versão 1.9.9 - Novos testes e docker e documentação.
+- 01/07/2026 - Versão 2.0.0 - Migração para Clean Architecture (Arquitetura Hexagonal) - Inicio Unidade Medida.
