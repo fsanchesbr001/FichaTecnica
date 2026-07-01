@@ -2,7 +2,6 @@ package com.fabriciosanches.fichatecnica.controllers;
 
 import com.fabriciosanches.fichatecnica.constants.Constants;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
-import com.fabriciosanches.fichatecnica.repository.UsuarioRepository;
 import com.fabriciosanches.fichatecnica.security.DadosTokenJWT;
 import com.fabriciosanches.fichatecnica.security.TokenBlacklistService;
 import com.fabriciosanches.fichatecnica.security.TokenService;
@@ -10,6 +9,11 @@ import com.fabriciosanches.fichatecnica.dtos.AutenticacaoDTO;
 import com.fabriciosanches.fichatecnica.domains.Usuario;
 import com.fabriciosanches.fichatecnica.services.SegurancaService;
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,6 +27,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "Autenticação", description = "Login, logout e emissão de JWT para acesso à API")
 public class AutenticacaoController {
 
     private final AuthenticationManager manager;
@@ -32,7 +37,6 @@ public class AutenticacaoController {
 
     public AutenticacaoController(AuthenticationManager manager,
                                   TokenService tokenService,
-                                  UsuarioRepository usuarioRepository,
                                   SegurancaService segurancaService,
                                   TokenBlacklistService tokenBlacklistService) {
         this.manager = manager;
@@ -43,6 +47,12 @@ public class AutenticacaoController {
 
     //Testado
     @PostMapping("/login")
+    @Operation(summary = "Efetua login", description = "Autentica o usuário e retorna o token JWT com dados de expiração e perfil.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Login realizado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Credenciais inválidas ou dados obrigatórios ausentes"),
+            @ApiResponse(responseCode = "500", description = "Erro inesperado ao autenticar")
+    })
     public ResponseEntity<DadosTokenJWT> efetuarLogin(@RequestBody @Valid AutenticacaoDTO dados){
         LoggerFactory.getLogger(this.getClass()).info("Fluxo entrou no método efetuarLogin - Usuário: {}", dados.login());
 
@@ -92,6 +102,13 @@ public class AutenticacaoController {
      * @return 200 OK com mensagem de confirmação, ou 400 se não houver sessão ativa
      */
     @PostMapping("/logout")
+    @Operation(summary = "Efetua logout", description = "Revoga o token JWT atual e encerra a sessão do usuário.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Logout realizado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Não há sessão ativa ou o token não pôde ser validado"),
+            @ApiResponse(responseCode = "401", description = "Token ausente ou inválido")
+    })
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Map<String, String>> efetuarLogout() {
         LoggerFactory.getLogger(this.getClass()).info("Fluxo entrou no método efetuarLogout");
 

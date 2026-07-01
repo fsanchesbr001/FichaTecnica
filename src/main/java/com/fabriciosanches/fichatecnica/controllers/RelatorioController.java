@@ -4,6 +4,11 @@ import com.fabriciosanches.fichatecnica.dtos.RelatorioRequestDTO;
 import com.fabriciosanches.fichatecnica.services.RelatorioService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +28,8 @@ import java.time.format.DateTimeFormatter;
  */
 @RestController
 @RequestMapping("ficha-tecnica/relatorios")
+@Tag(name = "Relatórios", description = "Geração de relatórios em PDF a partir de dados JSON")
+@SecurityRequirement(name = "bearerAuth")
 public class RelatorioController {
 
     private static final Logger logger = LogManager.getLogger(RelatorioController.class);
@@ -62,6 +69,12 @@ public class RelatorioController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/gerar-pdf")
+    @Operation(summary = "Gera relatório PDF", description = "Recebe os dados do relatório em JSON e devolve o arquivo PDF pronto para download.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "PDF gerado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Parâmetros inválidos para geração do PDF"),
+            @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o PDF")
+    })
     public ResponseEntity<byte[]> gerarPDF(@RequestBody RelatorioRequestDTO request) {
         logger.info("Início do método gerarPDF – RelatorioController");
         logger.info("Título do relatório: '{}'", request.titulo());

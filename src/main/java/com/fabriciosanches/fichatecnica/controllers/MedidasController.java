@@ -9,6 +9,11 @@ import com.fabriciosanches.fichatecnica.services.RelatorioService;
 import com.fabriciosanches.fichatecnica.services.UnidadeMedidaService;
 import com.google.gson.Gson;
 import jakarta.transaction.Transactional;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpHeaders;
@@ -26,6 +31,8 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("ficha-tecnica")
+@Tag(name = "Unidades de Medida", description = "Cadastro, consulta, atualização, exclusão e relatórios de unidades de medida")
+@SecurityRequirement(name = "bearerAuth")
 public class MedidasController {
     private static final Logger logger = LogManager.getLogger(MedidasController.class);
 
@@ -38,6 +45,11 @@ public class MedidasController {
     }
 
     @GetMapping("/unidades-medida")
+    @Operation(summary = "Lista unidades de medida", description = "Retorna todas as unidades de medida cadastradas.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Erro ao buscar unidades de medida")
+    })
     public ResponseEntity<List<UnidadeMedidaDTO>> buscarLista(){
         logger.info("Inicio do método buscarLista");
         logger.info("Buscando lista de unidades de medida");
@@ -55,6 +67,11 @@ public class MedidasController {
     }
 
     @GetMapping("/unidades-medida/{id:[0-9]+}")
+    @Operation(summary = "Busca unidade de medida por ID", description = "Retorna os dados de uma unidade de medida específica.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Unidade encontrada"),
+            @ApiResponse(responseCode = "404", description = "Unidade não encontrada")
+    })
     public ResponseEntity<UnidadeMedidaDTO> buscarPorId(@PathVariable Long id){
         logger.info("Inicio do método buscarPorId");
         logger.info("Buscando unidade de medida por id: {}", id);
@@ -71,6 +88,12 @@ public class MedidasController {
     }
 
     @DeleteMapping("/unidades-medida/{id:[0-9]+}")
+    @Operation(summary = "Remove unidade de medida", description = "Exclui uma unidade de medida existente pelo ID.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Unidade removida com sucesso"),
+            @ApiResponse(responseCode = "409", description = "Unidade vinculada a outros registros"),
+            @ApiResponse(responseCode = "404", description = "Unidade não encontrada")
+    })
     public ResponseEntity<?> apagar(@PathVariable Long id) {
         logger.info("Inicio do método apagar");
         logger.info("Apagando unidade de medida por id: {}", id);
@@ -88,6 +111,11 @@ public class MedidasController {
 
     @PutMapping("/unidades-medida/{id:[0-9]+}")
     @Transactional
+    @Operation(summary = "Atualiza unidade de medida", description = "Altera os dados de uma unidade de medida existente.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Unidade atualizada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos para atualização")
+    })
     public ResponseEntity<?> atualizarUnidade(@PathVariable Long id, @RequestBody UnidadeMedidaDTO unidade) {
         logger.info("Inicio do método atualizarUnidade");
         logger.info("Atualizando unidade de medida por id: {}", id);
@@ -105,6 +133,11 @@ public class MedidasController {
 
     @PostMapping("/unidades-medida")
     @Transactional
+    @Operation(summary = "Cadastra unidade de medida", description = "Cria uma nova unidade de medida.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Unidade cadastrada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos para cadastro")
+    })
     public ResponseEntity<?> cadastrarUnidade(@RequestBody UnidadeMedidaDTO unidade) {
         logger.info("Inicio do método cadastrarUnidade");
         logger.info("Cadastrando unidade de medida: {}", unidade);
@@ -126,6 +159,13 @@ public class MedidasController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/unidades-medida/gerar-pdf-lista")
+     @Operation(summary = "Gera PDF da lista de unidades", description = "Exporta a lista completa de unidades de medida em PDF.")
+     @ApiResponses({
+             @ApiResponse(responseCode = "200", description = "PDF gerado com sucesso"),
+             @ApiResponse(responseCode = "204", description = "Nenhuma unidade encontrada para o relatório"),
+             @ApiResponse(responseCode = "400", description = "Parâmetros inválidos para geração do PDF"),
+             @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o relatório")
+     })
     public ResponseEntity<byte[]> gerarPdfLista() {
         logger.info("Início do método gerarPdfLista – MedidasController");
         try {
@@ -180,6 +220,13 @@ public class MedidasController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/unidades-medida/gerar-pdf-detalhe/{id:[0-9]+}")
+     @Operation(summary = "Gera PDF detalhado da unidade", description = "Exporta a ficha detalhada de uma unidade de medida em PDF.")
+     @ApiResponses({
+             @ApiResponse(responseCode = "200", description = "PDF gerado com sucesso"),
+             @ApiResponse(responseCode = "404", description = "Unidade não encontrada"),
+             @ApiResponse(responseCode = "400", description = "Parâmetros inválidos para geração do PDF"),
+             @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o relatório")
+     })
     public ResponseEntity<byte[]> gerarPdfDetalhe(@PathVariable Long id) {
         logger.info("Início do método gerarPdfDetalhe – MedidasController – id: {}", id);
         try {

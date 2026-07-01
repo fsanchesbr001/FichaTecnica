@@ -11,6 +11,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
 import java.util.Map;
@@ -29,6 +34,8 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("ficha-tecnica/produtos")
+@Tag(name = "Imagens de Produto", description = "Upload assíncrono, monitoramento de jobs e remoção de imagens de produto")
+@SecurityRequirement(name = "bearerAuth")
 public class ProdutoImagemController {
 
     private static final Logger logger = LogManager.getLogger(ProdutoImagemController.class);
@@ -55,6 +62,12 @@ public class ProdutoImagemController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(value = "/{id}/imagem/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Inicia upload de imagem", description = "Inicia o upload assíncrono da imagem de um produto e retorna o job de processamento.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "202", description = "Upload iniciado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Imagem inválida ou dados incorretos"),
+            @ApiResponse(responseCode = "500", description = "Erro inesperado ao iniciar o upload")
+    })
     public ResponseEntity<?> iniciarUpload(
             @PathVariable Long id,
             @RequestPart("file") MultipartFile file) {
@@ -95,6 +108,13 @@ public class ProdutoImagemController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}/imagem/status/{jobId}")
+    @Operation(summary = "Consulta status do upload", description = "Verifica o andamento de um job de upload de imagem.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Status retornado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Job não encontrado"),
+            @ApiResponse(responseCode = "409", description = "Job não pertence ao produto informado"),
+            @ApiResponse(responseCode = "500", description = "Erro inesperado ao consultar o status")
+    })
     public ResponseEntity<?> consultarStatus(
             @PathVariable Long id,
             @PathVariable String jobId) {
@@ -137,6 +157,12 @@ public class ProdutoImagemController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}/imagem")
+    @Operation(summary = "Remove imagem do produto", description = "Apaga a imagem vinculada ao produto e limpa o registro no banco.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Imagem removida com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Produto não encontrado"),
+            @ApiResponse(responseCode = "500", description = "Erro inesperado ao remover a imagem")
+    })
     public ResponseEntity<?> removerImagem(@PathVariable Long id) {
         logger.info("[ProdutoImagemController] Removendo imagem do produto id={}", id);
 
@@ -169,6 +195,10 @@ public class ProdutoImagemController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/imagem/jobs")
+    @Operation(summary = "Lista jobs de upload", description = "Retorna todos os jobs de upload registrados na sessão atual da aplicação.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Jobs retornados com sucesso")
+    })
     public ResponseEntity<List<UploadJobDTO>> listarJobs() {
         logger.info("[ProdutoImagemController] Listando todos os jobs de upload");
         return ResponseEntity.ok(uploadService.listarJobsAtivos());

@@ -14,6 +14,11 @@ import com.fabriciosanches.fichatecnica.services.ProdutoService;
 import com.fabriciosanches.fichatecnica.services.RelatorioService;
 import com.google.gson.Gson;
 import jakarta.transaction.Transactional;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,6 +43,8 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("ficha-tecnica")
+@Tag(name = "Produtos", description = "Cadastro, consulta, atualização, exclusão e relatórios de produtos")
+@SecurityRequirement(name = "bearerAuth")
 public class ProdutoController {
     private static final Logger logger = LogManager.getLogger(ProdutoController.class);
 
@@ -63,6 +70,12 @@ public class ProdutoController {
     }
 
     @GetMapping("/produtos")
+    @Operation(summary = "Lista produtos", description = "Retorna todos os produtos cadastrados.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso"),
+            @ApiResponse(responseCode = "204", description = "Nenhum produto encontrado"),
+            @ApiResponse(responseCode = "404", description = "Erro ao consultar produtos")
+    })
     public ResponseEntity<List<ProdutoDTO>> buscarLista(){
         logger.info("Inicio do método buscarLista");
         logger.info("Buscando lista de produto");
@@ -86,6 +99,11 @@ public class ProdutoController {
 
     @PostMapping("/produtos")
     @Transactional
+    @Operation(summary = "Cadastra produto", description = "Cria um novo produto na base de dados.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Produto cadastrado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos para cadastro")
+    })
     public ResponseEntity<ProdutoDTO> cadastrarProduto(@RequestBody ProdutoDTO produto) {
         logger.info("Inicio do método cadastrarProduto");
         logger.info("Cadastrando produto: {}", produto);
@@ -107,6 +125,13 @@ public class ProdutoController {
       */
      @PreAuthorize("hasRole('ADMIN')")
      @GetMapping("/produtos/gerar-pdf-lista")
+      @Operation(summary = "Gera PDF da lista de produtos", description = "Exporta a lista completa de produtos em PDF.")
+      @ApiResponses({
+              @ApiResponse(responseCode = "200", description = "PDF gerado com sucesso"),
+              @ApiResponse(responseCode = "204", description = "Nenhum produto encontrado para o relatório"),
+              @ApiResponse(responseCode = "400", description = "Parâmetros inválidos para geração do PDF"),
+              @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o relatório")
+      })
      public ResponseEntity<byte[]> gerarPdfLista() {
          logger.info("Início do método gerarPdfLista – ProdutoController");
          try {
@@ -162,16 +187,23 @@ public class ProdutoController {
       */
      @PreAuthorize("hasRole('ADMIN')")
      @GetMapping("/produtos/gerar-pdf-detalhe/{id:[0-9]+}")
+      @Operation(summary = "Gera PDF detalhado do produto", description = "Exporta a ficha detalhada de um produto específico em PDF.")
+      @ApiResponses({
+              @ApiResponse(responseCode = "200", description = "PDF gerado com sucesso"),
+              @ApiResponse(responseCode = "404", description = "Produto não encontrado"),
+              @ApiResponse(responseCode = "400", description = "Parâmetros inválidos para geração do PDF"),
+              @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o relatório")
+      })
      public ResponseEntity<byte[]> gerarPdfDetalhe(@PathVariable Long id) {
          logger.info("Início do método gerarPdfDetalhe – ProdutoController – id: {}", id);
          try {
              ProdutoDTO produto = produtoService.buscarPorId(id);
              List<ProdutoCompletoDTO> itensProduto = itensProdutoService.listarItensProduto(id);
-             List<Long> codigosUnidade = itensProduto.stream()
-                     .map(ProdutoCompletoDTO::cdUnidade)
-                     .filter(codigo -> codigo != null)
-                     .distinct()
-                     .toList();
+              List<Long> codigosUnidade = itensProduto.stream()
+                      .map(ProdutoCompletoDTO::cdUnidade)
+                      .filter(java.util.Objects::nonNull)
+                      .distinct()
+                      .toList();
              Map<Long, String> descricoesUnidade = itensProdutoService.obterDescricoesUnidade(codigosUnidade);
 
              String jsonData = new Gson().toJson(List.of(montarRegistroRelatorio(produto, itensProduto, descricoesUnidade)));
@@ -333,6 +365,12 @@ public class ProdutoController {
     }
 
     @GetMapping("/produtos/{id:[0-9]+}")
+    @Operation(summary = "Busca produto por ID", description = "Retorna os dados de um produto específico.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Produto encontrado"),
+            @ApiResponse(responseCode = "204", description = "Produto não encontrado"),
+            @ApiResponse(responseCode = "404", description = "Erro ao buscar produto")
+    })
     public ResponseEntity<ProdutoDTO> buscarPorId(@PathVariable Long id){
         logger.info("Inicio do método buscarPorId");
         logger.info("Buscando produto por id: {}", id);
@@ -355,6 +393,11 @@ public class ProdutoController {
 
     @PutMapping("/produtos/{id:[0-9]+}")
     @Transactional
+    @Operation(summary = "Atualiza produto", description = "Altera os dados de um produto existente.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Produto atualizado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Produto não encontrado")
+    })
     public ResponseEntity<ProdutoDTO> atualizarProduto(@PathVariable Long id, @RequestBody ProdutoDTO produto) {
         logger.info("Inicio do método atualizarProduto");
         logger.info("Atualizando produto por id: {}", id);
@@ -372,6 +415,11 @@ public class ProdutoController {
 
     @DeleteMapping("/produtos/{id:[0-9]+}")
     @Transactional
+    @Operation(summary = "Remove produto", description = "Exclui um produto existente pelo ID.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Produto removido com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Produto não encontrado")
+    })
     public ResponseEntity<Void> apagar(@PathVariable Long id) {
         logger.info("Inicio do método apagar");
         logger.info("Apagando produto por id: {}", id);
