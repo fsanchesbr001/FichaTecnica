@@ -1,23 +1,36 @@
 package com.fabriciosanches.fichatecnica.core.domain;
 
 public class UnidadeMedida {
-    private Long codigo;
-    private String nome;
-    private String sigla;
+    private final Long codigo;
+    private final String nome;
+    private final String sigla;
 
-    public UnidadeMedida(Long codigo,String nome,String sigla) {
-        if (codigo == null || nome == null || sigla == null) {
-            throw new IllegalArgumentException("Código, nome e sigla não podem ser nulos");
-        }
-
-        this.codigo = codigo;
-        this.nome = nome;
-        this.sigla = sigla;
+    public UnidadeMedida(String nome, String sigla) {
+        this(null, nome, sigla);
     }
 
-    private void validar(){
-        if (nome==null || nome.isBlank() || sigla==null || sigla.isBlank()) {
-            throw new IllegalArgumentException("Nome e sigla não podem ser vazios");
+    public UnidadeMedida(Long codigo, String nome, String sigla) {
+        this.codigo = codigo;
+        this.nome = validarCampo(nome, "Nome não pode ser vazio");
+        this.sigla = validarCampo(sigla, "Sigla não pode ser vazia");
+    }
+
+    private String validarCampo(String valor, String mensagem) {
+        if (valor == null || valor.isBlank()) {
+            throw new IllegalArgumentException(mensagem);
         }
+        return valor.trim();
+    }
+
+    public Long getCodigo() {
+        return codigo;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public String getSigla() {
+        return sigla;
     }
 }

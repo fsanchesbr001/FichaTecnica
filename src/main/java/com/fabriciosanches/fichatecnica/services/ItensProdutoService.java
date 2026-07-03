@@ -3,10 +3,11 @@ package com.fabriciosanches.fichatecnica.services;
 import com.fabriciosanches.fichatecnica.domains.*;
 import com.fabriciosanches.fichatecnica.dtos.*;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.SpringDataUnidadeMedidaRepository;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.UnidadeMedidaEntity;
 import com.fabriciosanches.fichatecnica.repository.ItemProdutoRepository;
 import com.fabriciosanches.fichatecnica.repository.ItemRepository;
 import com.fabriciosanches.fichatecnica.repository.ProdutoRepository;
-import com.fabriciosanches.fichatecnica.repository.UnidadeMedidaRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -29,14 +30,14 @@ public class ItensProdutoService {
     private final ItemProdutoRepository itemProdutoRepository;
     private final ProdutoRepository produtoRepository;
     private final ItemRepository itemRepository;
-    private final UnidadeMedidaRepository unidadeMedidaRepository;
+    private final SpringDataUnidadeMedidaRepository unidadeMedidaRepository;
     private final ConversaoService conversaoService;
 
 
     public ItensProdutoService(ItemProdutoRepository itemProdutoRepository,
                                ProdutoRepository produtoRepository,
                                ItemRepository itemRepository,
-                               UnidadeMedidaRepository unidadeMedidaRepository,
+                               SpringDataUnidadeMedidaRepository unidadeMedidaRepository,
                                ConversaoService conversaoService) {
         this.itemProdutoRepository = itemProdutoRepository;
         this.produtoRepository = produtoRepository;
@@ -103,7 +104,7 @@ public class ItensProdutoService {
         return unidadeMedidaRepository.findAllById(codigosUnidade)
                 .stream()
                 .collect(Collectors.toMap(
-                        UnidadeMedida::getCodigo,
+                        UnidadeMedidaEntity::getCodigo,
                         unidade -> {
                             String nome = unidade.getNome();
                             String sigla = unidade.getSigla();
@@ -304,7 +305,7 @@ public class ItensProdutoService {
     }
 
     private UnidadeMedidaDTO getUnidadeMedidaDTO(ItemProdutoDTO itemProduto) {
-        UnidadeMedida unidadeMedida = unidadeMedidaRepository.findById(itemProduto.cdUnidadeMedida())
+        UnidadeMedidaEntity unidadeMedida = unidadeMedidaRepository.findById(itemProduto.cdUnidadeMedida())
                 .orElseThrow(() -> {
                     logger.error("Unidade de medida não encontrada");
                     return new FichaTecnicaException("Unidade de medida não encontrada");
