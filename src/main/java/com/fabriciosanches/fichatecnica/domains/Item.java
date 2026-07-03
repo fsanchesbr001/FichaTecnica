@@ -1,6 +1,7 @@
 package com.fabriciosanches.fichatecnica.domains;
 
 import com.fabriciosanches.fichatecnica.dtos.ItemDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.UnidadeMedidaEntity;
 import com.fabriciosanches.fichatecnica.serializers.BigDecimalCurrencySerializer;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.*;
@@ -26,7 +27,7 @@ public class Item {
 
     @OneToOne(optional = false)
     @JoinColumn(name = "cd_unidade_medida")
-    private UnidadeMedida unidadeMedida;
+    private UnidadeMedidaEntity unidadeMedida;
 
     @OneToMany(mappedBy = "item")
     private List<ItemProduto> itemProdutoList;
