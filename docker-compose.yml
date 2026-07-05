@@ -51,8 +51,31 @@ services:
     volumes:
       - uploads-data:/olivander/ficha_tecnica/imagens
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: ficha-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "${PROMETHEUS_EXTERNAL_PORT:-9090}:9090"
+    depends_on:
+      backend:
+        condition: service_started
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: ficha-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+    ports:
+      - "${GRAFANA_EXTERNAL_PORT:-3000}:3000"
+    depends_on:
+      prometheus:
+        condition: service_started
+
 volumes:
   mysql-data:
   uploads-data:
-
 
