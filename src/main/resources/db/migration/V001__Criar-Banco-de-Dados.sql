@@ -23,8 +23,8 @@ VALUES('fabricio@fabriciosanches.com',
        'USER',
        'Fabricio Sanches 2');
 
--- fichatecnica.seguranca definição
-CREATE TABLE fichatecnica.seguranca (
+-- seguranca definição
+CREATE TABLE seguranca (
                                         codigo BIGINT auto_increment NOT NULL,
                                         email varchar(255) NOT NULL,
                                         data_criacao DATETIME NULL,
@@ -45,7 +45,7 @@ CREATE TABLE fichatecnica.seguranca (
     COMMENT='Informacoes de controle de acesso.';
 
 -- Inserindo dados na tabela seguranca
-INSERT INTO fichatecnica.seguranca (
+INSERT INTO seguranca (
     email,
     data_criacao,
     data_expiracao_senha,
@@ -71,7 +71,7 @@ INSERT INTO fichatecnica.seguranca (
              FALSE
          );
 
-INSERT INTO fichatecnica.seguranca (
+INSERT INTO seguranca (
     email,
     data_criacao,
     data_expiracao_senha,

@@ -8,7 +8,7 @@ Este projeto visa a criação de uma ficha técnica de um produto, onde é poss�
 ## Dependências
 - Spring Data JPA
 
-## Docker (Backend + MySQL)
+## Docker (Backend + MySQL + Observabilidade)
 
 Arquivos adicionados na raiz do projeto:
 - `Dockerfile`
@@ -17,6 +17,7 @@ Arquivos adicionados na raiz do projeto:
 - `.env.example`
 - `.env.prod.example`
 - `.dockerignore`
+- `docker/prometheus/prometheus.yml`
 
 ### Preparar variáveis locais
 
@@ -40,6 +41,12 @@ docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod
 
 ```bash
 docker compose --env-file .env logs -f backend
+```
+
+### Ver logs da observabilidade
+
+```bash
+docker compose --env-file .env logs -f prometheus grafana
 ```
 
 ### Parar os containers
@@ -90,6 +97,48 @@ A documentação automática da API fica disponível em:
 
 Se o backend estiver em outro host/porta, ajuste a URL conforme o ambiente.
 
+## Observabilidade (Actuator + Prometheus + Grafana)
+
+Com a aplicação em execução:
+
+- Health geral: `http://localhost:8080/actuator/health`
+- Liveness: `http://localhost:8080/actuator/health/liveness`
+- Readiness: `http://localhost:8080/actuator/health/readiness`
+- Métricas Prometheus: `http://localhost:8080/actuator/prometheus`
+- Prometheus UI: `http://localhost:9090`
+- Grafana UI: `http://localhost:3000`
+
+Credenciais padrão do Grafana:
+
+- Usuário: `admin`
+- Senha: valor de `GRAFANA_ADMIN_PASSWORD` (default `admin`)
+
+### Configurar datasource no Grafana
+
+1. Acesse `Connections` → `Data Sources` → `Add data source`.
+2. Selecione `Prometheus`.
+3. URL: `http://prometheus:9090`.
+4. Clique em `Save & test`.
+
+### Dashboards sugeridos
+
+- Importar dashboard JVM Micrometer: ID `4701`.
+- Importar dashboard Spring Boot: ID `11378`.
+
+Query para taxa de requisições por endpoint de Unidade de Medida:
+
+```promql
+sum(rate(http_server_requests_seconds_count{uri=~"/ficha-tecnica/unidades-medida.*"}[1m])) by (uri, method, status)
+```
+
+Query para latência média das requisições de Unidade de Medida:
+
+```promql
+sum(rate(http_server_requests_seconds_sum{uri=~"/ficha-tecnica/unidades-medida.*"}[1m]))
+/
+sum(rate(http_server_requests_seconds_count{uri=~"/ficha-tecnica/unidades-medida.*"}[1m]))
+```
+
 ## Documentação
 - [Spring Boot](https://spring.io/projects/spring-boot)
 - [Spring Data JPA](https://spring.io/projects/spring-data-jpa)
@@ -98,7 +147,6 @@ Se o backend estiver em outro host/porta, ajuste a URL conforme o ambiente.
 
 ## Próximos Passos
 
-- Adicionar Observabilidade e monitoramento da aplicação.
 - Adicionar Documentação da API com Swagger.
 
 
@@ -156,3 +204,4 @@ Se o backend estiver em outro host/porta, ajuste a URL conforme o ambiente.
 - 07/06/2026 - Versão 1.9.9 - Novos testes e docker e documentação.
 - 01/07/2026 - Versão 2.0.0 - Migração para Clean Architecture (Arquitetura Hexagonal) - Inicio Unidade Medida.
 - 02/07/2026 - Versão 2.0.1 - Migração para Clean Architecture (Arquitetura Hexagonal) - CRUD Unidade de Medida Completo.
+- 05/07/2026 - Versão 2.0.2 - Migração para Clean Architecture (Arquitetura Hexagonal) - Unidade de Medida completa com Grafana e docker OK
