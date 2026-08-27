@@ -1,23 +1,27 @@
-package com.fabriciosanches.fichatecnica.controllers;
+package com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web;
 
+import com.fabriciosanches.fichatecnica.core.domain.Conversao;
+import com.fabriciosanches.fichatecnica.core.ports.in.AtualizarConversaoPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.BuscarConversaoPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.CriarConversaoPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.DeletarConversaoPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.GerarRelatorioConversaoPort;
 import com.fabriciosanches.fichatecnica.dtos.ConversaoDTO;
 import com.fabriciosanches.fichatecnica.dtos.ConversaoRelatorioDTO;
 import com.fabriciosanches.fichatecnica.dtos.RelatorioRequestDTO;
 import com.fabriciosanches.fichatecnica.enums.OrientacaoRelatorio;
 import com.fabriciosanches.fichatecnica.enums.TipoRelatorio;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
-import com.fabriciosanches.fichatecnica.services.ConversaoService;
 import com.fabriciosanches.fichatecnica.services.RelatorioService;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializer;
-import jakarta.transaction.Transactional;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpHeaders;
@@ -35,7 +39,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-
 @RestController
 @RequestMapping("ficha-tecnica")
 @Tag(name = "Conversões", description = "Cadastro, consulta, atualização, exclusão e relatórios de conversões de unidades")
@@ -43,7 +46,6 @@ import java.util.Map;
 public class ConversaoController {
     private static final Logger logger = LogManager.getLogger(ConversaoController.class);
 
-    /** Gson com formatação de BigDecimal no padrão brasileiro (ex.: 1.234,56). */
     private static final Gson GSON_BR = new GsonBuilder()
             .registerTypeAdapter(BigDecimal.class, (JsonSerializer<BigDecimal>) (src, typeOfSrc, ctx) -> {
                 NumberFormat fmt = NumberFormat.getNumberInstance(new Locale("pt", "BR"));
@@ -53,11 +55,24 @@ public class ConversaoController {
             })
             .create();
 
-    final ConversaoService conversaoService;
-    final RelatorioService relatorioService;
+    private final BuscarConversaoPort buscarConversaoPort;
+    private final CriarConversaoPort criarConversaoPort;
+    private final AtualizarConversaoPort atualizarConversaoPort;
+    private final DeletarConversaoPort deletarConversaoPort;
+    private final GerarRelatorioConversaoPort gerarRelatorioConversaoPort;
+    private final RelatorioService relatorioService;
 
-    public ConversaoController(ConversaoService conversaoService, RelatorioService relatorioService) {
-        this.conversaoService = conversaoService;
+    public ConversaoController(BuscarConversaoPort buscarConversaoPort,
+                               CriarConversaoPort criarConversaoPort,
+                               AtualizarConversaoPort atualizarConversaoPort,
+                               DeletarConversaoPort deletarConversaoPort,
+                               GerarRelatorioConversaoPort gerarRelatorioConversaoPort,
+                               RelatorioService relatorioService) {
+        this.buscarConversaoPort = buscarConversaoPort;
+        this.criarConversaoPort = criarConversaoPort;
+        this.atualizarConversaoPort = atualizarConversaoPort;
+        this.deletarConversaoPort = deletarConversaoPort;
+        this.gerarRelatorioConversaoPort = gerarRelatorioConversaoPort;
         this.relatorioService = relatorioService;
     }
 
@@ -65,26 +80,17 @@ public class ConversaoController {
     @Operation(summary = "Lista conversões", description = "Retorna todas as conversões cadastradas.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso"),
-            @ApiResponse(responseCode = "204", description = "Nenhuma conversão encontrada"),
-            @ApiResponse(responseCode = "404", description = "Erro ao buscar conversões")
+            @ApiResponse(responseCode = "204", description = "Nenhuma conversão encontrada")
     })
-    public ResponseEntity<List<ConversaoRelatorioDTO>> buscarLista(){
+    public ResponseEntity<List<ConversaoRelatorioDTO>> buscarLista() {
         logger.info("Inicio do método buscarLista");
-        logger.info("Buscando lista de conversões");
-        try {
-            List<ConversaoRelatorioDTO> conversoes = conversaoService.listarParaPdf();
-            if (conversoes.isEmpty()) {
-                logger.error("Lista de conversoes não encontrada");
-                return ResponseEntity.noContent().build();
-            }
-            logger.info("Lista de conversoes encontrada: {}", conversoes);
-            logger.info("Fim do método buscarLista");
-            return ResponseEntity.ok(conversoes);
+        List<ConversaoRelatorioDTO> conversoes = gerarRelatorioConversaoPort.buscarTodosComNomes();
+        if (conversoes.isEmpty()) {
+            logger.warn("Lista de conversões não encontrada");
+            return ResponseEntity.noContent().build();
         }
-        catch (FichaTecnicaException e){
-            logger.error("Erro ao buscar lista de conversoes", e);
-            return ResponseEntity.notFound().build();
-        }
+        logger.info("Fim do método buscarLista");
+        return ResponseEntity.ok(conversoes);
     }
 
     @GetMapping("/conversoes/{id:[0-9]+}")
@@ -93,17 +99,13 @@ public class ConversaoController {
             @ApiResponse(responseCode = "200", description = "Conversão encontrada"),
             @ApiResponse(responseCode = "404", description = "Conversão não encontrada")
     })
-    public ResponseEntity<ConversaoDTO> buscarPorId(@PathVariable Long id){
+    public ResponseEntity<ConversaoDTO> buscarPorId(@PathVariable Long id) {
         logger.info("Inicio do método buscarPorId");
-        logger.info("Buscando conversoes por id: {}", id);
         try {
-            ConversaoDTO conversao = conversaoService.buscarPorId(id);
-            logger.info("Conversao encontrada: {}", conversao);
+            Conversao conversao = buscarConversaoPort.buscarPorId(id);
             logger.info("Fim do método buscarPorId");
-            return ResponseEntity.ok(conversao);
-        }
-        catch (FichaTecnicaException e){
-            logger.error("Erro ao buscar conversao por id", e);
+            return ResponseEntity.ok(toDto(conversao));
+        } catch (java.util.NoSuchElementException e) {
             return ResponseEntity.notFound().build();
         }
     }
@@ -111,20 +113,15 @@ public class ConversaoController {
     @DeleteMapping("/conversoes/{id:[0-9]+}")
     @Operation(summary = "Remove conversão", description = "Exclui uma conversão existente pelo ID.")
     @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Conversão removida com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Conversão não encontrada")
+            @ApiResponse(responseCode = "204", description = "Conversão removida com sucesso")
     })
     public ResponseEntity<Void> apagar(@PathVariable Long id) {
         logger.info("Inicio do método apagar");
-        logger.info("Apagando conversoes por id: {}", id);
         try {
-            conversaoService.deletarConversao(id);
-            logger.info("Conversao apagada com sucesso");
+            deletarConversaoPort.deletar(id);
             logger.info("Fim do método apagar");
             return ResponseEntity.noContent().build();
-        }
-        catch (FichaTecnicaException e){
-            logger.error("Erro ao apagar conversao por id", e);
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
@@ -138,15 +135,11 @@ public class ConversaoController {
     })
     public ResponseEntity<ConversaoDTO> atualizarConversao(@PathVariable Long id, @RequestBody ConversaoDTO conversao) {
         logger.info("Inicio do método atualizarConversao");
-        logger.info("Atualizando conversao por id: {}", id);
         try {
-            ConversaoDTO conversoes = conversaoService.atualizarConversao(id, conversao);
-            logger.info("Conversao atualizada com sucesso: {}", conversoes);
+            Conversao conversaoAtualizada = atualizarConversaoPort.atualizar(id, toDomain(conversao));
             logger.info("Fim do método atualizarConversao");
-            return ResponseEntity.ok(conversoes);
-        }
-        catch (FichaTecnicaException e){
-            logger.error("Erro ao atualizar conversao por id", e);
+            return ResponseEntity.ok(toDto(conversaoAtualizada));
+        } catch (java.util.NoSuchElementException e) {
             return ResponseEntity.notFound().build();
         }
     }
@@ -160,37 +153,28 @@ public class ConversaoController {
     })
     public ResponseEntity<ConversaoDTO> cadastrarConversao(@RequestBody ConversaoDTO conversao) {
         logger.info("Inicio do método cadastrarConversao");
-        logger.info("Cadastrando unidade de medida: {}", conversao);
         try {
-            ConversaoDTO conversaoResponseDTO = conversaoService.cadastrarConversao(conversao);
-            logger.info("Conversao cadastrada com sucesso: {}", conversaoResponseDTO);
+            Conversao conversaoCriada = criarConversaoPort.criar(toDomain(conversao));
             logger.info("Fim do método cadastrarConversao");
-            return ResponseEntity.ok(conversaoResponseDTO);
-        }
-        catch (FichaTecnicaException e){
-            logger.error("Erro ao cadastrar conversao", e);
+            return ResponseEntity.ok(toDto(conversaoCriada));
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
     }
 
-    /**
-     * Gera um PDF com a lista completa de Conversões ordenadas por Unidade De.
-     * Os nomes das unidades são resolvidos via JPQL JOIN (sem chamadas extras ao serviço).
-     * Colunas exibidas: Unidade De, Unidade Para, Operação e Valor.
-     */
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/conversoes/gerar-pdf-lista")
-     @Operation(summary = "Gera PDF da lista de conversões", description = "Exporta a lista completa de conversões em PDF.")
-     @ApiResponses({
-             @ApiResponse(responseCode = "200", description = "PDF gerado com sucesso"),
-             @ApiResponse(responseCode = "204", description = "Nenhuma conversão encontrada para o relatório"),
-             @ApiResponse(responseCode = "400", description = "Parâmetros inválidos para geração do PDF"),
-             @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o relatório")
-     })
+    @Operation(summary = "Gera PDF da lista de conversões", description = "Exporta a lista completa de conversões em PDF.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "PDF gerado com sucesso"),
+            @ApiResponse(responseCode = "204", description = "Nenhuma conversão encontrada para o relatório"),
+            @ApiResponse(responseCode = "400", description = "Parâmetros inválidos para geração do PDF"),
+            @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o relatório")
+    })
     public ResponseEntity<byte[]> gerarPdfLista() {
         logger.info("Início do método gerarPdfLista – ConversaoController");
         try {
-            List<ConversaoRelatorioDTO> lista = conversaoService.listarParaPdf();
+            List<ConversaoRelatorioDTO> lista = gerarRelatorioConversaoPort.buscarTodosComNomes();
 
             if (lista.isEmpty()) {
                 logger.warn("Nenhuma conversão encontrada para gerar o relatório");
@@ -200,10 +184,10 @@ public class ConversaoController {
             String jsonData = GSON_BR.toJson(lista);
 
             Map<String, String> colunas = new LinkedHashMap<>();
-            colunas.put("unidadeDe",   "De");
+            colunas.put("unidadeDe", "De");
             colunas.put("unidadePara", "Para");
-            colunas.put("operacao",    "Operação");
-            colunas.put("valor",       "Valor");
+            colunas.put("operacao", "Operação");
+            colunas.put("valor", "Valor");
 
             RelatorioRequestDTO request = new RelatorioRequestDTO(
                     jsonData, "",
@@ -219,48 +203,39 @@ public class ConversaoController {
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss"));
             String filename = "Lista-Conversoes-" + timestamp + ".pdf";
 
-            logger.info("PDF de lista de Conversões gerado com sucesso – arquivo: '{}'", filename);
-
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                     .contentType(MediaType.APPLICATION_PDF)
                     .body(pdfBytes);
 
         } catch (IllegalArgumentException e) {
-            logger.error("Parâmetros inválidos para geração do PDF de lista: {}", e.getMessage());
             return ResponseEntity.badRequest().build();
         } catch (Exception e) {
-            logger.error("Erro inesperado ao gerar PDF de lista de Conversões", e);
             return ResponseEntity.internalServerError().build();
         }
     }
 
-    /**
-     * Gera um PDF detalhado para uma Conversão específica, identificada por {id}.
-     * Os nomes das unidades são resolvidos via JPQL JOIN (sem chamadas extras ao serviço).
-     * O relatório exibe todos os campos no formato de ficha (DETALHE / PAISAGEM).
-     */
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/conversoes/gerar-pdf-detalhe/{id:[0-9]+}")
-     @Operation(summary = "Gera PDF detalhado da conversão", description = "Exporta a ficha detalhada de uma conversão específica em PDF.")
-     @ApiResponses({
-             @ApiResponse(responseCode = "200", description = "PDF gerado com sucesso"),
-             @ApiResponse(responseCode = "404", description = "Conversão não encontrada"),
-             @ApiResponse(responseCode = "400", description = "Parâmetros inválidos para geração do PDF"),
-             @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o relatório")
-     })
+    @Operation(summary = "Gera PDF detalhado da conversão", description = "Exporta a ficha detalhada de uma conversão específica em PDF.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "PDF gerado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Conversão não encontrada"),
+            @ApiResponse(responseCode = "400", description = "Parâmetros inválidos para geração do PDF"),
+            @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o relatório")
+    })
     public ResponseEntity<byte[]> gerarPdfDetalhe(@PathVariable Long id) {
         logger.info("Início do método gerarPdfDetalhe – ConversaoController – id: {}", id);
         try {
-            ConversaoRelatorioDTO conversao = conversaoService.buscarPorIdParaPdf(id);
+            ConversaoRelatorioDTO conversao = gerarRelatorioConversaoPort.buscarPorIdComNomes(id);
 
             String jsonData = GSON_BR.toJson(List.of(conversao));
 
             Map<String, String> colunas = new LinkedHashMap<>();
-            colunas.put("unidadeDe",   "Unidade De");
+            colunas.put("unidadeDe", "Unidade De");
             colunas.put("unidadePara", "Unidade Para");
-            colunas.put("operacao",    "Operação");
-            colunas.put("valor",       "Valor");
+            colunas.put("operacao", "Operação");
+            colunas.put("valor", "Valor");
 
             RelatorioRequestDTO request = new RelatorioRequestDTO(
                     jsonData, "", "Detalhe da Conversão", colunas,
@@ -274,22 +249,31 @@ public class ConversaoController {
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss"));
             String filename = "Detalhe-Conversao-" + id + "-" + timestamp + ".pdf";
 
-            logger.info("PDF de detalhe de Conversão gerado com sucesso – arquivo: '{}'", filename);
-
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                     .contentType(MediaType.APPLICATION_PDF)
                     .body(pdfBytes);
 
-        } catch (FichaTecnicaException e) {
-            logger.error("Conversão não encontrada para id {}: {}", id, e.getMessage());
+        } catch (java.util.NoSuchElementException e) {
             return ResponseEntity.notFound().build();
         } catch (IllegalArgumentException e) {
-            logger.error("Parâmetros inválidos para geração do PDF de detalhe: {}", e.getMessage());
             return ResponseEntity.badRequest().build();
         } catch (Exception e) {
-            logger.error("Erro inesperado ao gerar PDF de detalhe de Conversão", e);
             return ResponseEntity.internalServerError().build();
         }
+    }
+
+    private Conversao toDomain(ConversaoDTO dto) {
+        return new Conversao(dto.codigo(), dto.unidadeDe(), dto.unidadePara(), dto.operacao(), dto.valor());
+    }
+
+    private ConversaoDTO toDto(Conversao conversao) {
+        return new ConversaoDTO(
+                conversao.getCodigo(),
+                conversao.getUnidadeDe(),
+                conversao.getUnidadePara(),
+                conversao.getOperacao(),
+                conversao.getValor()
+        );
     }
 }

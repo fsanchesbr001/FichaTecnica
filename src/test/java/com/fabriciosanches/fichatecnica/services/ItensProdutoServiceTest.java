@@ -1,5 +1,6 @@
 package com.fabriciosanches.fichatecnica.services;
 
+import com.fabriciosanches.fichatecnica.core.ports.in.ObterValoresConversaoPort;
 import com.fabriciosanches.fichatecnica.domains.Item;
 import com.fabriciosanches.fichatecnica.domains.ItemProduto;
 import com.fabriciosanches.fichatecnica.domains.Produto;
@@ -42,7 +43,7 @@ class ItensProdutoServiceTest {
     @Mock
     private SpringDataUnidadeMedidaRepository unidadeMedidaRepository;
     @Mock
-    private ConversaoService conversaoService;
+    private ObterValoresConversaoPort obterValoresConversaoPort;
 
     @InjectMocks
     private ItensProdutoService service;
@@ -198,7 +199,7 @@ class ItensProdutoServiceTest {
         paraSomatorio.setValor(new BigDecimal("12.50"));
 
         when(itemProdutoRepository.findByProdutoCodigoAndItemCodigo(1L, 2L)).thenReturn(existente);
-        when(conversaoService.obterValoresConversao(item, 3.5, 3L))
+        when(obterValoresConversaoPort.obterValoresConversao(item, 3.5, 3L))
                 .thenReturn(new ConversaoValoresDTO(3.5, 3L, new BigDecimal("12.50")));
         when(produtoRepository.findById(1L)).thenReturn(Optional.of(produto));
         when(itemProdutoRepository.findByProdutoCodigo(1L)).thenReturn(List.of(paraSomatorio));

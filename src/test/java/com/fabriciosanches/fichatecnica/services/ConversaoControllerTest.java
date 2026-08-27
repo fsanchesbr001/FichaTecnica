@@ -1,9 +1,14 @@
 package com.fabriciosanches.fichatecnica.services;
 
-import com.fabriciosanches.fichatecnica.controllers.ConversaoController;
+import com.fabriciosanches.fichatecnica.core.domain.Conversao;
+import com.fabriciosanches.fichatecnica.core.ports.in.AtualizarConversaoPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.BuscarConversaoPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.CriarConversaoPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.DeletarConversaoPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.GerarRelatorioConversaoPort;
 import com.fabriciosanches.fichatecnica.dtos.ConversaoDTO;
 import com.fabriciosanches.fichatecnica.dtos.ConversaoRelatorioDTO;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.ConversaoController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -29,20 +34,35 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ConversaoControllerTest {
 
     private MockMvc mockMvc;
-    private ConversaoService conversaoService;
+    private BuscarConversaoPort buscarConversaoPort;
+    private CriarConversaoPort criarConversaoPort;
+    private AtualizarConversaoPort atualizarConversaoPort;
+    private DeletarConversaoPort deletarConversaoPort;
+    private GerarRelatorioConversaoPort gerarRelatorioConversaoPort;
     private RelatorioService relatorioService;
 
     @BeforeEach
     void setUp() {
-        conversaoService = Mockito.mock(ConversaoService.class);
+        buscarConversaoPort = Mockito.mock(BuscarConversaoPort.class);
+        criarConversaoPort = Mockito.mock(CriarConversaoPort.class);
+        atualizarConversaoPort = Mockito.mock(AtualizarConversaoPort.class);
+        deletarConversaoPort = Mockito.mock(DeletarConversaoPort.class);
+        gerarRelatorioConversaoPort = Mockito.mock(GerarRelatorioConversaoPort.class);
         relatorioService = Mockito.mock(RelatorioService.class);
-        ConversaoController controller = new ConversaoController(conversaoService, relatorioService);
+        ConversaoController controller = new ConversaoController(
+                buscarConversaoPort,
+                criarConversaoPort,
+                atualizarConversaoPort,
+                deletarConversaoPort,
+                gerarRelatorioConversaoPort,
+                relatorioService
+        );
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }
 
     @Test
     void buscarLista_DeveRetornarNoContentQuandoListaVazia() throws Exception {
-        when(conversaoService.listarParaPdf()).thenReturn(List.of());
+        when(gerarRelatorioConversaoPort.buscarTodosComNomes()).thenReturn(List.of());
 
         mockMvc.perform(get("/ficha-tecnica/conversoes"))
                 .andExpect(status().isNoContent());
@@ -50,7 +70,7 @@ class ConversaoControllerTest {
 
     @Test
     void buscarPorId_DeveRetornarNotFoundQuandoFalhar() throws Exception {
-        when(conversaoService.buscarPorId(1L)).thenThrow(new FichaTecnicaException("nao encontrado"));
+        when(buscarConversaoPort.buscarPorId(1L)).thenThrow(new java.util.NoSuchElementException("nao encontrado"));
 
         mockMvc.perform(get("/ficha-tecnica/conversoes/{id}", 1L))
                 .andExpect(status().isNotFound());
@@ -64,7 +84,7 @@ class ConversaoControllerTest {
 
     @Test
     void apagar_DeveRetornarNotFoundQuandoFalhar() throws Exception {
-        doThrow(new FichaTecnicaException("erro")).when(conversaoService).deletarConversao(1L);
+        doThrow(new IllegalArgumentException("erro")).when(deletarConversaoPort).deletar(1L);
 
         mockMvc.perform(delete("/ficha-tecnica/conversoes/{id}", 1L))
                 .andExpect(status().isNotFound());
@@ -72,8 +92,8 @@ class ConversaoControllerTest {
 
     @Test
     void atualizarConversao_DeveRetornarOk() throws Exception {
-        when(conversaoService.atualizarConversao(eq(1L), any(ConversaoDTO.class)))
-                .thenReturn(new ConversaoDTO(1L, 1L, 2L, "*", new BigDecimal("1000.00")));
+        when(atualizarConversaoPort.atualizar(eq(1L), any(Conversao.class)))
+                .thenReturn(new Conversao(1L, 1L, 2L, "*", new BigDecimal("1000.00")));
 
         mockMvc.perform(put("/ficha-tecnica/conversoes/{id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -91,8 +111,8 @@ class ConversaoControllerTest {
 
     @Test
     void cadastrarConversao_DeveRetornarBadRequestQuandoFalhar() throws Exception {
-        when(conversaoService.cadastrarConversao(any(ConversaoDTO.class)))
-                .thenThrow(new FichaTecnicaException("erro"));
+        when(criarConversaoPort.criar(any(Conversao.class)))
+                .thenThrow(new IllegalArgumentException("erro"));
 
         mockMvc.perform(post("/ficha-tecnica/conversoes")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -109,7 +129,7 @@ class ConversaoControllerTest {
 
     @Test
     void gerarPdfLista_DeveRetornarPdf() throws Exception {
-        when(conversaoService.listarParaPdf()).thenReturn(List.of(
+        when(gerarRelatorioConversaoPort.buscarTodosComNomes()).thenReturn(List.of(
                 new ConversaoRelatorioDTO(1L, "kg", "g", "*", new BigDecimal("1000.00"))
         ));
         when(relatorioService.gerarRelatorioPDF(any())).thenReturn(new byte[]{1, 2, 3});
@@ -121,7 +141,7 @@ class ConversaoControllerTest {
 
     @Test
     void gerarPdfDetalhe_DeveRetornarNotFoundQuandoNaoEncontrar() throws Exception {
-        when(conversaoService.buscarPorIdParaPdf(1L)).thenThrow(new FichaTecnicaException("nao encontrado"));
+        when(gerarRelatorioConversaoPort.buscarPorIdComNomes(1L)).thenThrow(new java.util.NoSuchElementException("nao encontrado"));
 
         mockMvc.perform(get("/ficha-tecnica/conversoes/gerar-pdf-detalhe/{id}", 1L))
                 .andExpect(status().isNotFound());
@@ -129,7 +149,7 @@ class ConversaoControllerTest {
 
     @Test
     void gerarPdfDetalhe_DeveRetornarInternalServerErrorQuandoErroInesperado() throws Exception {
-        when(conversaoService.buscarPorIdParaPdf(1L))
+        when(gerarRelatorioConversaoPort.buscarPorIdComNomes(1L))
                 .thenReturn(new ConversaoRelatorioDTO(1L, "kg", "g", "*", new BigDecimal("1000.00")));
         when(relatorioService.gerarRelatorioPDF(any())).thenThrow(new RuntimeException("erro"));
 
@@ -137,4 +157,3 @@ class ConversaoControllerTest {
                 .andExpect(status().isInternalServerError());
     }
 }
-

@@ -1,17 +1,18 @@
-package com.fabriciosanches.fichatecnica.services;
+package com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web;
 
 import com.fabriciosanches.fichatecnica.core.domain.UnidadeMedida;
 import com.fabriciosanches.fichatecnica.core.ports.in.AtualizarUnidadeMedidaPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.BuscarUnidadeMedidaPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.CriarUnidadeMedidaPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.DeletarUnidadeMedidaPort;
-import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.UnidadeMedidaController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -24,8 +25,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.List;
 
 class MedidasControllerTest {
 

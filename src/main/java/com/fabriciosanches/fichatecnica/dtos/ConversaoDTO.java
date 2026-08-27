@@ -1,7 +1,7 @@
 package com.fabriciosanches.fichatecnica.dtos;
 
 
-import com.fabriciosanches.fichatecnica.domains.Conversao;
+import com.fabriciosanches.fichatecnica.core.domain.Conversao;
 import com.fabriciosanches.fichatecnica.serializers.BigDecimalCurrencySerializer;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;

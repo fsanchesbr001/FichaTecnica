@@ -1,6 +1,5 @@
-package com.fabriciosanches.fichatecnica.repository;
+package com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence;
 
-import com.fabriciosanches.fichatecnica.domains.Conversao;
 import com.fabriciosanches.fichatecnica.dtos.ConversaoRelatorioDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -9,11 +8,11 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface ConversaoRepository extends JpaRepository<Conversao,Long> {
-    @Query("SELECT COUNT(u) FROM Conversao u WHERE u.unidadeDe = :unidadeDe AND u.unidadePara = :unidadePara")
+public interface SpringDataConversaoRepository extends JpaRepository<ConversaoEntity, Long> {
+    @Query("SELECT COUNT(c) FROM Conversao c WHERE c.unidadeDe = :unidadeDe AND c.unidadePara = :unidadePara")
     long countByUnidadeDeAndUnidadePara(@Param("unidadeDe") Long unidadeDe, @Param("unidadePara") Long unidadePara);
 
-    Conversao findByUnidadeDeAndUnidadePara(Long unidadeDe, Long unidadePara);
+    Optional<ConversaoEntity> findByUnidadeDeAndUnidadePara(Long unidadeDe, Long unidadePara);
 
     @Query("""
             SELECT new com.fabriciosanches.fichatecnica.dtos.ConversaoRelatorioDTO(
