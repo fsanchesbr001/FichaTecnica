@@ -1,5 +1,6 @@
 package com.fabriciosanches.fichatecnica.services;
 
+import com.fabriciosanches.fichatecnica.core.ports.in.ObterValoresConversaoPort;
 import com.fabriciosanches.fichatecnica.domains.HistoricoItem;
 import com.fabriciosanches.fichatecnica.domains.Item;
 import com.fabriciosanches.fichatecnica.domains.ItemProduto;
@@ -40,7 +41,7 @@ class ItemServiceTest {
     @Mock
     private ItemProdutoRepository itemProdutoRepository;
     @Mock
-    private ConversaoService conversaoService;
+    private ObterValoresConversaoPort obterValoresConversaoPort;
     @Mock
     private ProdutoRepository produtoRepository;
 
@@ -159,7 +160,7 @@ class ItemServiceTest {
         when(repository.findById(1L)).thenReturn(Optional.of(item));
         when(repository.save(any(Item.class))).thenReturn(item);
         when(itemProdutoRepository.findByItem(item)).thenReturn(List.of(itemProduto));
-        when(conversaoService.obterValoresConversao(item, 2.0, 2L))
+        when(obterValoresConversaoPort.obterValoresConversao(item, 2.0, 2L))
                 .thenReturn(new ConversaoValoresDTO(2.0, 2L, new BigDecimal("7.00")));
 
         ItemDTO novosDados = new ItemDTO(1L, "Farinha Premium", unidadeMedida, new BigDecimal("9.00"));

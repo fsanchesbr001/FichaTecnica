@@ -1,8 +1,7 @@
-package com.fabriciosanches.fichatecnica.services;
+package com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web;
 
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarRelatorioDetalheUnidadeMedidaPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarRelatorioListaUnidadeMedidaPort;
-import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.UnidadeMedidaRelatorioController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

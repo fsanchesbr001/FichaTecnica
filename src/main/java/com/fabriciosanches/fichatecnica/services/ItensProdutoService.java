@@ -1,5 +1,6 @@
 package com.fabriciosanches.fichatecnica.services;
 
+import com.fabriciosanches.fichatecnica.core.ports.in.ObterValoresConversaoPort;
 import com.fabriciosanches.fichatecnica.domains.*;
 import com.fabriciosanches.fichatecnica.dtos.*;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
@@ -31,19 +32,19 @@ public class ItensProdutoService {
     private final ProdutoRepository produtoRepository;
     private final ItemRepository itemRepository;
     private final SpringDataUnidadeMedidaRepository unidadeMedidaRepository;
-    private final ConversaoService conversaoService;
+    private final ObterValoresConversaoPort obterValoresConversaoPort;
 
 
     public ItensProdutoService(ItemProdutoRepository itemProdutoRepository,
                                ProdutoRepository produtoRepository,
                                ItemRepository itemRepository,
                                SpringDataUnidadeMedidaRepository unidadeMedidaRepository,
-                               ConversaoService conversaoService) {
+                               ObterValoresConversaoPort obterValoresConversaoPort) {
         this.itemProdutoRepository = itemProdutoRepository;
         this.produtoRepository = produtoRepository;
         this.itemRepository = itemRepository;
         this.unidadeMedidaRepository = unidadeMedidaRepository;
-        this.conversaoService = conversaoService;
+        this.obterValoresConversaoPort = obterValoresConversaoPort;
     }
 
     public ItemProduto buscarPorId(Long id) {
@@ -63,7 +64,7 @@ public class ItensProdutoService {
         for (var item: itemProduto) {
             var itemEntity = getItem(item.cdItem());
             var unidadeMedida = getUnidadeMedidaDTO(item);
-            ConversaoValoresDTO conversaoValoresDTO = conversaoService.obterValoresConversao(itemEntity,
+            ConversaoValoresDTO conversaoValoresDTO = obterValoresConversaoPort.obterValoresConversao(itemEntity,
                     item.qtdItem(),item.cdUnidadeMedida());
             saveItem(item, produto, itemEntity, unidadeMedida, conversaoValoresDTO);
 
@@ -259,7 +260,7 @@ public class ItensProdutoService {
                 itemProduto.getUnidadePara().getCodigo(),
                 itemProduto.getValor());
 
-        ConversaoValoresDTO conversaoValoresDTO = conversaoService.obterValoresConversao(
+        ConversaoValoresDTO conversaoValoresDTO = obterValoresConversaoPort.obterValoresConversao(
                 itemProduto.getItem(),
                 itemProdutoDTO.qtdItem(),
                 itemProdutoDTO.cdUnidadeMedida());

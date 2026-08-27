@@ -1,5 +1,6 @@
 package com.fabriciosanches.fichatecnica.services;
 
+import com.fabriciosanches.fichatecnica.core.ports.in.ObterValoresConversaoPort;
 import com.fabriciosanches.fichatecnica.domains.HistoricoItem;
 import com.fabriciosanches.fichatecnica.domains.ItemProduto;
 import com.fabriciosanches.fichatecnica.domains.Produto;
@@ -29,17 +30,19 @@ public class ItemService {
     private final ItemRepository repository;
     private final HistoricoItemRepository historicoItemRepository;
     private final ItemProdutoRepository itemProdutoRepository;
-    private final ConversaoService conversaoService;
+    private final ObterValoresConversaoPort obterValoresConversaoPort;
     private final ProdutoRepository produtoRepository;
 
 
     public ItemService(ItemRepository repository,
                        HistoricoItemRepository historicoItemRepository,
-                       ItemProdutoRepository itemProdutoRepository, ConversaoService conversaoService, ProdutoRepository produtoRepository) {
+                       ItemProdutoRepository itemProdutoRepository,
+                       ObterValoresConversaoPort obterValoresConversaoPort,
+                       ProdutoRepository produtoRepository) {
         this.repository = repository;
         this.historicoItemRepository = historicoItemRepository;
         this.itemProdutoRepository = itemProdutoRepository;
-        this.conversaoService = conversaoService;
+        this.obterValoresConversaoPort = obterValoresConversaoPort;
         this.produtoRepository = produtoRepository;
     }
 
@@ -101,7 +104,7 @@ public class ItemService {
             // Atualizar o valor do item nos produtos associados
             for (ItemProduto itemProduto : itemProdutos) {
                // Obter a conversão de valores
-                ConversaoValoresDTO conversaoValoresDTO = conversaoService.
+                ConversaoValoresDTO conversaoValoresDTO = obterValoresConversaoPort.
                         obterValoresConversao(
                         itemProduto.getItem(),
                         itemProduto.getQuantidade(),
