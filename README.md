@@ -206,3 +206,4 @@ sum(rate(http_server_requests_seconds_count{uri=~"/ficha-tecnica/unidades-medida
 - 02/07/2026 - Versão 2.0.1 - Migração para Clean Architecture (Arquitetura Hexagonal) - CRUD Unidade de Medida Completo.
 - 05/07/2026 - Versão 2.0.2 - Migração para Clean Architecture (Arquitetura Hexagonal) - Unidade de Medida completa com Grafana e docker OK
 - 27/08/2026 - Versão 2.0.5 - Migração para Clean Architecture (Arquitetura Hexagonal) - CRUD Conversão Completo.
+- 06/09/2026 - Versão 2.0.6 - Migração para Clean Architecture (Arquitetura Hexagonal) - CRUD Item e Historico Item Completo.

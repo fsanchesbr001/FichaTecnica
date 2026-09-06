@@ -1,7 +1,7 @@
 package com.fabriciosanches.fichatecnica.repository;
 
-import com.fabriciosanches.fichatecnica.domains.Item;
 import com.fabriciosanches.fichatecnica.domains.ItemProduto;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.ItemEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -11,7 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 public interface ItemProdutoRepository extends JpaRepository<ItemProduto, Long> {
-    List<ItemProduto> findByItem(Item item);
+    List<ItemProduto> findByItem(ItemEntity item);
+    List<ItemProduto> findByItemCodigo(Long itemCodigo);
     ItemProduto findByProdutoCodigoAndItemCodigo(Long idProduto, Long idItem);
 
     @Modifying
@@ -21,3 +22,4 @@ public interface ItemProdutoRepository extends JpaRepository<ItemProduto, Long> 
 
     List<ItemProduto> findByProdutoCodigo(Long idProduto);
 }
+

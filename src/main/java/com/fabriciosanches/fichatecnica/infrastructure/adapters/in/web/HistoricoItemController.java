@@ -1,9 +1,10 @@
-package com.fabriciosanches.fichatecnica.controllers;
+package com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web;
 
+import com.fabriciosanches.fichatecnica.core.domain.HistoricoItem;
+import com.fabriciosanches.fichatecnica.core.ports.in.ListarHistoricoItemPort;
 import com.fabriciosanches.fichatecnica.dtos.GraficoPrecoItemDTO;
 import com.fabriciosanches.fichatecnica.dtos.HistoricoItemDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
-import com.fabriciosanches.fichatecnica.services.HistoricoItemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -28,10 +29,10 @@ public class HistoricoItemController {
 
     private static final Logger logger = LogManager.getLogger(HistoricoItemController.class);
 
-    final HistoricoItemService historicoItemService;
+    private final ListarHistoricoItemPort listarHistoricoItemPort;
 
-    public HistoricoItemController(HistoricoItemService historicoItemService) {
-        this.historicoItemService = historicoItemService;
+    public HistoricoItemController(ListarHistoricoItemPort listarHistoricoItemPort) {
+        this.listarHistoricoItemPort = listarHistoricoItemPort;
     }
 
     @GetMapping("/historico-itens")
@@ -40,17 +41,11 @@ public class HistoricoItemController {
             @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso"),
             @ApiResponse(responseCode = "404", description = "Erro ao buscar histórico")
     })
-    public ResponseEntity<List<HistoricoItemDTO>> buscarLista(){
-        logger.info("Inicio do método buscarLista");
-        logger.info("Buscando lista de historico de itens");
+    public ResponseEntity<List<HistoricoItemDTO>> buscarLista() {
         try {
-            List<HistoricoItemDTO> historicoItemDTOList = historicoItemService.listar();
-            logger.info("Lista de historico de itens encontrada: {}", historicoItemDTOList);
-            logger.info("Fim do método buscarLista");
+            List<HistoricoItemDTO> historicoItemDTOList = listarHistoricoItemPort.listar().stream().map(this::toDto).toList();
             return ResponseEntity.ok(historicoItemDTOList);
-        }
-        catch (FichaTecnicaException e){
-            logger.error("Erro ao buscar lista de historico de itens", e);
+        } catch (FichaTecnicaException e) {
             return ResponseEntity.notFound().build();
         }
     }
@@ -61,17 +56,11 @@ public class HistoricoItemController {
             @ApiResponse(responseCode = "200", description = "Registro encontrado"),
             @ApiResponse(responseCode = "404", description = "Registro não encontrado")
     })
-    public ResponseEntity<HistoricoItemDTO> buscarPorId(@PathVariable Long id){
-        logger.info("Inicio do método buscarPorId");
-        logger.info("Buscando item por id: {}", id);
+    public ResponseEntity<HistoricoItemDTO> buscarPorId(@PathVariable Long id) {
         try {
-            HistoricoItemDTO historicoItem = historicoItemService.buscarPorId(id);
-            logger.info("Item encontrado: {}", historicoItem);
-            logger.info("Fim do método buscarPorId");
-            return ResponseEntity.ok(historicoItem);
-        }
-        catch (FichaTecnicaException e){
-            logger.error("Erro ao buscar item por id", e);
+            HistoricoItem historicoItem = listarHistoricoItemPort.buscarPorId(id);
+            return ResponseEntity.ok(toDto(historicoItem));
+        } catch (FichaTecnicaException e) {
             return ResponseEntity.notFound().build();
         }
     }
@@ -82,31 +71,17 @@ public class HistoricoItemController {
             @ApiResponse(responseCode = "200", description = "Registros retornados com sucesso"),
             @ApiResponse(responseCode = "404", description = "Erro ao buscar histórico do item")
     })
-    public ResponseEntity<List<HistoricoItemDTO>> buscarPorItemId(@PathVariable Long id){
-        logger.info("Inicio do método buscarItemPorId");
-        logger.info("Buscando item por id: {}", id);
+    public ResponseEntity<List<HistoricoItemDTO>> buscarPorItemId(@PathVariable Long id) {
         try {
-            List<HistoricoItemDTO> listaHistoricoItem = historicoItemService.buscarPorCodigoItem(id);
-            logger.info("Item encontrado: {}", listaHistoricoItem);
-            logger.info("Fim do método buscarPorId");
+            List<HistoricoItemDTO> listaHistoricoItem = listarHistoricoItemPort.listarPorCodigoItem(id).stream()
+                    .map(this::toDto)
+                    .toList();
             return ResponseEntity.ok(listaHistoricoItem);
-        }
-        catch (FichaTecnicaException e){
-            logger.error("Erro ao buscar item por id", e);
+        } catch (FichaTecnicaException e) {
             return ResponseEntity.notFound().build();
         }
     }
 
-    /**
-     * Retorna os dados de variação de preços de um item no formato Chart.js (ng2-charts).
-     * <p>
-     * Recebe o <b>código do Item</b> (campo {@code cdItem} no histórico) e retorna todos os
-     * registros daquele item ordenados por data, com variação percentual entre pontos consecutivos.
-     * </p>
-     *
-     * @param codigoItem código do Item (não o id da linha de histórico)
-     * @return {@link GraficoPrecoItemDTO} com os dados do gráfico
-     */
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/historico-itens/grafico-precos/{codigoItem}")
     @Operation(summary = "Gera gráfico de preços", description = "Retorna os dados do gráfico de evolução de preços de um item.")
@@ -118,7 +93,7 @@ public class HistoricoItemController {
     public ResponseEntity<GraficoPrecoItemDTO> gerarGraficoPrecos(@PathVariable Long codigoItem) {
         logger.info("Início do método gerarGraficoPrecos – codigoItem={}", codigoItem);
         try {
-            GraficoPrecoItemDTO grafico = historicoItemService.gerarGraficoPreco(codigoItem);
+            GraficoPrecoItemDTO grafico = listarHistoricoItemPort.gerarGraficoPreco(codigoItem);
             logger.info("Gráfico de preços gerado com sucesso para codigoItem={}", codigoItem);
             return ResponseEntity.ok(grafico);
         } catch (FichaTecnicaException e) {
@@ -129,4 +104,14 @@ public class HistoricoItemController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    private HistoricoItemDTO toDto(HistoricoItem historicoItem) {
+        return new HistoricoItemDTO(
+                historicoItem.getCodigo(),
+                historicoItem.getCdItem(),
+                historicoItem.getValor(),
+                historicoItem.getDataInicio()
+        );
+    }
 }
+

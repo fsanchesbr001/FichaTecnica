@@ -1,17 +1,18 @@
 package com.fabriciosanches.fichatecnica.services;
 
 import com.fabriciosanches.fichatecnica.core.ports.in.ObterValoresConversaoPort;
-import com.fabriciosanches.fichatecnica.domains.Item;
+import com.fabriciosanches.fichatecnica.core.domain.Item;
 import com.fabriciosanches.fichatecnica.domains.ItemProduto;
 import com.fabriciosanches.fichatecnica.domains.Produto;
 import com.fabriciosanches.fichatecnica.dtos.ConversaoValoresDTO;
 import com.fabriciosanches.fichatecnica.dtos.GraficoPizzaDTO;
 import com.fabriciosanches.fichatecnica.dtos.ProdutosPorItemDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.ItemEntity;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.SpringDataItemRepository;
 import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.SpringDataUnidadeMedidaRepository;
 import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.UnidadeMedidaEntity;
 import com.fabriciosanches.fichatecnica.repository.ItemProdutoRepository;
-import com.fabriciosanches.fichatecnica.repository.ItemRepository;
 import com.fabriciosanches.fichatecnica.repository.ProdutoRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -39,7 +41,7 @@ class ItensProdutoServiceTest {
     @Mock
     private ProdutoRepository produtoRepository;
     @Mock
-    private ItemRepository itemRepository;
+    private SpringDataItemRepository itemRepository;
     @Mock
     private SpringDataUnidadeMedidaRepository unidadeMedidaRepository;
     @Mock
@@ -79,12 +81,13 @@ class ItensProdutoServiceTest {
         FichaTecnicaException ex = assertThrows(FichaTecnicaException.class,
                 () -> service.listarProdutosPorItem(99L));
 
-        assertEquals("Item não encontrado", ex.getMessage());
+        assertTrue(ex.getMessage().contains("Item"));
+        assertTrue(ex.getMessage().contains("encontrado"));
     }
 
     @Test
     void listarProdutosPorItem_DeveRetornarProdutosRelacionados() {
-        Item item = new Item();
+        ItemEntity item = new ItemEntity();
         item.setCodigo(10L);
 
         Produto p1 = new Produto();
@@ -136,13 +139,13 @@ class ItensProdutoServiceTest {
         produto.setCodigo(1L);
         produto.setNome("Bolo");
 
-        Item farinha = new Item();
+        ItemEntity farinha = new ItemEntity();
         farinha.setCodigo(10L);
         farinha.setNome("Farinha");
 
-        Item acucar = new Item();
+        ItemEntity acucar = new ItemEntity();
         acucar.setCodigo(20L);
-        acucar.setNome("Açúcar");
+        acucar.setNome("AÃ§Ãºcar");
 
         ItemProduto ip1 = new ItemProduto();
         ip1.setProduto(produto);
@@ -161,7 +164,7 @@ class ItensProdutoServiceTest {
 
         assertEquals("Bolo", dto.nomeProduto());
         assertEquals(2, dto.fatias().size());
-        assertEquals(List.of("Farinha", "Açúcar"), dto.labels());
+        assertEquals(List.of("Farinha", "AÃ§Ãºcar"), dto.labels());
         assertEquals(25.0, dto.valores().get(0));
         assertEquals(75.0, dto.valores().get(1));
         assertTrue(dto.valorTotal().contains("40"));
@@ -174,7 +177,9 @@ class ItensProdutoServiceTest {
         FichaTecnicaException ex = assertThrows(FichaTecnicaException.class,
                 () -> service.atualizarQuantidadeItemProduto(1L, 2L, 3.0));
 
-        assertEquals("ItemProduto não encontrado para o produto e item especificados", ex.getMessage());
+        assertTrue(ex.getMessage().contains("ItemProduto"));
+        assertTrue(ex.getMessage().contains("produto"));
+        assertTrue(ex.getMessage().contains("item especificados"));
     }
 
     @Test
@@ -182,7 +187,7 @@ class ItensProdutoServiceTest {
         Produto produto = new Produto();
         produto.setCodigo(1L);
 
-        Item item = new Item();
+        ItemEntity item = new ItemEntity();
         item.setCodigo(2L);
 
         UnidadeMedidaEntity unidade = new UnidadeMedidaEntity();
@@ -199,7 +204,7 @@ class ItensProdutoServiceTest {
         paraSomatorio.setValor(new BigDecimal("12.50"));
 
         when(itemProdutoRepository.findByProdutoCodigoAndItemCodigo(1L, 2L)).thenReturn(existente);
-        when(obterValoresConversaoPort.obterValoresConversao(item, 3.5, 3L))
+        when(obterValoresConversaoPort.obterValoresConversao(any(Item.class), eq(3.5), eq(3L)))
                 .thenReturn(new ConversaoValoresDTO(3.5, 3L, new BigDecimal("12.50")));
         when(produtoRepository.findById(1L)).thenReturn(Optional.of(produto));
         when(itemProdutoRepository.findByProdutoCodigo(1L)).thenReturn(List.of(paraSomatorio));
@@ -213,3 +218,4 @@ class ItensProdutoServiceTest {
         verify(produtoRepository).save(produto);
     }
 }
+

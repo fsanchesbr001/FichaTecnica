@@ -1,5 +1,11 @@
-package com.fabriciosanches.fichatecnica.controllers;
+package com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web;
 
+import com.fabriciosanches.fichatecnica.core.domain.Item;
+import com.fabriciosanches.fichatecnica.core.ports.in.AtualizarItemPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.BuscarItemPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.CriarItemPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.DeletarItemPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.ListarHistoricoItemPort;
 import com.fabriciosanches.fichatecnica.dtos.GraficoPrecoItemDTO;
 import com.fabriciosanches.fichatecnica.dtos.ItemDTO;
 import com.fabriciosanches.fichatecnica.dtos.RelatorioRequestDTO;
@@ -8,23 +14,28 @@ import com.fabriciosanches.fichatecnica.enums.OrientacaoRelatorio;
 import com.fabriciosanches.fichatecnica.enums.TipoRelatorio;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.services.GraficoService;
-import com.fabriciosanches.fichatecnica.services.HistoricoItemService;
-import com.fabriciosanches.fichatecnica.services.ItemService;
 import com.fabriciosanches.fichatecnica.services.RelatorioService;
 import com.google.gson.Gson;
-import jakarta.transaction.Transactional;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -40,16 +51,28 @@ public class ItemController {
 
     private static final Logger logger = LogManager.getLogger(ItemController.class);
 
-    final ItemService itemService;
-    final RelatorioService relatorioService;
-    final HistoricoItemService historicoItemService;
-    final GraficoService graficoService;
+    private final BuscarItemPort buscarItemPort;
+    private final CriarItemPort criarItemPort;
+    private final AtualizarItemPort atualizarItemPort;
+    private final DeletarItemPort deletarItemPort;
+    private final ListarHistoricoItemPort listarHistoricoItemPort;
+    private final RelatorioService relatorioService;
+    private final GraficoService graficoService;
 
-    public ItemController(ItemService itemService, RelatorioService relatorioService,
-                          HistoricoItemService historicoItemService, GraficoService graficoService) {
-        this.itemService = itemService;
+    public ItemController(
+            BuscarItemPort buscarItemPort,
+            CriarItemPort criarItemPort,
+            AtualizarItemPort atualizarItemPort,
+            DeletarItemPort deletarItemPort,
+            ListarHistoricoItemPort listarHistoricoItemPort,
+            RelatorioService relatorioService,
+            GraficoService graficoService) {
+        this.buscarItemPort = buscarItemPort;
+        this.criarItemPort = criarItemPort;
+        this.atualizarItemPort = atualizarItemPort;
+        this.deletarItemPort = deletarItemPort;
+        this.listarHistoricoItemPort = listarHistoricoItemPort;
         this.relatorioService = relatorioService;
-        this.historicoItemService = historicoItemService;
         this.graficoService = graficoService;
     }
 
@@ -57,51 +80,31 @@ public class ItemController {
     @Operation(summary = "Lista itens", description = "Retorna todos os itens cadastrados.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso"),
-            @ApiResponse(responseCode = "204", description = "Nenhum item encontrado"),
-            @ApiResponse(responseCode = "404", description = "Erro ao buscar itens")
+            @ApiResponse(responseCode = "204", description = "Nenhum item encontrado")
     })
-    public ResponseEntity<List<ItemDTO>> buscarLista(){
-        logger.info("Inicio do método buscarLista");
-        logger.info("Buscando lista de itens");
+    public ResponseEntity<List<ItemDTO>> buscarLista() {
         try {
-            List<ItemDTO> itens = itemService.listar();
+            List<ItemDTO> itens = buscarItemPort.listar().stream().map(this::toDto).toList();
             if (itens.isEmpty()) {
-                logger.error("Lista de itens não encontrada");
                 return ResponseEntity.noContent().build();
             }
-            logger.info("Lista de itens encontrada: {}", itens);
-            logger.info("Fim do método buscarLista");
             return ResponseEntity.ok(itens);
-        }
-        catch (FichaTecnicaException e){
-            logger.error("Erro ao buscar lista de itens", e);
+        } catch (FichaTecnicaException e) {
             return ResponseEntity.notFound().build();
         }
-
     }
 
     @GetMapping("/itens/{id}")
     @Operation(summary = "Busca item por ID", description = "Retorna os dados de um item específico.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Item encontrado"),
-            @ApiResponse(responseCode = "204", description = "Item não encontrado"),
             @ApiResponse(responseCode = "404", description = "Erro ao buscar item")
     })
-    public ResponseEntity<ItemDTO> buscarPorId(@PathVariable Long id){
-        logger.info("Inicio do método buscarPorId");
-        logger.info("Buscando item por id: {}", id);
+    public ResponseEntity<ItemDTO> buscarPorId(@PathVariable Long id) {
         try {
-            ItemDTO item = itemService.buscarPorId(id);
-            if (item == null) {
-                logger.error("Item não encontrado");
-                return ResponseEntity.noContent().build();
-            }
-            logger.info("Item encontrado: {}", item);
-            logger.info("Fim do método buscarPorId");
-            return ResponseEntity.ok(item);
-        }
-        catch (FichaTecnicaException e){
-            logger.error("Erro ao buscar item por id", e);
+            Item item = buscarItemPort.buscarPorId(id);
+            return ResponseEntity.ok(toDto(item));
+        } catch (FichaTecnicaException e) {
             return ResponseEntity.notFound().build();
         }
     }
@@ -115,20 +118,12 @@ public class ItemController {
             @ApiResponse(responseCode = "404", description = "Item não encontrado")
     })
     public ResponseEntity<Void> apagar(@PathVariable Long id) {
-        logger.info("Inicio do método apagar");
-        logger.info("Apagando item por id: {}", id);
         try {
-            itemService.deletarItem(id);
-            logger.info("Item apagado com sucesso");
-            logger.info("Fim do método apagar");
+            deletarItemPort.deletar(id);
             return ResponseEntity.noContent().build();
-        }
-        catch (FichaTecnicaException e){
-            logger.error("Existem Históricos para o Item " + id);
+        } catch (FichaTecnicaException e) {
             return ResponseEntity.unprocessableEntity().build();
-        }
-        catch (Exception e){
-            logger.error("Erro ao apagar item por id", e);
+        } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
     }
@@ -141,16 +136,10 @@ public class ItemController {
             @ApiResponse(responseCode = "404", description = "Item não encontrado")
     })
     public ResponseEntity<ItemDTO> atualizarItem(@PathVariable Long id, @RequestBody ItemDTO itemDTO) {
-        logger.info("Inicio do método atualizarItem");
-        logger.info("Atualizando item por id: {}", id);
         try {
-            ItemDTO item = itemService.atualizarItem(id, itemDTO);
-            logger.info("Item atualizado com sucesso: {}", item);
-            logger.info("Fim do método atualizarUnidade");
-            return ResponseEntity.ok(item);
-        }
-        catch (FichaTecnicaException e){
-            logger.error("Erro ao atualizar unidade de medida por id", e);
+            Item item = atualizarItemPort.atualizar(id, itemDTO.nome(), itemDTO.unidadeMedida(), itemDTO.valor());
+            return ResponseEntity.ok(toDto(item));
+        } catch (FichaTecnicaException e) {
             return ResponseEntity.notFound().build();
         }
     }
@@ -163,49 +152,30 @@ public class ItemController {
             @ApiResponse(responseCode = "400", description = "Dados inválidos para cadastro")
     })
     public ResponseEntity<ItemDTO> cadastrarItem(@RequestBody ItemDTO itemDTO) {
-        logger.info("Inicio do método cadastrarItem");
-        logger.info("Cadastrando Item: {}", itemDTO);
         try {
-            ItemDTO item = itemService.cadastrarItem(itemDTO);
-            logger.info("Item cadastrado com sucesso: {}", item);
-            logger.info("Fim do método cadastrarItem");
-            return ResponseEntity.ok(item);
-        }
-        catch (FichaTecnicaException e){
-            logger.error("Erro ao cadastrar item", e);
+            Item item = criarItemPort.criar(itemDTO.nome(), itemDTO.unidadeMedida(), itemDTO.valor());
+            return ResponseEntity.ok(toDto(item));
+        } catch (FichaTecnicaException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
     }
 
-    /**
-     * Gera um PDF com a lista completa de Itens ordenados por nome.
-     * Colunas exibidas: Nome, Unidade de Medida e Valor.
-     */
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/itens/gerar-pdf-lista")
-     @Operation(summary = "Gera PDF da lista de itens", description = "Exporta a lista completa de itens em PDF.")
-     @ApiResponses({
-             @ApiResponse(responseCode = "200", description = "PDF gerado com sucesso"),
-             @ApiResponse(responseCode = "204", description = "Nenhum item encontrado para o relatório"),
-             @ApiResponse(responseCode = "400", description = "Parâmetros inválidos para geração do PDF"),
-             @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o relatório")
-     })
+    @Operation(summary = "Gera PDF da lista de itens", description = "Exporta a lista completa de itens em PDF.")
     public ResponseEntity<byte[]> gerarPdfLista() {
         logger.info("Início do método gerarPdfLista – ItemController");
         try {
-            List<ItemDTO> lista = itemService.listar();
-
+            List<ItemDTO> lista = buscarItemPort.listar().stream().map(this::toDto).toList();
             if (lista.isEmpty()) {
-                logger.warn("Nenhum item encontrado para gerar o relatório");
                 return ResponseEntity.noContent().build();
             }
 
             String jsonData = new Gson().toJson(lista);
-
             Map<String, String> colunas = new LinkedHashMap<>();
-            colunas.put("nome",          "Nome");
+            colunas.put("nome", "Nome");
             colunas.put("unidadeMedida", "Unidade de Medida");
-            colunas.put("valor",         "Valor");
+            colunas.put("valor", "Valor");
 
             RelatorioRequestDTO request = new RelatorioRequestDTO(
                     jsonData,
@@ -218,62 +188,37 @@ public class ItemController {
             );
 
             byte[] pdfBytes = relatorioService.gerarRelatorioPDF(request);
-
-            String timestamp = LocalDateTime.now()
-                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss"));
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss"));
             String filename = "Lista-Itens-" + timestamp + ".pdf";
-
-            logger.info("PDF de lista de Itens gerado com sucesso – arquivo: '{}'", filename);
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                     .contentType(MediaType.APPLICATION_PDF)
                     .body(pdfBytes);
-
-        } catch (IllegalArgumentException e) {
-            logger.error("Parâmetros inválidos para geração do PDF de lista de Itens: {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
             logger.error("Erro inesperado ao gerar PDF de lista de Itens", e);
             return ResponseEntity.internalServerError().build();
         }
     }
 
-    /**
-     * Gera um PDF detalhado para um Item específico, identificado por {id}.
-     * O relatório exibe todos os campos do item no formato de ficha (DETALHE / PAISAGEM).
-     * Caso existam registros de histórico de preços, um gráfico de variação de preços
-     * (JFreeChart – linha azul, pontos vermelhos) é adicionado ao final do relatório,
-     * antes do rodapé.
-     */
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/itens/gerar-pdf-detalhe/{id:[0-9]+}")
-     @Operation(summary = "Gera PDF detalhado do item", description = "Exporta a ficha detalhada de um item específico em PDF.")
-     @ApiResponses({
-             @ApiResponse(responseCode = "200", description = "PDF gerado com sucesso"),
-             @ApiResponse(responseCode = "404", description = "Item não encontrado"),
-             @ApiResponse(responseCode = "400", description = "Parâmetros inválidos para geração do PDF"),
-             @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o relatório")
-     })
+    @Operation(summary = "Gera PDF detalhado do item", description = "Exporta a ficha detalhada de um item específico em PDF.")
     public ResponseEntity<byte[]> gerarPdfDetalhe(@PathVariable Long id) {
-        logger.info("Início do método gerarPdfDetalhe – ItemController – id: {}", id);
         try {
-            ItemDTO item = itemService.buscarPorId(id);
-
-            String jsonData = new Gson().toJson(List.of(item));
+            Item item = buscarItemPort.buscarPorId(id);
+            String jsonData = new Gson().toJson(List.of(toDto(item)));
 
             Map<String, String> colunas = new LinkedHashMap<>();
-            colunas.put("nome",          "Nome");
+            colunas.put("nome", "Nome");
             colunas.put("unidadeMedida", "Unidade de Medida");
-            colunas.put("valor",         "Valor");
+            colunas.put("valor", "Valor");
 
-            // Tenta gerar o gráfico de variação de preços (opcional – ignora se não houver histórico)
             byte[] graficoPng = null;
             try {
-                GraficoPrecoItemDTO graficoDTO = historicoItemService.gerarGraficoPreco(id);
+                GraficoPrecoItemDTO graficoDTO = listarHistoricoItemPort.gerarGraficoPreco(id);
                 if (graficoDTO != null && !graficoDTO.labels().isEmpty()) {
                     graficoPng = graficoService.gerarGraficoPNG(graficoDTO);
-                    logger.info("Gráfico de preços gerado para inclusão no PDF – item id={}", id);
                 }
             } catch (FichaTecnicaException ex) {
                 logger.info("Sem histórico de preços para o item id={} – PDF será gerado sem gráfico", id);
@@ -306,27 +251,24 @@ public class ItemController {
             }
 
             byte[] pdfBytes = relatorioService.gerarRelatorioPDF(request);
-
-            String timestamp = LocalDateTime.now()
-                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss"));
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss"));
             String filename = "Detalhe-Item-" + id + "-" + timestamp + ".pdf";
-
-            logger.info("PDF de detalhe de Item gerado com sucesso – arquivo: '{}'", filename);
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                     .contentType(MediaType.APPLICATION_PDF)
                     .body(pdfBytes);
-
         } catch (FichaTecnicaException e) {
-            logger.error("Item não encontrado para id {}: {}", id, e.getMessage());
             return ResponseEntity.notFound().build();
         } catch (IllegalArgumentException e) {
-            logger.error("Parâmetros inválidos para geração do PDF de detalhe de Item: {}", e.getMessage());
             return ResponseEntity.badRequest().build();
         } catch (Exception e) {
-            logger.error("Erro inesperado ao gerar PDF de detalhe de Item", e);
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    private ItemDTO toDto(Item item) {
+        return new ItemDTO(item.getCodigo(), item.getNome(), item.getUnidadeMedida(), item.getValor());
+    }
 }
+
