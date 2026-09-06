@@ -1,13 +1,15 @@
 package com.fabriciosanches.fichatecnica.services;
 
 import com.fabriciosanches.fichatecnica.core.ports.in.ObterValoresConversaoPort;
+import com.fabriciosanches.fichatecnica.core.domain.Item;
 import com.fabriciosanches.fichatecnica.domains.*;
 import com.fabriciosanches.fichatecnica.dtos.*;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.ItemEntity;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.SpringDataItemRepository;
 import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.SpringDataUnidadeMedidaRepository;
 import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.UnidadeMedidaEntity;
 import com.fabriciosanches.fichatecnica.repository.ItemProdutoRepository;
-import com.fabriciosanches.fichatecnica.repository.ItemRepository;
 import com.fabriciosanches.fichatecnica.repository.ProdutoRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,14 +32,14 @@ public class ItensProdutoService {
 
     private final ItemProdutoRepository itemProdutoRepository;
     private final ProdutoRepository produtoRepository;
-    private final ItemRepository itemRepository;
+    private final SpringDataItemRepository itemRepository;
     private final SpringDataUnidadeMedidaRepository unidadeMedidaRepository;
     private final ObterValoresConversaoPort obterValoresConversaoPort;
 
 
     public ItensProdutoService(ItemProdutoRepository itemProdutoRepository,
                                ProdutoRepository produtoRepository,
-                               ItemRepository itemRepository,
+                               SpringDataItemRepository itemRepository,
                                SpringDataUnidadeMedidaRepository unidadeMedidaRepository,
                                ObterValoresConversaoPort obterValoresConversaoPort) {
         this.itemProdutoRepository = itemProdutoRepository;
@@ -64,7 +66,7 @@ public class ItensProdutoService {
         for (var item: itemProduto) {
             var itemEntity = getItem(item.cdItem());
             var unidadeMedida = getUnidadeMedidaDTO(item);
-            ConversaoValoresDTO conversaoValoresDTO = obterValoresConversaoPort.obterValoresConversao(itemEntity,
+            ConversaoValoresDTO conversaoValoresDTO = obterValoresConversaoPort.obterValoresConversao(toDomain(itemEntity),
                     item.qtdItem(),item.cdUnidadeMedida());
             saveItem(item, produto, itemEntity, unidadeMedida, conversaoValoresDTO);
 
@@ -140,7 +142,7 @@ public class ItensProdutoService {
 
     public List<ProdutosPorItemDTO> listarProdutosPorItem(Long codigoItem) {
         logger.info("Inicio do método listarProdutosPorItem");
-        Item item = itemRepository.findById(codigoItem)
+        ItemEntity item = itemRepository.findById(codigoItem)
                 .orElseThrow(() -> {
                     logger.error("Item não encontrado");
                     return new FichaTecnicaException("Item não encontrado");
@@ -261,7 +263,7 @@ public class ItensProdutoService {
                 itemProduto.getValor());
 
         ConversaoValoresDTO conversaoValoresDTO = obterValoresConversaoPort.obterValoresConversao(
-                itemProduto.getItem(),
+                toDomain(itemProduto.getItem()),
                 itemProdutoDTO.qtdItem(),
                 itemProdutoDTO.cdUnidadeMedida());
 
@@ -279,13 +281,13 @@ public class ItensProdutoService {
 
     private Boolean isValidItens(List<ItemProdutoDTO> itemProduto) {
         var listItem = itemRepository.findAll();
-        var itemIdsCompleta = listItem.stream().map(Item::getCodigo)
+        var itemIdsCompleta = listItem.stream().map(ItemEntity::getCodigo)
                 .collect(Collectors.toSet());
 
         return  itemProduto.stream().allMatch(item -> itemIdsCompleta.contains(item.cdItem()));
     }
 
-    private void saveItem(ItemProdutoDTO itemProduto, Produto produto, Item item,
+    private void saveItem(ItemProdutoDTO itemProduto, Produto produto, ItemEntity item,
                           UnidadeMedidaDTO unidadeMedida, ConversaoValoresDTO conversaoValoresDTO) {
         var itemProdutoSalvo = new ItemProduto();
         itemProdutoSalvo.setId(new ItemProdutoId(produto.getCodigo(), item.getCodigo()));
@@ -314,8 +316,12 @@ public class ItensProdutoService {
         return new UnidadeMedidaDTO(unidadeMedida);
     }
 
-    private Item getItem(Long  idItem) {
+    private ItemEntity getItem(Long  idItem) {
         return itemRepository.findById(idItem)
                 .orElseThrow();
+    }
+
+    private Item toDomain(ItemEntity entity) {
+        return new Item(entity.getCodigo(), entity.getNome(), entity.getUnidadeMedida(), entity.getValor());
     }
 }

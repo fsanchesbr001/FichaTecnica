@@ -1,5 +1,6 @@
 package com.fabriciosanches.fichatecnica.domains;
 
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.ItemEntity;
 import com.fabriciosanches.fichatecnica.serializers.BigDecimalCurrencySerializer;
 import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.UnidadeMedidaEntity;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -22,7 +23,7 @@ public class ItemProduto {
     @ManyToOne
     @JoinColumn(name = "cd_item" , insertable = false, updatable = false)
     @MapsId("itemId")
-    private Item item;
+    private ItemEntity item;
 
     @ManyToOne
     @JoinColumn(name = "cd_produto" , insertable = false, updatable = false)

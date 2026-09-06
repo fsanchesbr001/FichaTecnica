@@ -1,7 +1,8 @@
 package com.fabriciosanches.fichatecnica.dtos;
 
 
-import com.fabriciosanches.fichatecnica.domains.Item;
+import com.fabriciosanches.fichatecnica.core.domain.Item;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.ItemEntity;
 import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.UnidadeMedidaEntity;
 import com.fabriciosanches.fichatecnica.serializers.BigDecimalCurrencySerializer;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -15,8 +16,17 @@ public record ItemDTO(Long codigo, String nome, UnidadeMedidaEntity unidadeMedid
         this(item.getCodigo(),item.getNome(), item.getUnidadeMedida(), item.getValor());
     }
 
+    public ItemDTO(ItemEntity item) {
+        this(item.getCodigo(), item.getNome(), item.getUnidadeMedida(), item.getValor());
+    }
+
     public static List<ItemDTO> from(List<Item> lista) {
         return lista.stream().map(ItemDTO::new).toList();
     }
 
+    public static List<ItemDTO> fromEntities(List<ItemEntity> lista) {
+        return lista.stream().map(ItemDTO::new).toList();
+    }
+
 }
+

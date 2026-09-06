@@ -24,7 +24,10 @@ import java.awt.geom.Ellipse2D;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Serviço responsável pela geração de gráficos como imagens PNG.
@@ -44,6 +47,7 @@ public class GraficoService {
     private static final Color COR_LINHA  = new Color(21, 101, 192);   // #1565C0
     /** Cor dos pontos (círculos) – vermelho. */
     private static final Color COR_PONTOS = new Color(211, 47, 47);    // #D32F2F
+    private static final Pattern LABEL_EVENTO_PATTERN = Pattern.compile("^(.*?)(?:\\s*\\[#(\\d+)])?$");
 
     /**
      * Gera um gráfico de linha de variação de preços a partir de um {@link GraficoPrecoItemDTO}
@@ -56,7 +60,7 @@ public class GraficoService {
      *   <li>Pontos de intersecção: círculos vermelhos (#D32F2F)</li>
      * </ul>
      *
-     * @param dto dados do gráfico gerados pelo {@link HistoricoItemService}
+     * @param dto dados do gráfico gerados pelo fluxo de histórico de item (use case)
      * @return array de bytes da imagem PNG
      * @throws IOException se ocorrer erro ao serializar o gráfico
      */
@@ -67,10 +71,13 @@ public class GraficoService {
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
         List<String>     labels  = dto.labels();
         List<BigDecimal> valores = dto.valores();
+        List<EventoInfo> eventos = new ArrayList<>(labels.size());
 
         for (int i = 0; i < labels.size(); i++) {
+            EventoInfo evento = parseEventoInfo(labels.get(i), i);
+            eventos.add(evento);
             BigDecimal val = (valores.get(i) != null) ? valores.get(i) : BigDecimal.ZERO;
-            dataset.addValue(val, dto.nomeItem(), labels.get(i));
+            dataset.addValue(val, dto.nomeItem(), new EventoCategoria(evento.data(), evento.codigoEvento(), i));
         }
 
         // ── Gráfico ───────────────────────────────────────────────────────────
@@ -122,11 +129,13 @@ public class GraficoService {
         renderer.setDrawOutlines(true);
         renderer.setDefaultToolTipGenerator(
                 (categoryDataset, row, col) -> {
-                    String label      = labels.get(col);
+                    EventoInfo evento = eventos.get(col);
+                    String label      = evento.data();
+                    String codigoInfo = evento.codigoEvento() == null ? "" : " | #" + evento.codigoEvento();
                     String valorFmt   = dto.valoresFormatados().get(col);
                     String variacao   = dto.variacoes().get(col);
                     String varMon     = dto.variacoesMonetarias().get(col);
-                    return label + " – " + valorFmt + " | " + variacao + " (" + varMon + ")";
+                    return label + " – " + valorFmt + codigoInfo + " | " + variacao + " (" + varMon + ")";
                 }
         );
         plot.setRenderer(renderer);
@@ -145,6 +154,7 @@ public class GraficoService {
         logger.info("Gráfico PNG gerado com sucesso – {} bytes, {} pontos", pngBytes.length, labels.size());
         return pngBytes;
     }
+
 
     /**
      * Gera um gráfico de pizza (composição de custo de produto) e retorna os bytes PNG.
@@ -193,6 +203,41 @@ public class GraficoService {
 
         logger.info("Gráfico de pizza PNG gerado com sucesso – {} bytes, {} fatias", pngBytes.length, labels.size());
         return pngBytes;
+    }
+
+    private EventoInfo parseEventoInfo(String labelOriginal, int fallbackOrdem) {
+        String base = labelOriginal != null ? labelOriginal : "";
+        Matcher matcher = LABEL_EVENTO_PATTERN.matcher(base.trim());
+        if (!matcher.matches()) {
+            return new EventoInfo(base, (long) fallbackOrdem);
+        }
+
+        String data = matcher.group(1) != null ? matcher.group(1).trim() : "";
+        String codigoTexto = matcher.group(2);
+        if (codigoTexto == null || codigoTexto.isBlank()) {
+            return new EventoInfo(data, (long) fallbackOrdem);
+        }
+
+        try {
+            return new EventoInfo(data, Long.parseLong(codigoTexto));
+        } catch (NumberFormatException ignored) {
+            return new EventoInfo(data, (long) fallbackOrdem);
+        }
+    }
+
+    private record EventoInfo(String data, Long codigoEvento) {}
+
+    private record EventoCategoria(String dataLabel, Long codigoEvento, int ordemCadastro)
+            implements Comparable<EventoCategoria> {
+        @Override
+        public int compareTo(EventoCategoria other) {
+            return Integer.compare(this.ordemCadastro, other.ordemCadastro);
+        }
+
+        @Override
+        public String toString() {
+            return dataLabel;
+        }
     }
 }
 
