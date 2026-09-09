@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
+import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -43,8 +44,8 @@ class AtualizarUnidadeMedidaUseCaseTest {
     void atualizar_DeveLancarExcecaoQuandoNaoEncontrarPorId() {
         when(repositoryPort.buscarPorId(1L)).thenReturn(Optional.empty());
 
-        java.util.NoSuchElementException exception =
-                assertThrows(java.util.NoSuchElementException.class, () -> useCase.atualizar(1L, "Quilo", "kg"));
+        NoSuchElementException exception =
+                assertThrows(NoSuchElementException.class, () -> useCase.atualizar(1L, "Quilo", "kg"));
 
         assertEquals("Unidade de medida não encontrada", exception.getMessage());
         verify(repositoryPort, never()).salvar(any(UnidadeMedida.class));

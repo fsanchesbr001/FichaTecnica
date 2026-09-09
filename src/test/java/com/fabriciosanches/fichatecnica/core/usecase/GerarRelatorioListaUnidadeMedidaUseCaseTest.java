@@ -5,6 +5,7 @@ import com.fabriciosanches.fichatecnica.core.ports.out.GeradorRelatorioUnidadeMe
 import com.fabriciosanches.fichatecnica.core.ports.out.UnidadeMedidaRepositoryPort;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -16,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -43,11 +43,9 @@ class GerarRelatorioListaUnidadeMedidaUseCaseTest {
         byte[] resultado = useCase.executar();
 
         assertArrayEquals(new byte[]{1, 2, 3}, resultado);
-        verify(reportPort).gerarRelatorioLista(argThat(lista ->
-                lista.size() == 2
-                        && "Centímetro".equals(lista.get(0).getNome())
-                        && "Metro".equals(lista.get(1).getNome())
-        ));
+        ArgumentCaptor<List<UnidadeMedida>> captor = ArgumentCaptor.forClass(List.class);
+        verify(reportPort).gerarRelatorioLista(captor.capture());
+        assertEquals(List.of("Centímetro", "Metro"), captor.getValue().stream().map(UnidadeMedida::getNome).toList());
     }
 
     @Test

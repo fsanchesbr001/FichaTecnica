@@ -34,8 +34,7 @@ class BuscarConversaoUseCaseTest {
 
         List<Conversao> resultado = useCase.buscarTodos();
 
-        assertEquals(2L, resultado.get(0).getUnidadeDe());
-        assertEquals(5L, resultado.get(1).getUnidadeDe());
+        assertEquals(List.of(2L, 5L), resultado.stream().map(Conversao::getUnidadeDe).toList());
     }
 
     @Test

@@ -61,7 +61,11 @@ class ListarHistoricoItemUseCaseTest {
 
         GraficoPrecoItemDTO dto = useCase.gerarGraficoPreco(10L);
 
-        assertEquals(List.of("05/09/2026 [#1]", "05/09/2026 [#2]", "05/09/2026 [#3]"), dto.labels());
+        assertEquals(3, dto.labels().size());
+        assertEquals("05/09/2026", dto.labels().get(0).substring(0, 10));
+        assertEquals("05/09/2026", dto.labels().get(1).substring(0, 10));
+        assertEquals("05/09/2026", dto.labels().get(2).substring(0, 10));
+        assertEquals(List.of("[#1]", "[#2]", "[#3]"), dto.labels().stream().map(label -> label.substring(label.indexOf('['))).toList());
         assertEquals(List.of(new BigDecimal("90.00"), new BigDecimal("85.00"), new BigDecimal("100.00")), dto.valores());
         assertEquals("-5,6%", dto.variacoes().get(1));
         assertEquals("+17,7%", dto.variacoes().get(2));

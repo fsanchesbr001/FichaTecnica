@@ -37,8 +37,7 @@ class BuscarItemUseCaseTest {
 
         List<Item> result = useCase.listar();
 
-        assertEquals("Acucar", result.get(0).getNome());
-        assertEquals("farinha", result.get(1).getNome());
+        assertEquals(List.of("Acucar", "farinha"), result.stream().map(Item::getNome).toList());
     }
 
     @Test

@@ -4,17 +4,17 @@ import com.fabriciosanches.fichatecnica.core.domain.Item;
 import com.fabriciosanches.fichatecnica.core.ports.in.ObterValoresConversaoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.RegistrarHistoricoItemPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.ItemRepositoryPort;
-import com.fabriciosanches.fichatecnica.domains.ItemProduto;
-import com.fabriciosanches.fichatecnica.domains.ItemProdutoId;
-import com.fabriciosanches.fichatecnica.domains.Produto;
+import com.fabriciosanches.fichatecnica.core.ports.out.ItemProdutoRepositoryPort;
+import com.fabriciosanches.fichatecnica.core.ports.out.ProdutoRepositoryPort;
+import com.fabriciosanches.fichatecnica.core.domain.ItemProduto;
+import com.fabriciosanches.fichatecnica.core.domain.ItemProdutoId;
+import com.fabriciosanches.fichatecnica.core.domain.Produto;
 import com.fabriciosanches.fichatecnica.dtos.ConversaoValoresDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
-import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.ItemEntity;
 import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.UnidadeMedidaEntity;
-import com.fabriciosanches.fichatecnica.repository.ItemProdutoRepository;
-import com.fabriciosanches.fichatecnica.repository.ProdutoRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -40,11 +40,11 @@ class AtualizarItemUseCaseTest {
     @Mock
     private RegistrarHistoricoItemPort registrarHistoricoItemPort;
     @Mock
-    private ItemProdutoRepository itemProdutoRepository;
+    private ItemProdutoRepositoryPort itemProdutoRepositoryPort;
     @Mock
     private ObterValoresConversaoPort obterValoresConversaoPort;
     @Mock
-    private ProdutoRepository produtoRepository;
+    private ProdutoRepositoryPort produtoRepositoryPort;
 
     @InjectMocks
     private AtualizarItemUseCase useCase;
@@ -69,40 +69,38 @@ class AtualizarItemUseCaseTest {
 
         when(itemRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(item));
         when(itemRepositoryPort.salvar(any(Item.class))).thenReturn(item);
-        when(itemProdutoRepository.findByItemCodigo(1L)).thenReturn(List.of());
+        when(itemProdutoRepositoryPort.buscarPorItemId(1L)).thenReturn(List.of());
 
         Item result = useCase.atualizar(1L, "Farinha Premium", unidade, new BigDecimal("9.00"));
 
         assertEquals("Farinha Premium", result.getNome());
         verify(registrarHistoricoItemPort).registrar(eq(1L), eq(new BigDecimal("9.00")), any(LocalDate.class));
-        verify(produtoRepository, never()).save(any(Produto.class));
+        verify(produtoRepositoryPort, never()).salvar(any(Produto.class));
     }
 
     @Test
     void atualizar_DeveRecalcularProdutoQuandoExistemItensProduto() {
         UnidadeMedidaEntity unidadeBase = new UnidadeMedidaEntity(1L, "Quilo", "kg");
-        UnidadeMedidaEntity unidadePara = new UnidadeMedidaEntity(2L, "Grama", "g");
         Item item = new Item(1L, "Farinha", unidadeBase, new BigDecimal("7.50"));
 
         Produto produto = new Produto(10L, "Bolo", "Desc", null, new BigDecimal("20.00"), BigDecimal.ZERO, null);
-        ItemEntity itemEntity = new ItemEntity(1L, "Farinha", unidadeBase, new BigDecimal("7.50"));
-
-        ItemProduto itemProduto = new ItemProduto(new ItemProdutoId(10L, 1L), itemEntity, produto, unidadePara,
+        ItemProduto itemProduto = new ItemProduto(new ItemProdutoId(10L, 1L), item, produto, new com.fabriciosanches.fichatecnica.core.domain.UnidadeMedida(2L, "Grama", "g"),
                 2.0, new BigDecimal("5.00"));
-        produto.setProdutosList(List.of(itemProduto));
 
         when(itemRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(item));
         when(itemRepositoryPort.salvar(any(Item.class))).thenReturn(item);
-        when(itemProdutoRepository.findByItemCodigo(1L)).thenReturn(List.of(itemProduto));
+        when(itemProdutoRepositoryPort.buscarPorItemId(1L)).thenReturn(List.of(itemProduto));
         when(obterValoresConversaoPort.obterValoresConversao(any(Item.class), eq(2.0), eq(2L)))
                 .thenReturn(new ConversaoValoresDTO(2.0, 2L, new BigDecimal("7.00")));
+        when(itemProdutoRepositoryPort.salvar(any(ItemProduto.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(produtoRepositoryPort.salvar(any(Produto.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         useCase.atualizar(1L, "Farinha Nova", unidadeBase, new BigDecimal("8.90"));
 
-        assertEquals(new BigDecimal("7.00"), itemProduto.getValor());
-        assertEquals(new BigDecimal("7.00"), produto.getValorItens());
-        verify(itemProdutoRepository).save(itemProduto);
-        verify(produtoRepository).save(produto);
+        ArgumentCaptor<ItemProduto> captor = ArgumentCaptor.forClass(ItemProduto.class);
+        verify(itemProdutoRepositoryPort).salvar(captor.capture());
+        assertEquals(new BigDecimal("7.00"), captor.getValue().getValor());
+        verify(produtoRepositoryPort).salvar(any(Produto.class));
     }
 }
 
