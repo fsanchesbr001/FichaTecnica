@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,9 +34,7 @@ class BuscarUnidadeMedidaUseCaseTest {
 
         List<UnidadeMedida> resultado = useCase.buscarTodos();
 
-        assertEquals(2, resultado.size());
-        assertEquals("Centímetro", resultado.get(0).getNome());
-        assertEquals("Metro", resultado.get(1).getNome());
+        assertEquals(List.of("Centímetro", "Metro"), resultado.stream().map(UnidadeMedida::getNome).toList());
     }
 
     @Test
@@ -51,8 +50,8 @@ class BuscarUnidadeMedidaUseCaseTest {
     void buscarPorId_DeveLancarExcecaoQuandoNaoEncontrar() {
         when(repositoryPort.buscarPorId(1L)).thenReturn(Optional.empty());
 
-        java.util.NoSuchElementException exception =
-                assertThrows(java.util.NoSuchElementException.class, () -> useCase.buscarPorId(1L));
+        NoSuchElementException exception =
+                assertThrows(NoSuchElementException.class, () -> useCase.buscarPorId(1L));
 
         assertEquals("Unidade de medida não encontrada", exception.getMessage());
     }

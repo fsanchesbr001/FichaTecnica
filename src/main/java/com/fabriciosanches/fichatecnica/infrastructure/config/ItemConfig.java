@@ -8,12 +8,12 @@ import com.fabriciosanches.fichatecnica.core.ports.in.ObterValoresConversaoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.RegistrarHistoricoItemPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.HistoricoItemRepositoryPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.ItemRepositoryPort;
+import com.fabriciosanches.fichatecnica.core.ports.out.ItemProdutoRepositoryPort;
+import com.fabriciosanches.fichatecnica.core.ports.out.ProdutoRepositoryPort;
 import com.fabriciosanches.fichatecnica.core.usecase.AtualizarItemUseCase;
 import com.fabriciosanches.fichatecnica.core.usecase.BuscarItemUseCase;
 import com.fabriciosanches.fichatecnica.core.usecase.CriarItemUseCase;
 import com.fabriciosanches.fichatecnica.core.usecase.DeletarItemUseCase;
-import com.fabriciosanches.fichatecnica.repository.ItemProdutoRepository;
-import com.fabriciosanches.fichatecnica.repository.ProdutoRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -34,15 +34,15 @@ public class ItemConfig {
     public AtualizarItemPort atualizarItemPort(
             ItemRepositoryPort itemRepositoryPort,
             RegistrarHistoricoItemPort registrarHistoricoItemPort,
-            ItemProdutoRepository itemProdutoRepository,
+            ItemProdutoRepositoryPort itemProdutoRepositoryPort,
             ObterValoresConversaoPort obterValoresConversaoPort,
-            ProdutoRepository produtoRepository) {
+            ProdutoRepositoryPort produtoRepositoryPort) {
         return new AtualizarItemUseCase(
                 itemRepositoryPort,
                 registrarHistoricoItemPort,
-                itemProdutoRepository,
+                itemProdutoRepositoryPort,
                 obterValoresConversaoPort,
-                produtoRepository
+                produtoRepositoryPort
         );
     }
 
@@ -50,9 +50,9 @@ public class ItemConfig {
     public DeletarItemPort deletarItemPort(
             ItemRepositoryPort itemRepositoryPort,
             HistoricoItemRepositoryPort historicoItemRepositoryPort,
-            ItemProdutoRepository itemProdutoRepository,
-            ProdutoRepository produtoRepository) {
-        return new DeletarItemUseCase(itemRepositoryPort, historicoItemRepositoryPort, itemProdutoRepository, produtoRepository);
+            ItemProdutoRepositoryPort itemProdutoRepositoryPort,
+            ProdutoRepositoryPort produtoRepositoryPort) {
+        return new DeletarItemUseCase(itemRepositoryPort, historicoItemRepositoryPort, itemProdutoRepositoryPort, produtoRepositoryPort);
     }
 }
 

@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,8 +48,8 @@ class AtualizarConversaoUseCaseTest {
     void atualizar_DeveLancarExcecaoQuandoNaoEncontrarPorId() {
         when(repositoryPort.buscarPorId(1L)).thenReturn(Optional.empty());
 
-        java.util.NoSuchElementException exception = assertThrows(
-                java.util.NoSuchElementException.class,
+        NoSuchElementException exception = assertThrows(
+                NoSuchElementException.class,
                 () -> useCase.atualizar(1L, new Conversao(2L, 3L, "MULTIPLICA", BigDecimal.ONE))
         );
 

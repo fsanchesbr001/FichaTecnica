@@ -13,6 +13,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -29,7 +31,7 @@ class CriarUnidadeMedidaUseCaseTest {
     @Test
     void criar_DevePersistirQuandoSiglaNaoExiste() {
         when(repositoryPort.buscarPorSigla("M")).thenReturn(Optional.empty());
-        when(repositoryPort.salvar(org.mockito.ArgumentMatchers.any(UnidadeMedida.class)))
+        when(repositoryPort.salvar(any(UnidadeMedida.class)))
                 .thenReturn(new UnidadeMedida(1L, "Metro", "M"));
 
         UnidadeMedida unidadeCriada = useCase.criar("  Metro  ", " m ");
@@ -52,7 +54,7 @@ class CriarUnidadeMedidaUseCaseTest {
                 assertThrows(IllegalArgumentException.class, () -> useCase.criar("Mililitro", "m"));
 
         assertEquals("Já existe uma unidade de medida com a sigla 'M'.", exception.getMessage());
-        verify(repositoryPort, never()).salvar(org.mockito.ArgumentMatchers.any(UnidadeMedida.class));
+        verify(repositoryPort, never()).salvar(any(UnidadeMedida.class));
     }
 
     @Test
@@ -61,8 +63,8 @@ class CriarUnidadeMedidaUseCaseTest {
                 assertThrows(IllegalArgumentException.class, () -> useCase.criar("  ", "m"));
 
         assertEquals("Nome não pode ser vazio", exception.getMessage());
-        verify(repositoryPort, never()).buscarPorSigla(org.mockito.ArgumentMatchers.anyString());
-        verify(repositoryPort, never()).salvar(org.mockito.ArgumentMatchers.any(UnidadeMedida.class));
+                        verify(repositoryPort, never()).buscarPorSigla(anyString());
+                        verify(repositoryPort, never()).salvar(any(UnidadeMedida.class));
     }
 
     @Test
@@ -71,7 +73,7 @@ class CriarUnidadeMedidaUseCaseTest {
                 assertThrows(IllegalArgumentException.class, () -> useCase.criar("Metro", null));
 
         assertEquals("Sigla não pode ser vazia", exception.getMessage());
-        verify(repositoryPort, never()).buscarPorSigla(org.mockito.ArgumentMatchers.anyString());
-        verify(repositoryPort, never()).salvar(org.mockito.ArgumentMatchers.any(UnidadeMedida.class));
+                        verify(repositoryPort, never()).buscarPorSigla(anyString());
+                        verify(repositoryPort, never()).salvar(any(UnidadeMedida.class));
     }
 }

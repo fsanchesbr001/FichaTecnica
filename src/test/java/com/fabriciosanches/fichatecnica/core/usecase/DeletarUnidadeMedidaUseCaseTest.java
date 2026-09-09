@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
+import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -37,8 +38,8 @@ class DeletarUnidadeMedidaUseCaseTest {
     void deletar_DeveLancarExcecaoQuandoNaoExistir() {
         when(repositoryPort.buscarPorId(1L)).thenReturn(Optional.empty());
 
-        java.util.NoSuchElementException exception =
-                assertThrows(java.util.NoSuchElementException.class, () -> useCase.deletar(1L));
+        NoSuchElementException exception =
+                assertThrows(NoSuchElementException.class, () -> useCase.deletar(1L));
 
         assertEquals("Unidade de medida não encontrada", exception.getMessage());
     }

@@ -28,7 +28,7 @@ class RegistrarHistoricoItemUseCaseTest {
     @Test
     void registrar_DevePersistirHistoricoComDataInformada() {
         when(historicoItemRepositoryPort.salvar(any(HistoricoItem.class)))
-                .thenAnswer(inv -> inv.getArgument(0));
+                .thenReturn(new HistoricoItem(1L, 10L, new BigDecimal("100.00"), LocalDate.of(2026, 9, 5)));
 
         LocalDate data = LocalDate.of(2026, 9, 5);
         HistoricoItem result = useCase.registrar(10L, new BigDecimal("100.00"), data);

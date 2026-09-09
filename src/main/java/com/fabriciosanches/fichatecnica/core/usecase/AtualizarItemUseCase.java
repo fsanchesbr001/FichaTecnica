@@ -1,19 +1,18 @@
 package com.fabriciosanches.fichatecnica.core.usecase;
 
 import com.fabriciosanches.fichatecnica.core.domain.Item;
+import com.fabriciosanches.fichatecnica.core.domain.ItemProduto;
+import com.fabriciosanches.fichatecnica.core.domain.Produto;
 import com.fabriciosanches.fichatecnica.core.ports.in.AtualizarItemPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.ObterValoresConversaoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.RegistrarHistoricoItemPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.ItemRepositoryPort;
-import com.fabriciosanches.fichatecnica.domains.ItemProduto;
-import com.fabriciosanches.fichatecnica.domains.Produto;
+import com.fabriciosanches.fichatecnica.core.ports.out.ItemProdutoRepositoryPort;
+import com.fabriciosanches.fichatecnica.core.ports.out.ProdutoRepositoryPort;
 import com.fabriciosanches.fichatecnica.dtos.ConversaoValoresDTO;
 import com.fabriciosanches.fichatecnica.dtos.QuantidadeValorDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.UnidadeMedidaEntity;
-import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.ItemEntity;
-import com.fabriciosanches.fichatecnica.repository.ItemProdutoRepository;
-import com.fabriciosanches.fichatecnica.repository.ProdutoRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -23,21 +22,21 @@ import java.util.Objects;
 public class AtualizarItemUseCase implements AtualizarItemPort {
     private final ItemRepositoryPort itemRepositoryPort;
     private final RegistrarHistoricoItemPort registrarHistoricoItemPort;
-    private final ItemProdutoRepository itemProdutoRepository;
+    private final ItemProdutoRepositoryPort itemProdutoRepositoryPort;
     private final ObterValoresConversaoPort obterValoresConversaoPort;
-    private final ProdutoRepository produtoRepository;
+    private final ProdutoRepositoryPort produtoRepositoryPort;
 
     public AtualizarItemUseCase(
             ItemRepositoryPort itemRepositoryPort,
             RegistrarHistoricoItemPort registrarHistoricoItemPort,
-            ItemProdutoRepository itemProdutoRepository,
+            ItemProdutoRepositoryPort itemProdutoRepositoryPort,
             ObterValoresConversaoPort obterValoresConversaoPort,
-            ProdutoRepository produtoRepository) {
+            ProdutoRepositoryPort produtoRepositoryPort) {
         this.itemRepositoryPort = Objects.requireNonNull(itemRepositoryPort, "Item repository port não pode ser nulo");
         this.registrarHistoricoItemPort = Objects.requireNonNull(registrarHistoricoItemPort, "Port de histórico não pode ser nulo");
-        this.itemProdutoRepository = Objects.requireNonNull(itemProdutoRepository, "ItemProdutoRepository não pode ser nulo");
+        this.itemProdutoRepositoryPort = Objects.requireNonNull(itemProdutoRepositoryPort, "ItemProdutoRepositoryPort não pode ser nulo");
         this.obterValoresConversaoPort = Objects.requireNonNull(obterValoresConversaoPort, "ObterValoresConversaoPort não pode ser nulo");
-        this.produtoRepository = Objects.requireNonNull(produtoRepository, "ProdutoRepository não pode ser nulo");
+        this.produtoRepositoryPort = Objects.requireNonNull(produtoRepositoryPort, "ProdutoRepositoryPort não pode ser nulo");
     }
 
     @Override
@@ -59,39 +58,41 @@ public class AtualizarItemUseCase implements AtualizarItemPort {
         Item itemAtualizado = itemRepositoryPort.salvar(item);
         registrarHistoricoItemPort.registrar(itemAtualizado.getCodigo(), valor, LocalDate.now());
 
-        List<ItemProduto> itemProdutos = itemProdutoRepository.findByItemCodigo(itemAtualizado.getCodigo());
+        List<ItemProduto> itemProdutos = itemProdutoRepositoryPort.buscarPorItemId(itemAtualizado.getCodigo());
         for (ItemProduto itemProduto : itemProdutos) {
             ConversaoValoresDTO conversaoValoresDTO = obterValoresConversaoPort.obterValoresConversao(
-                    toDomain(itemProduto.getItem()),
+                    itemProduto.getItem(),
                     itemProduto.getQuantidade(),
                     itemProduto.getUnidadePara().getCodigo()
             );
             itemProduto.setValor(conversaoValoresDTO.valor());
-            itemProdutoRepository.save(itemProduto);
+            itemProdutoRepositoryPort.salvar(itemProduto);
 
-            Produto produto = itemProduto.getProduto();
-            QuantidadeValorDTO quantidadeValorDTO = calcularQuantidadeEValorTotal(produto);
+            Produto produto = itemProduto.getProduto() != null
+                    ? itemProduto.getProduto()
+                    : produtoRepositoryPort.buscarPorId(itemProduto.getId().getProdutoId())
+                    .orElseThrow(() -> new FichaTecnicaException("Produto não encontrado"));
+            QuantidadeValorDTO quantidadeValorDTO = calcularQuantidadeEValorTotal(produto.getCodigo());
             produto.setValorItens(quantidadeValorDTO.valorTotal());
-            produtoRepository.save(produto);
+            produtoRepositoryPort.salvar(produto);
         }
 
         return itemAtualizado;
     }
 
-    private QuantidadeValorDTO calcularQuantidadeEValorTotal(Produto produto) {
+    private QuantidadeValorDTO calcularQuantidadeEValorTotal(Long produtoId) {
         int quantidadeTotal = 0;
         BigDecimal valorTotal = BigDecimal.ZERO;
 
-        for (ItemProduto itemProduto : produto.getProdutosList()) {
+        for (ItemProduto itemProduto : itemProdutoRepositoryPort.buscarPorProdutoId(produtoId)) {
             quantidadeTotal += 1;
-            valorTotal = valorTotal.add(itemProduto.getValor());
+            if (itemProduto.getValor() != null) {
+                valorTotal = valorTotal.add(itemProduto.getValor());
+            }
         }
 
         return new QuantidadeValorDTO(quantidadeTotal, valorTotal);
     }
 
-    private Item toDomain(ItemEntity entity) {
-        return new Item(entity.getCodigo(), entity.getNome(), entity.getUnidadeMedida(), entity.getValor());
-    }
 }
 

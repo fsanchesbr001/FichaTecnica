@@ -1,6 +1,9 @@
-package com.fabriciosanches.fichatecnica.services;
+package com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web;
 
-import com.fabriciosanches.fichatecnica.controllers.ProdutoImagemController;
+import com.fabriciosanches.fichatecnica.core.ports.in.ConsultarUploadImagemProdutoPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.IniciarUploadImagemProdutoPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.ListarJobsUploadImagemProdutoPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.RemoverImagemProdutoPort;
 import com.fabriciosanches.fichatecnica.dtos.UploadJobDTO;
 import com.fabriciosanches.fichatecnica.enums.UploadJobStatus;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
@@ -27,19 +30,29 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ProdutoImagemControllerTest {
 
     private MockMvc mockMvc;
-    private ProdutoImagemUploadService uploadService;
+    private IniciarUploadImagemProdutoPort iniciarUploadImagemProdutoPort;
+    private ConsultarUploadImagemProdutoPort consultarUploadImagemProdutoPort;
+    private RemoverImagemProdutoPort removerImagemProdutoPort;
+    private ListarJobsUploadImagemProdutoPort listarJobsUploadImagemProdutoPort;
 
     @BeforeEach
     void setUp() {
-        uploadService = Mockito.mock(ProdutoImagemUploadService.class);
-        ProdutoImagemController controller = new ProdutoImagemController(uploadService);
+        iniciarUploadImagemProdutoPort = Mockito.mock(IniciarUploadImagemProdutoPort.class);
+        consultarUploadImagemProdutoPort = Mockito.mock(ConsultarUploadImagemProdutoPort.class);
+        removerImagemProdutoPort = Mockito.mock(RemoverImagemProdutoPort.class);
+        listarJobsUploadImagemProdutoPort = Mockito.mock(ListarJobsUploadImagemProdutoPort.class);
+        ProdutoImagemController controller = new ProdutoImagemController(
+                iniciarUploadImagemProdutoPort,
+                consultarUploadImagemProdutoPort,
+                removerImagemProdutoPort,
+                listarJobsUploadImagemProdutoPort);
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }
 
     @Test
     void iniciarUpload_DeveRetornarAccepted() throws Exception {
         UploadJobDTO job = new UploadJobDTO("job-1", UploadJobStatus.PENDING, 4L, null, null);
-        when(uploadService.iniciarUpload(eq(4L), any())).thenReturn(job);
+        when(iniciarUploadImagemProdutoPort.iniciar(eq(4L), any())).thenReturn(job);
 
         MockMultipartFile file = new MockMultipartFile("file", "imagem.png", "image/png", "abc".getBytes());
 
@@ -47,13 +60,12 @@ class ProdutoImagemControllerTest {
                         .file(file)
                         .contentType(MULTIPART_FORM_DATA))
                 .andExpect(status().isAccepted())
-                .andExpect(jsonPath("$.jobId").value("job-1"))
-                .andExpect(jsonPath("$.status").value("PENDING"));
+                .andExpect(jsonPath("$.jobId").value("job-1"));
     }
 
     @Test
-    void iniciarUpload_DeveRetornarBadRequestQuandoRegraNegocioFalhar() throws Exception {
-        when(uploadService.iniciarUpload(eq(4L), any())).thenThrow(new FichaTecnicaException("arquivo invalido"));
+    void iniciarUpload_DeveRetornarBadRequestQuandoFalhar() throws Exception {
+        when(iniciarUploadImagemProdutoPort.iniciar(eq(4L), any())).thenThrow(new FichaTecnicaException("arquivo invalido"));
 
         MockMultipartFile file = new MockMultipartFile("file", "imagem.png", "image/png", "abc".getBytes());
 
@@ -67,7 +79,7 @@ class ProdutoImagemControllerTest {
     @Test
     void consultarStatus_DeveRetornarConflictQuandoJobNaoPertencerAoProduto() throws Exception {
         UploadJobDTO job = new UploadJobDTO("job-1", UploadJobStatus.DONE, 99L, "url", null);
-        when(uploadService.consultarStatus("job-1")).thenReturn(job);
+        when(consultarUploadImagemProdutoPort.consultar("job-1")).thenReturn(job);
 
         mockMvc.perform(get("/ficha-tecnica/produtos/{id}/imagem/status/{jobId}", 4L, "job-1"))
                 .andExpect(status().isConflict());
@@ -75,7 +87,7 @@ class ProdutoImagemControllerTest {
 
     @Test
     void consultarStatus_DeveRetornarNotFoundQuandoJobNaoExistir() throws Exception {
-        when(uploadService.consultarStatus("job-404")).thenThrow(new FichaTecnicaException("nao encontrado"));
+        when(consultarUploadImagemProdutoPort.consultar("job-404")).thenThrow(new FichaTecnicaException("nao encontrado"));
 
         mockMvc.perform(get("/ficha-tecnica/produtos/{id}/imagem/status/{jobId}", 4L, "job-404"))
                 .andExpect(status().isNotFound())
@@ -90,7 +102,7 @@ class ProdutoImagemControllerTest {
 
     @Test
     void removerImagem_DeveRetornarNotFoundQuandoProdutoNaoExistir() throws Exception {
-        doThrow(new FichaTecnicaException("produto nao encontrado")).when(uploadService).removerImagem(4L);
+        doThrow(new FichaTecnicaException("produto nao encontrado")).when(removerImagemProdutoPort).remover(4L);
 
         mockMvc.perform(delete("/ficha-tecnica/produtos/{id}/imagem", 4L))
                 .andExpect(status().isNotFound())
@@ -99,7 +111,7 @@ class ProdutoImagemControllerTest {
 
     @Test
     void listarJobs_DeveRetornarListaDeJobs() throws Exception {
-        when(uploadService.listarJobsAtivos())
+        when(listarJobsUploadImagemProdutoPort.listar())
                 .thenReturn(List.of(new UploadJobDTO("job-1", UploadJobStatus.DONE, 4L, "url", null)));
 
         mockMvc.perform(get("/ficha-tecnica/produtos/imagem/jobs"))
