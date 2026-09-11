@@ -1,11 +1,11 @@
 package com.fabriciosanches.fichatecnica.infrastructure.adapters.out.report;
 
 import com.fabriciosanches.fichatecnica.core.domain.UnidadeMedida;
+import com.fabriciosanches.fichatecnica.core.ports.in.GerarRelatorioPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.GeradorRelatorioUnidadeMedidaPort;
 import com.fabriciosanches.fichatecnica.dtos.RelatorioRequestDTO;
 import com.fabriciosanches.fichatecnica.enums.OrientacaoRelatorio;
 import com.fabriciosanches.fichatecnica.enums.TipoRelatorio;
-import com.fabriciosanches.fichatecnica.services.RelatorioService;
 import com.google.gson.Gson;
 import org.springframework.stereotype.Component;
 
@@ -18,11 +18,11 @@ import java.util.Objects;
 @Component
 public class ITextUnidadeMedidaReportAdapter implements GeradorRelatorioUnidadeMedidaPort {
 
-    private final RelatorioService relatorioService;
+    private final GerarRelatorioPort gerarRelatorioPort;
     private final Gson gson = new Gson();
 
-    public ITextUnidadeMedidaReportAdapter(RelatorioService relatorioService) {
-        this.relatorioService = Objects.requireNonNull(relatorioService, "RelatorioService não pode ser nulo");
+    public ITextUnidadeMedidaReportAdapter(GerarRelatorioPort gerarRelatorioPort) {
+        this.gerarRelatorioPort = Objects.requireNonNull(gerarRelatorioPort, "GerarRelatorioPort não pode ser nulo");
     }
 
     @Override
@@ -79,7 +79,7 @@ public class ITextUnidadeMedidaReportAdapter implements GeradorRelatorioUnidadeM
 
     private byte[] gerarPdf(RelatorioRequestDTO request, String tipo) {
         try {
-            return relatorioService.gerarRelatorioPDF(request);
+            return gerarRelatorioPort.gerarRelatorioPDF(request);
         } catch (IOException e) {
             throw new IllegalStateException("Erro ao gerar relatório PDF de " + tipo + " de unidade de medida", e);
         }

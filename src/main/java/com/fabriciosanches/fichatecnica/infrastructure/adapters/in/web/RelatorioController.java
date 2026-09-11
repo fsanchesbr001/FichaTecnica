@@ -1,7 +1,8 @@
-package com.fabriciosanches.fichatecnica.controllers;
+package com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web;
 
+import com.fabriciosanches.fichatecnica.core.ports.in.GerarGraficoPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.GerarRelatorioPort;
 import com.fabriciosanches.fichatecnica.dtos.RelatorioRequestDTO;
-import com.fabriciosanches.fichatecnica.services.RelatorioService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,10 +35,13 @@ public class RelatorioController {
 
     private static final Logger logger = LogManager.getLogger(RelatorioController.class);
 
-    private final RelatorioService relatorioService;
+    private final GerarRelatorioPort gerarRelatorioPort;
+    private final GerarGraficoPort gerarGraficoPort;
 
-    public RelatorioController(RelatorioService relatorioService) {
-        this.relatorioService = relatorioService;
+    public RelatorioController(GerarRelatorioPort gerarRelatorioPort,
+                               GerarGraficoPort gerarGraficoPort) {
+        this.gerarRelatorioPort = gerarRelatorioPort;
+        this.gerarGraficoPort = gerarGraficoPort;
     }
 
     /**
@@ -80,7 +84,7 @@ public class RelatorioController {
         logger.info("Título do relatório: '{}'", request.titulo());
 
         try {
-            byte[] pdfBytes = relatorioService.gerarRelatorioPDF(request);
+            byte[] pdfBytes = gerarRelatorioPort.gerarRelatorioPDF(request);
 
             // Gera o nome do arquivo: <Titulo-sanitizado>-YYYY-MM-DD-HH-mm-ss.pdf
             String timestamp = LocalDateTime.now()
@@ -108,4 +112,5 @@ public class RelatorioController {
         }
     }
 }
+
 

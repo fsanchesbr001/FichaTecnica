@@ -7,6 +7,8 @@ import com.fabriciosanches.fichatecnica.core.ports.in.BuscarItemPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.CriarItemPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.DeletarItemPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.ListarHistoricoItemPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.GerarGraficoPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.GerarRelatorioPort;
 import com.fabriciosanches.fichatecnica.dtos.GraficoPrecoItemDTO;
 import com.fabriciosanches.fichatecnica.dtos.ItemDTO;
 import com.fabriciosanches.fichatecnica.dtos.RelatorioRequestDTO;
@@ -14,8 +16,6 @@ import com.fabriciosanches.fichatecnica.enums.ImagemPosicao;
 import com.fabriciosanches.fichatecnica.enums.OrientacaoRelatorio;
 import com.fabriciosanches.fichatecnica.enums.TipoRelatorio;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
-import com.fabriciosanches.fichatecnica.services.GraficoService;
-import com.fabriciosanches.fichatecnica.services.RelatorioService;
 import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.UnidadeMedidaEntity;
 import com.google.gson.Gson;
 import io.swagger.v3.oas.annotations.Operation;
@@ -58,8 +58,8 @@ public class ItemController {
     private final AtualizarItemPort atualizarItemPort;
     private final DeletarItemPort deletarItemPort;
     private final ListarHistoricoItemPort listarHistoricoItemPort;
-    private final RelatorioService relatorioService;
-    private final GraficoService graficoService;
+    private final GerarRelatorioPort gerarRelatorioPort;
+    private final GerarGraficoPort gerarGraficoPort;
 
     public ItemController(
             BuscarItemPort buscarItemPort,
@@ -67,15 +67,15 @@ public class ItemController {
             AtualizarItemPort atualizarItemPort,
             DeletarItemPort deletarItemPort,
             ListarHistoricoItemPort listarHistoricoItemPort,
-            RelatorioService relatorioService,
-            GraficoService graficoService) {
+            GerarRelatorioPort gerarRelatorioPort,
+            GerarGraficoPort gerarGraficoPort) {
         this.buscarItemPort = buscarItemPort;
         this.criarItemPort = criarItemPort;
         this.atualizarItemPort = atualizarItemPort;
         this.deletarItemPort = deletarItemPort;
         this.listarHistoricoItemPort = listarHistoricoItemPort;
-        this.relatorioService = relatorioService;
-        this.graficoService = graficoService;
+        this.gerarRelatorioPort = gerarRelatorioPort;
+        this.gerarGraficoPort = gerarGraficoPort;
     }
 
     @GetMapping("/itens")
@@ -189,7 +189,7 @@ public class ItemController {
                     true
             );
 
-            byte[] pdfBytes = relatorioService.gerarRelatorioPDF(request);
+            byte[] pdfBytes = gerarRelatorioPort.gerarRelatorioPDF(request);
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss"));
             String filename = "Lista-Itens-" + timestamp + ".pdf";
 
@@ -220,7 +220,7 @@ public class ItemController {
             try {
                 GraficoPrecoItemDTO graficoDTO = listarHistoricoItemPort.gerarGraficoPreco(id);
                 if (graficoDTO != null && !graficoDTO.labels().isEmpty()) {
-                    graficoPng = graficoService.gerarGraficoPNG(graficoDTO);
+                    graficoPng = gerarGraficoPort.gerarGraficoPNG(graficoDTO);
                 }
             } catch (FichaTecnicaException ex) {
                 logger.info("Sem histórico de preços para o item id={} – PDF será gerado sem gráfico", id);
@@ -252,7 +252,7 @@ public class ItemController {
                 );
             }
 
-            byte[] pdfBytes = relatorioService.gerarRelatorioPDF(request);
+            byte[] pdfBytes = gerarRelatorioPort.gerarRelatorioPDF(request);
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss"));
             String filename = "Detalhe-Item-" + id + "-" + timestamp + ".pdf";
 
@@ -293,4 +293,3 @@ public class ItemController {
                 unidadeMedida.getSigla());
     }
 }
-

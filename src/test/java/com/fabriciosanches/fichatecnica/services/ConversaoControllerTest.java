@@ -5,6 +5,7 @@ import com.fabriciosanches.fichatecnica.core.ports.in.AtualizarConversaoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.BuscarConversaoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.CriarConversaoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.DeletarConversaoPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.GerarRelatorioPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarRelatorioConversaoPort;
 import com.fabriciosanches.fichatecnica.dtos.ConversaoDTO;
 import com.fabriciosanches.fichatecnica.dtos.ConversaoRelatorioDTO;
@@ -39,7 +40,7 @@ class ConversaoControllerTest {
     private AtualizarConversaoPort atualizarConversaoPort;
     private DeletarConversaoPort deletarConversaoPort;
     private GerarRelatorioConversaoPort gerarRelatorioConversaoPort;
-    private RelatorioService relatorioService;
+    private GerarRelatorioPort gerarRelatorioPort;
 
     @BeforeEach
     void setUp() {
@@ -48,14 +49,14 @@ class ConversaoControllerTest {
         atualizarConversaoPort = Mockito.mock(AtualizarConversaoPort.class);
         deletarConversaoPort = Mockito.mock(DeletarConversaoPort.class);
         gerarRelatorioConversaoPort = Mockito.mock(GerarRelatorioConversaoPort.class);
-        relatorioService = Mockito.mock(RelatorioService.class);
+        gerarRelatorioPort = Mockito.mock(GerarRelatorioPort.class);
         ConversaoController controller = new ConversaoController(
                 buscarConversaoPort,
                 criarConversaoPort,
                 atualizarConversaoPort,
                 deletarConversaoPort,
                 gerarRelatorioConversaoPort,
-                relatorioService
+                gerarRelatorioPort
         );
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }
@@ -132,7 +133,7 @@ class ConversaoControllerTest {
         when(gerarRelatorioConversaoPort.buscarTodosComNomes()).thenReturn(List.of(
                 new ConversaoRelatorioDTO(1L, "kg", "g", "*", new BigDecimal("1000.00"))
         ));
-        when(relatorioService.gerarRelatorioPDF(any())).thenReturn(new byte[]{1, 2, 3});
+        when(gerarRelatorioPort.gerarRelatorioPDF(any())).thenReturn(new byte[]{1, 2, 3});
 
         mockMvc.perform(get("/ficha-tecnica/conversoes/gerar-pdf-lista"))
                 .andExpect(status().isOk())
@@ -151,7 +152,7 @@ class ConversaoControllerTest {
     void gerarPdfDetalhe_DeveRetornarInternalServerErrorQuandoErroInesperado() throws Exception {
         when(gerarRelatorioConversaoPort.buscarPorIdComNomes(1L))
                 .thenReturn(new ConversaoRelatorioDTO(1L, "kg", "g", "*", new BigDecimal("1000.00")));
-        when(relatorioService.gerarRelatorioPDF(any())).thenThrow(new RuntimeException("erro"));
+        when(gerarRelatorioPort.gerarRelatorioPDF(any())).thenThrow(new RuntimeException("erro"));
 
         mockMvc.perform(get("/ficha-tecnica/conversoes/gerar-pdf-detalhe/{id}", 1L))
                 .andExpect(status().isInternalServerError());

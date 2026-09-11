@@ -1,5 +1,6 @@
-package com.fabriciosanches.fichatecnica.services;
+package com.fabriciosanches.fichatecnica.core.usecase;
 
+import com.fabriciosanches.fichatecnica.core.ports.in.GerarRelatorioPort;
 import com.fabriciosanches.fichatecnica.dtos.RelatorioRequestDTO;
 import com.fabriciosanches.fichatecnica.enums.ImagemPosicao;
 import com.fabriciosanches.fichatecnica.enums.OrientacaoRelatorio;
@@ -33,7 +34,6 @@ import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -59,10 +59,9 @@ import java.util.*;
  *       alinhada à esquerda e texto "Emitido pelo Ficha Técnica Ollivander" centralizado.</li>
  * </ul>
  */
-@Service
-public class RelatorioService {
+public class GerarRelatorioUseCase implements GerarRelatorioPort {
 
-    private static final Logger logger = LogManager.getLogger(RelatorioService.class);
+    private static final Logger logger = LogManager.getLogger(GerarRelatorioUseCase.class);
 
     // ── Layout constants ──────────────────────────────────────────────────────
     /** Margem horizontal (esquerda e direita) em pontos. */
@@ -759,3 +758,4 @@ public class RelatorioService {
         }
     }
 }
+

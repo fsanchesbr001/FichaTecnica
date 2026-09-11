@@ -5,13 +5,13 @@ import com.fabriciosanches.fichatecnica.core.domain.Seguranca;
 import com.fabriciosanches.fichatecnica.core.domain.Usuario;
 import com.fabriciosanches.fichatecnica.core.ports.in.ControleAcessoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.RecuperacaoSenhaPort;
+import com.fabriciosanches.fichatecnica.core.ports.out.EnviarEmailPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.SegurancaRepositoryPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.UsuarioRepositoryPort;
 import com.fabriciosanches.fichatecnica.dtos.EnviarEmailPrimeiroAcessoRequestDTO;
 import com.fabriciosanches.fichatecnica.dtos.EnviarEmailSegurancaResponseDTO;
 import com.fabriciosanches.fichatecnica.dtos.SegurancaDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
-import com.fabriciosanches.fichatecnica.mail.EmailService;
 import com.fabriciosanches.fichatecnica.util.Utilidades;
 import jakarta.mail.MessagingException;
 import org.apache.logging.log4j.LogManager;
@@ -19,24 +19,22 @@ import org.apache.logging.log4j.Logger;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 
 public class SegurancaUseCase implements RecuperacaoSenhaPort, ControleAcessoPort {
 
-    private final Logger logger = LogManager.getLogger(SegurancaUseCase.class);
+    private static final Logger logger = LogManager.getLogger(SegurancaUseCase.class);
     private final SegurancaRepositoryPort segurancaRepositoryPort;
     private final UsuarioRepositoryPort usuarioRepositoryPort;
-    private final EmailService emailService;
+    private final EnviarEmailPort enviarEmailPort;
 
     public SegurancaUseCase(SegurancaRepositoryPort segurancaRepositoryPort,
                             UsuarioRepositoryPort usuarioRepositoryPort,
-                            EmailService emailService) {
+                            EnviarEmailPort enviarEmailPort) {
         this.segurancaRepositoryPort = Objects.requireNonNull(segurancaRepositoryPort, "SegurancaRepositoryPort não pode ser nulo");
         this.usuarioRepositoryPort = Objects.requireNonNull(usuarioRepositoryPort, "UsuarioRepositoryPort não pode ser nulo");
-        this.emailService = Objects.requireNonNull(emailService, "EmailService não pode ser nulo");
+        this.enviarEmailPort = Objects.requireNonNull(enviarEmailPort, "EnviarEmailPort não pode ser nulo");
     }
 
     @Override
@@ -59,24 +57,21 @@ public class SegurancaUseCase implements RecuperacaoSenhaPort, ControleAcessoPor
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         String dataExpiracaoTokenFormatada = seguranca.getDataExpiracaoToken().format(formatter);
 
-        Map<String, Object> variaveisEmail = new HashMap<>();
-        variaveisEmail.put("token", token);
-        variaveisEmail.put("validadeToken", dataExpiracaoTokenFormatada);
-
         SegurancaDTO segurancaDTO = new SegurancaDTO(seguranca);
-        emailService.sendEmail(segurancaDTO.email(), Constants.SUBJECT_EMAIL_RECUPERACAO_SENHA,
-                Constants.TEMPLATE_EMAIL_RECUPERACAO_SENHA, variaveisEmail);
+        String corpo = "Token de segurança: " + token + "\n"
+                + "Validade: " + dataExpiracaoTokenFormatada + "\n"
+                + "Se você não solicitou, ignore este email.";
+        enviarEmailPort.enviar(segurancaDTO.email(), Constants.SUBJECT_EMAIL_RECUPERACAO_SENHA, corpo);
 
         return new EnviarEmailSegurancaResponseDTO(segurancaDTO, dataExpiracaoTokenFormatada);
     }
 
     @Override
     public void enviarEmailPrimeiroAcesso(EnviarEmailPrimeiroAcessoRequestDTO dados) throws MessagingException {
-        Map<String, Object> variaveisEmail = new HashMap<>();
-        variaveisEmail.put("nomeUsuario", dados.nomeUsuario());
-        variaveisEmail.put("senha", dados.senhaAleatoria());
-        emailService.sendEmail(dados.email(), Constants.SUBJECT_EMAIL_PRIMEIRO_ACESSO,
-                Constants.TEMPLATE_EMAIL_PRIMEIRO_ACESSO, variaveisEmail);
+        String corpo = "Olá, " + dados.nomeUsuario() + "!\n"
+                + "Sua senha temporária é: " + dados.senhaAleatoria() + "\n"
+                + "Altere a senha no primeiro acesso.";
+        enviarEmailPort.enviar(dados.email(), Constants.SUBJECT_EMAIL_PRIMEIRO_ACESSO, corpo);
     }
 
     @Override

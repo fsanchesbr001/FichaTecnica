@@ -54,4 +54,3 @@ public class UsuarioConfig {
         return usuarioUseCase;
     }
 }
-

@@ -3,12 +3,12 @@ package com.fabriciosanches.fichatecnica.core.usecase;
 import com.fabriciosanches.fichatecnica.constants.Constants;
 import com.fabriciosanches.fichatecnica.core.domain.Seguranca;
 import com.fabriciosanches.fichatecnica.core.domain.Usuario;
+import com.fabriciosanches.fichatecnica.core.ports.out.EnviarEmailPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.SegurancaRepositoryPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.UsuarioRepositoryPort;
 import com.fabriciosanches.fichatecnica.dtos.EnviarEmailSegurancaResponseDTO;
 import com.fabriciosanches.fichatecnica.enums.UserRole;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
-import com.fabriciosanches.fichatecnica.mail.EmailService;
 import com.fabriciosanches.fichatecnica.util.Utilidades;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,7 +36,7 @@ class SegurancaUseCaseTest {
     @Mock
     private UsuarioRepositoryPort usuarioRepositoryPort;
     @Mock
-    private EmailService emailService;
+    private EnviarEmailPort enviarEmailPort;
 
     @InjectMocks
     private SegurancaUseCase useCase;
@@ -67,8 +67,7 @@ class SegurancaUseCaseTest {
 
         assertEquals("user@email.com", response.email());
         assertTrue(response.tokenSeguranca().length() == 8);
-        verify(emailService).sendEmail(eq("user@email.com"), eq(Constants.SUBJECT_EMAIL_RECUPERACAO_SENHA),
-                eq(Constants.TEMPLATE_EMAIL_RECUPERACAO_SENHA), anyMap());
+        verify(enviarEmailPort).enviar(eq("user@email.com"), eq(Constants.SUBJECT_EMAIL_RECUPERACAO_SENHA), anyString());
     }
 
     @Test
