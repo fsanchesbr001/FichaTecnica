@@ -1,9 +1,16 @@
-package com.fabriciosanches.fichatecnica.domains;
+package com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence;
 
-import com.fabriciosanches.fichatecnica.dtos.SegurancaDTO;
-
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -14,7 +21,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Seguranca {
+public class SegurancaEntity {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
@@ -53,19 +60,5 @@ public class Seguranca {
 
     @Column(nullable = false, name = "data_expiracao_token")
     private LocalDateTime dataExpiracaoToken;
-
-    public Seguranca(SegurancaDTO segurancaDTO) {
-        this.codigo = null; // Código é gerado automaticamente
-        this.cpf = segurancaDTO.cpf();
-        this.email = segurancaDTO.email();
-        this.tokenSeguranca = segurancaDTO.tokenSeguranca();
-        this.tentativas = segurancaDTO.tentativas();
-        this.bloqueado_admin = segurancaDTO.bloqueado_admin();
-        this.bloqueado_tentativas = segurancaDTO.bloqueado_tentativas();
-        this.bloqueado_expiracao = segurancaDTO.bloqueado_expiracao();
-        this.primeiro_acesso = segurancaDTO.primeiro_acesso();
-        this.dataCriacao = LocalDateTime.now(); // Data de criação é a data atual
-        this.dataExpiracaoSenha = segurancaDTO.dataExpiracaoSenha();
-        this.dataExpiracaoToken = segurancaDTO.dataExpiracaoToken();
-    }
 }
+

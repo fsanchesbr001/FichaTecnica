@@ -1,6 +1,7 @@
 package com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence;
 
 import com.fabriciosanches.fichatecnica.core.domain.Item;
+import com.fabriciosanches.fichatecnica.core.domain.UnidadeMedida;
 import com.fabriciosanches.fichatecnica.core.ports.out.ItemRepositoryPort;
 import org.springframework.stereotype.Component;
 
@@ -43,11 +44,23 @@ public class ItemPersistenceAdapter implements ItemRepositoryPort {
     }
 
     private Item toDomain(ItemEntity entidade) {
-        return new Item(entidade.getCodigo(), entidade.getNome(), entidade.getUnidadeMedida(), entidade.getValor());
+        return new Item(
+                entidade.getCodigo(),
+                entidade.getNome(),
+                entidade.getUnidadeMedida() == null ? null : new UnidadeMedida(
+                        entidade.getUnidadeMedida().getCodigo(),
+                        entidade.getUnidadeMedida().getNome(),
+                        entidade.getUnidadeMedida().getSigla()),
+                entidade.getValor());
     }
 
     private ItemEntity toEntity(Item item) {
-        return new ItemEntity(item.getCodigo(), item.getNome(), item.getUnidadeMedida(), item.getValor());
+        UnidadeMedida unidadeMedida = item.getUnidadeMedida();
+        UnidadeMedidaEntity unidadeEntity = unidadeMedida == null ? null : new UnidadeMedidaEntity(
+                unidadeMedida.getCodigo(),
+                unidadeMedida.getNome(),
+                unidadeMedida.getSigla());
+        return new ItemEntity(item.getCodigo(), item.getNome(), unidadeEntity, item.getValor());
     }
 }
 

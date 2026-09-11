@@ -15,7 +15,6 @@ import com.fabriciosanches.fichatecnica.dtos.GraficoPizzaDTO;
 import com.fabriciosanches.fichatecnica.dtos.ProdutosPorItemDTO;
 import com.fabriciosanches.fichatecnica.dtos.QuantidadeValorDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
-import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.UnidadeMedidaEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -83,7 +82,7 @@ class ItensProdutoUseCaseTest {
 
     @Test
     void listarPorItem_DeveRetornarProdutosRelacionados() {
-        Item item = new Item(10L, "Farinha", new UnidadeMedidaEntity(1L, "Quilo", "kg"), new BigDecimal("10.00"));
+        Item item = new Item(10L, "Farinha", new UnidadeMedida(1L, "Quilo", "kg"), new BigDecimal("10.00"));
         Produto p1 = new Produto(1L, "Bolo", "Desc", null, new BigDecimal("20.00"), BigDecimal.ZERO, List.of());
         Produto p2 = new Produto(2L, "Torta", "Desc2", null, new BigDecimal("30.00"), BigDecimal.ZERO, List.of());
         ItemProduto ip1 = new ItemProduto(new ItemProdutoId(1L, 10L), item, p1, new UnidadeMedida(1L, "Quilo", "kg"), 2.0, new BigDecimal("5.00"));
@@ -100,7 +99,7 @@ class ItensProdutoUseCaseTest {
 
     @Test
     void adicionar_DeveSalvarItensEAtualizarValorDoProduto() {
-        Item item = new Item(10L, "Farinha", new UnidadeMedidaEntity(1L, "Quilo", "kg"), new BigDecimal("10.00"));
+        Item item = new Item(10L, "Farinha", new UnidadeMedida(1L, "Quilo", "kg"), new BigDecimal("10.00"));
         Produto produto = new Produto(1L, "Bolo", "Desc", null, new BigDecimal("20.00"), BigDecimal.ZERO, List.of());
         ItemProduto solicitado = new ItemProduto(new ItemProdutoId(1L, 10L), item, produto, new UnidadeMedida(1L, "Quilo", "kg"), 2.0, BigDecimal.ZERO);
 
@@ -124,7 +123,7 @@ class ItensProdutoUseCaseTest {
 
     @Test
     void calcular_DeveSomarValoresDosItens() {
-        Item item = new Item(10L, "Farinha", new UnidadeMedidaEntity(1L, "Quilo", "kg"), new BigDecimal("10.00"));
+        Item item = new Item(10L, "Farinha", new UnidadeMedida(1L, "Quilo", "kg"), new BigDecimal("10.00"));
         Produto produto = new Produto(1L, "Bolo", "Desc", null, new BigDecimal("20.00"), BigDecimal.ZERO, List.of());
         when(itemProdutoRepositoryPort.buscarPorProdutoId(1L)).thenReturn(List.of(
                 new ItemProduto(new ItemProdutoId(1L, 10L), item, produto, new UnidadeMedida(1L, "Quilo", "kg"), 2.0, new BigDecimal("5.00")),
@@ -139,7 +138,7 @@ class ItensProdutoUseCaseTest {
 
     @Test
     void gerar_DeveRetornarGraficoQuandoHouverItens() {
-        Item item = new Item(10L, "Farinha", new UnidadeMedidaEntity(1L, "Quilo", "kg"), new BigDecimal("10.00"));
+        Item item = new Item(10L, "Farinha", new UnidadeMedida(1L, "Quilo", "kg"), new BigDecimal("10.00"));
         Produto produto = new Produto(1L, "Bolo", "Desc", null, new BigDecimal("20.00"), BigDecimal.ZERO, List.of());
         when(produtoRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(produto));
         when(itemProdutoRepositoryPort.buscarPorProdutoId(1L)).thenReturn(List.of(
@@ -155,7 +154,7 @@ class ItensProdutoUseCaseTest {
 
     @Test
     void remover_DeveExcluirItemProdutoERecalcularValor() {
-        Item item = new Item(10L, "Farinha", new UnidadeMedidaEntity(1L, "Quilo", "kg"), new BigDecimal("10.00"));
+        Item item = new Item(10L, "Farinha", new UnidadeMedida(1L, "Quilo", "kg"), new BigDecimal("10.00"));
         Produto produto = new Produto(1L, "Bolo", "Desc", null, new BigDecimal("20.00"), BigDecimal.ZERO, List.of());
         ItemProduto existente = new ItemProduto(new ItemProdutoId(1L, 10L), item, produto, new UnidadeMedida(1L, "Quilo", "kg"), 2.0, new BigDecimal("5.00"));
         when(itemProdutoRepositoryPort.buscarPorProdutoIdEItemId(1L, 10L)).thenReturn(Optional.of(existente));
@@ -171,7 +170,7 @@ class ItensProdutoUseCaseTest {
 
     @Test
     void atualizarQuantidade_DeveAtualizarQuantidadeEValor() {
-        Item item = new Item(10L, "Farinha", new UnidadeMedidaEntity(1L, "Quilo", "kg"), new BigDecimal("10.00"));
+        Item item = new Item(10L, "Farinha", new UnidadeMedida(1L, "Quilo", "kg"), new BigDecimal("10.00"));
         Produto produto = new Produto(1L, "Bolo", "Desc", null, new BigDecimal("20.00"), BigDecimal.ZERO, List.of());
         ItemProduto existente = new ItemProduto(new ItemProdutoId(1L, 10L), item, produto, new UnidadeMedida(1L, "Quilo", "kg"), 2.0, new BigDecimal("5.00"));
         when(itemProdutoRepositoryPort.buscarPorProdutoIdEItemId(1L, 10L)).thenReturn(Optional.of(existente));

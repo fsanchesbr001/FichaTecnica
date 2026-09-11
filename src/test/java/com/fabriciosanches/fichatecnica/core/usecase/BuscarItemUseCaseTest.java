@@ -1,9 +1,9 @@
 package com.fabriciosanches.fichatecnica.core.usecase;
 
 import com.fabriciosanches.fichatecnica.core.domain.Item;
+import com.fabriciosanches.fichatecnica.core.domain.UnidadeMedida;
 import com.fabriciosanches.fichatecnica.core.ports.out.ItemRepositoryPort;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
-import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.UnidadeMedidaEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,7 +29,7 @@ class BuscarItemUseCaseTest {
 
     @Test
     void listar_DeveOrdenarPorNomeCaseInsensitive() {
-        UnidadeMedidaEntity unidade = new UnidadeMedidaEntity(1L, "Quilo", "kg");
+        UnidadeMedida unidade = new UnidadeMedida(1L, "Quilo", "kg");
         when(repositoryPort.buscarTodos()).thenReturn(List.of(
                 new Item(2L, "farinha", unidade, new BigDecimal("2.00")),
                 new Item(1L, "Acucar", unidade, new BigDecimal("1.00"))

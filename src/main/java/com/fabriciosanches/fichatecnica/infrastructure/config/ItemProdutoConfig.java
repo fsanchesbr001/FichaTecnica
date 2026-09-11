@@ -16,6 +16,7 @@ import com.fabriciosanches.fichatecnica.core.usecase.ItensProdutoUseCase;
 import com.fabriciosanches.fichatecnica.core.ports.in.ObterValoresConversaoPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 @Configuration
 public class ItemProdutoConfig {
@@ -36,42 +37,42 @@ public class ItemProdutoConfig {
     }
 
     @Bean
-    public AdicionarItemAoProdutoPort adicionarItemAoProdutoPort(ItensProdutoUseCase useCase) {
+    public AdicionarItemAoProdutoPort adicionarItemAoProdutoPort(@Qualifier("itensProdutoUseCase") ItensProdutoUseCase useCase) {
         return useCase;
     }
 
     @Bean
-    public ListarItensDoProdutoPort listarItensDoProdutoPort(ItensProdutoUseCase useCase) {
+    public ListarItensDoProdutoPort listarItensDoProdutoPort(@Qualifier("itensProdutoUseCase") ItensProdutoUseCase useCase) {
         return useCase;
     }
 
     @Bean
-    public ListarProdutosPorItemPort listarProdutosPorItemPort(ItensProdutoUseCase useCase) {
+    public ListarProdutosPorItemPort listarProdutosPorItemPort(@Qualifier("itensProdutoUseCase") ItensProdutoUseCase useCase) {
         return useCase;
     }
 
     @Bean
-    public CalcularValoresItensProdutoPort calcularValoresItensProdutoPort(ItensProdutoUseCase useCase) {
+    public CalcularValoresItensProdutoPort calcularValoresItensProdutoPort(@Qualifier("itensProdutoUseCase") ItensProdutoUseCase useCase) {
         return useCase;
     }
 
     @Bean
-    public RemoverItemDoProdutoPort removerItemDoProdutoPort(ItensProdutoUseCase useCase) {
+    public RemoverItemDoProdutoPort removerItemDoProdutoPort(@Qualifier("itensProdutoUseCase") ItensProdutoUseCase useCase) {
         return useCase;
     }
 
     @Bean
-    public AtualizarQuantidadeItemDoProdutoPort atualizarQuantidadeItemDoProdutoPort(ItensProdutoUseCase useCase) {
+    public AtualizarQuantidadeItemDoProdutoPort atualizarQuantidadeItemDoProdutoPort(@Qualifier("itensProdutoUseCase") ItensProdutoUseCase useCase) {
         return useCase;
     }
 
     @Bean
-    public ObterDescricoesUnidadePort obterDescricoesUnidadePort(ItensProdutoUseCase useCase) {
+    public ObterDescricoesUnidadePort obterDescricoesUnidadePort(@Qualifier("itensProdutoUseCase") ItensProdutoUseCase useCase) {
         return useCase;
     }
 
     @Bean
-    public GerarGraficoPizzaProdutoPort gerarGraficoPizzaProdutoPort(ItensProdutoUseCase useCase) {
+    public GerarGraficoPizzaProdutoPort gerarGraficoPizzaProdutoPort(@Qualifier("itensProdutoUseCase") ItensProdutoUseCase useCase) {
         return useCase;
     }
 }

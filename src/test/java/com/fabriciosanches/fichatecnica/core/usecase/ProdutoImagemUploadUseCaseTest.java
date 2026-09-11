@@ -1,5 +1,6 @@
 package com.fabriciosanches.fichatecnica.core.usecase;
 
+import com.fabriciosanches.fichatecnica.core.domain.ArquivoUpload;
 import com.fabriciosanches.fichatecnica.core.domain.Produto;
 import com.fabriciosanches.fichatecnica.core.ports.out.ProdutoImagemStoragePort;
 import com.fabriciosanches.fichatecnica.core.ports.out.ProdutoRepositoryPort;
@@ -11,7 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mock.web.MockMultipartFile;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -39,7 +39,7 @@ class ProdutoImagemUploadUseCaseTest {
     @Test
     void iniciar_DeveSalvarImagemERegistrarJob() {
         Produto produto = new Produto(4L, "Bolo", "Desc", null, new BigDecimal("15.00"), BigDecimal.ZERO, List.of());
-        MockMultipartFile file = new MockMultipartFile("file", "imagem.png", "image/png", "conteudo".getBytes());
+        ArquivoUpload file = new ArquivoUpload("imagem.png", "image/png", "conteudo".getBytes());
         when(produtoRepositoryPort.buscarPorId(4L)).thenReturn(Optional.of(produto));
         when(produtoImagemStoragePort.salvar(any(), any(), any(), any())).thenReturn("http://localhost/uploads/produtos/4/imagem.png");
         when(produtoRepositoryPort.salvar(any(Produto.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -58,7 +58,7 @@ class ProdutoImagemUploadUseCaseTest {
         when(produtoRepositoryPort.buscarPorId(4L)).thenReturn(Optional.of(produto));
 
         FichaTecnicaException exception = assertThrows(FichaTecnicaException.class,
-                () -> useCase.iniciar(4L, new MockMultipartFile("file", "imagem.png", "image/png", new byte[]{})));
+                () -> useCase.iniciar(4L, new ArquivoUpload("imagem.png", "image/png", new byte[]{})));
 
         assertEquals("Arquivo de imagem não pode ser vazio.", exception.getMessage());
     }
@@ -86,7 +86,7 @@ class ProdutoImagemUploadUseCaseTest {
     @Test
     void listar_DeveRetornarJobsRegistrados() {
         Produto produto = new Produto(4L, "Bolo", "Desc", null, new BigDecimal("15.00"), BigDecimal.ZERO, List.of());
-        MockMultipartFile file = new MockMultipartFile("file", "imagem.png", "image/png", "conteudo".getBytes());
+        ArquivoUpload file = new ArquivoUpload("imagem.png", "image/png", "conteudo".getBytes());
         when(produtoRepositoryPort.buscarPorId(4L)).thenReturn(Optional.of(produto));
         when(produtoImagemStoragePort.salvar(any(), any(), any(), any())).thenReturn("http://localhost/uploads/produtos/4/imagem.png");
         when(produtoRepositoryPort.salvar(any(Produto.class))).thenAnswer(invocation -> invocation.getArgument(0));

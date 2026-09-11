@@ -1,5 +1,6 @@
 package com.fabriciosanches.fichatecnica.infrastructure.config;
 
+import com.fabriciosanches.fichatecnica.core.ports.in.AtualizarProdutoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.BuscarProdutoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.ConsultarUploadImagemProdutoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.CriarProdutoPort;
@@ -11,6 +12,7 @@ import com.fabriciosanches.fichatecnica.core.ports.out.ProdutoImagemStoragePort;
 import com.fabriciosanches.fichatecnica.core.ports.out.ProdutoRepositoryPort;
 import com.fabriciosanches.fichatecnica.core.usecase.ProdutoImagemUploadUseCase;
 import com.fabriciosanches.fichatecnica.core.usecase.ProdutoUseCase;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -23,22 +25,22 @@ public class ProdutoConfig {
     }
 
     @Bean
-    public CriarProdutoPort criarProdutoPort(ProdutoUseCase produtoUseCase) {
+    public CriarProdutoPort criarProdutoPort(@Qualifier("produtoUseCase") ProdutoUseCase produtoUseCase) {
         return produtoUseCase;
     }
 
     @Bean
-    public BuscarProdutoPort buscarProdutoPort(ProdutoUseCase produtoUseCase) {
+    public BuscarProdutoPort buscarProdutoPort(@Qualifier("produtoUseCase") ProdutoUseCase produtoUseCase) {
         return produtoUseCase;
     }
 
     @Bean
-    public com.fabriciosanches.fichatecnica.core.ports.in.AtualizarProdutoPort atualizarProdutoPort(ProdutoUseCase produtoUseCase) {
+    public AtualizarProdutoPort atualizarProdutoPort(@Qualifier("produtoUseCase") ProdutoUseCase produtoUseCase) {
         return produtoUseCase;
     }
 
     @Bean
-    public DeletarProdutoPort deletarProdutoPort(ProdutoUseCase produtoUseCase) {
+    public DeletarProdutoPort deletarProdutoPort(@Qualifier("produtoUseCase") ProdutoUseCase produtoUseCase) {
         return produtoUseCase;
     }
 
@@ -50,23 +52,26 @@ public class ProdutoConfig {
     }
 
     @Bean
-    public IniciarUploadImagemProdutoPort iniciarUploadImagemProdutoPort(ProdutoImagemUploadUseCase useCase) {
+    public IniciarUploadImagemProdutoPort iniciarUploadImagemProdutoPort(
+            @Qualifier("produtoImagemUploadUseCase") ProdutoImagemUploadUseCase useCase) {
         return useCase;
     }
 
     @Bean
-    public ConsultarUploadImagemProdutoPort consultarUploadImagemProdutoPort(ProdutoImagemUploadUseCase useCase) {
+    public ConsultarUploadImagemProdutoPort consultarUploadImagemProdutoPort(
+            @Qualifier("produtoImagemUploadUseCase") ProdutoImagemUploadUseCase useCase) {
         return useCase;
     }
 
     @Bean
-    public RemoverImagemProdutoPort removerImagemProdutoPort(ProdutoImagemUploadUseCase useCase) {
+    public RemoverImagemProdutoPort removerImagemProdutoPort(
+            @Qualifier("produtoImagemUploadUseCase") ProdutoImagemUploadUseCase useCase) {
         return useCase;
     }
 
     @Bean
-    public ListarJobsUploadImagemProdutoPort listarJobsUploadImagemProdutoPort(ProdutoImagemUploadUseCase useCase) {
+    public ListarJobsUploadImagemProdutoPort listarJobsUploadImagemProdutoPort(
+            @Qualifier("produtoImagemUploadUseCase") ProdutoImagemUploadUseCase useCase) {
         return useCase;
     }
 }
-

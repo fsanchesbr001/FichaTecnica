@@ -8,8 +8,8 @@ import com.fabriciosanches.fichatecnica.core.ports.out.ProdutoRepositoryPort;
 import com.fabriciosanches.fichatecnica.core.domain.ItemProduto;
 import com.fabriciosanches.fichatecnica.core.domain.ItemProdutoId;
 import com.fabriciosanches.fichatecnica.core.domain.Produto;
+import com.fabriciosanches.fichatecnica.core.domain.UnidadeMedida;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
-import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.UnidadeMedidaEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
@@ -53,7 +53,7 @@ class DeletarItemUseCaseTest {
 
     @Test
     void deletar_DeveExcluirHistoricoAtualizarProdutosERemoverItem() {
-        UnidadeMedidaEntity unidade = new UnidadeMedidaEntity(1L, "Quilo", "kg");
+        UnidadeMedida unidade = new UnidadeMedida(1L, "Quilo", "kg");
         Item item = new Item(1L, "Farinha", unidade, new BigDecimal("8.00"));
 
         Produto produto = new Produto(10L, "Bolo", "Desc", null,

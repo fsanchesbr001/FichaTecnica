@@ -1,12 +1,15 @@
-package com.fabriciosanches.fichatecnica.services;
+package com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web;
 
 import com.fabriciosanches.fichatecnica.constants.Constants;
-import com.fabriciosanches.fichatecnica.controllers.AutenticacaoController;
-import com.fabriciosanches.fichatecnica.domains.Usuario;
+import com.fabriciosanches.fichatecnica.core.domain.Usuario;
+import com.fabriciosanches.fichatecnica.core.ports.in.ControleAcessoPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.GerarTokenPort;
 import com.fabriciosanches.fichatecnica.enums.UserRole;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.security.DadosTokenJWT;
 import com.fabriciosanches.fichatecnica.security.TokenBlacklistService;
 import com.fabriciosanches.fichatecnica.security.TokenService;
+import com.fabriciosanches.fichatecnica.security.UsuarioSecurityDetails;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,22 +39,25 @@ class AutenticacaoControllerTest {
 
     private MockMvc mockMvc;
     private AuthenticationManager manager;
-    private TokenService tokenService;
-    private SegurancaService segurancaService;
+    private GerarTokenPort gerarTokenPort;
+    private ControleAcessoPort controleAcessoPort;
     private TokenBlacklistService tokenBlacklistService;
+    private TokenService tokenService;
 
     @BeforeEach
     void setUp() {
         manager = Mockito.mock(AuthenticationManager.class);
-        tokenService = Mockito.mock(TokenService.class);
-        segurancaService = Mockito.mock(SegurancaService.class);
+        gerarTokenPort = Mockito.mock(GerarTokenPort.class);
+        controleAcessoPort = Mockito.mock(ControleAcessoPort.class);
         tokenBlacklistService = Mockito.mock(TokenBlacklistService.class);
+        tokenService = Mockito.mock(TokenService.class);
 
         AutenticacaoController controller = new AutenticacaoController(
                 manager,
-                tokenService,
-                segurancaService,
-                tokenBlacklistService
+                gerarTokenPort,
+                controleAcessoPort,
+                tokenBlacklistService,
+                tokenService
         );
 
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
@@ -73,12 +79,18 @@ class AutenticacaoControllerTest {
     @Test
     void efetuarLogin_DeveRetornarOkQuandoAutenticacaoForValida() throws Exception {
         Usuario usuario = new Usuario(1L, "admin@email.com", "senha", UserRole.ADMIN, "Admin");
-        Authentication authentication = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
+        UsuarioSecurityDetails details = new UsuarioSecurityDetails(usuario);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(details, null, details.getAuthorities());
 
         when(manager.authenticate(any())).thenReturn(authentication);
-        when(tokenService.gerarToken(usuario)).thenReturn("jwt-ok");
-        when(tokenService.getExpirationMinutes()).thenReturn(120L);
-        when(tokenService.getTokenExpiresAt()).thenReturn(OffsetDateTime.parse("2026-05-28T01:00:00-03:00"));
+        when(gerarTokenPort.gerarToken(any(Usuario.class))).thenReturn(new DadosTokenJWT(
+                "jwt-ok",
+                120L,
+                OffsetDateTime.parse("2026-05-28T01:00:00-03:00"),
+                "admin@email.com",
+                "Admin",
+                "ROLE_ADMIN"
+        ));
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -108,12 +120,12 @@ class AutenticacaoControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.jwt").value(Constants.MSG_DADOS_SEGURANCA_NAO_ENCONTRADOS));
 
-        verify(segurancaService).errouSenha(eq("admin@email.com"));
+        verify(controleAcessoPort).errouSenha(eq("admin@email.com"));
     }
 
     @Test
     void efetuarLogin_DeveRetornarBadRequestQuandoRegraNegocioFalhar() throws Exception {
-        doThrow(new FichaTecnicaException("bloqueado")).when(segurancaService).validarAcesso("admin@email.com");
+        doThrow(new FichaTecnicaException("bloqueado")).when(controleAcessoPort).validarAcesso("admin@email.com");
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)

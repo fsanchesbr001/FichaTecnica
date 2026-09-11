@@ -1,5 +1,6 @@
 package com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web;
 
+import com.fabriciosanches.fichatecnica.core.domain.ArquivoUpload;
 import com.fabriciosanches.fichatecnica.core.ports.in.ConsultarUploadImagemProdutoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.IniciarUploadImagemProdutoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.ListarJobsUploadImagemProdutoPort;
@@ -52,7 +53,7 @@ class ProdutoImagemControllerTest {
     @Test
     void iniciarUpload_DeveRetornarAccepted() throws Exception {
         UploadJobDTO job = new UploadJobDTO("job-1", UploadJobStatus.PENDING, 4L, null, null);
-        when(iniciarUploadImagemProdutoPort.iniciar(eq(4L), any())).thenReturn(job);
+        when(iniciarUploadImagemProdutoPort.iniciar(eq(4L), any(ArquivoUpload.class))).thenReturn(job);
 
         MockMultipartFile file = new MockMultipartFile("file", "imagem.png", "image/png", "abc".getBytes());
 
@@ -65,7 +66,7 @@ class ProdutoImagemControllerTest {
 
     @Test
     void iniciarUpload_DeveRetornarBadRequestQuandoFalhar() throws Exception {
-        when(iniciarUploadImagemProdutoPort.iniciar(eq(4L), any())).thenThrow(new FichaTecnicaException("arquivo invalido"));
+        when(iniciarUploadImagemProdutoPort.iniciar(eq(4L), any(ArquivoUpload.class))).thenThrow(new FichaTecnicaException("arquivo invalido"));
 
         MockMultipartFile file = new MockMultipartFile("file", "imagem.png", "image/png", "abc".getBytes());
 

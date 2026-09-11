@@ -1,6 +1,7 @@
 package com.fabriciosanches.fichatecnica.core.usecase;
 
 import com.fabriciosanches.fichatecnica.core.domain.Produto;
+import com.fabriciosanches.fichatecnica.core.domain.ArquivoUpload;
 import com.fabriciosanches.fichatecnica.core.ports.in.ConsultarUploadImagemProdutoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.IniciarUploadImagemProdutoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.ListarJobsUploadImagemProdutoPort;
@@ -10,7 +11,6 @@ import com.fabriciosanches.fichatecnica.core.ports.out.ProdutoRepositoryPort;
 import com.fabriciosanches.fichatecnica.dtos.UploadJobDTO;
 import com.fabriciosanches.fichatecnica.enums.UploadJobStatus;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -31,17 +31,17 @@ public class ProdutoImagemUploadUseCase implements IniciarUploadImagemProdutoPor
     }
 
     @Override
-    public UploadJobDTO iniciar(Long produtoId, MultipartFile file) {
+    public UploadJobDTO iniciar(Long produtoId, ArquivoUpload arquivo) {
         Produto produto = produtoRepositoryPort.buscarPorId(produtoId)
                 .orElseThrow(() -> new FichaTecnicaException("Produto não encontrado id=" + produtoId));
 
-        validarArquivo(file);
+        validarArquivo(arquivo);
         String jobId = UUID.randomUUID().toString();
         jobs.put(jobId, new JobState(jobId, UploadJobStatus.PENDING, produtoId, null, null));
         atualizarJob(jobId, UploadJobStatus.PROCESSING, null, null);
 
         try {
-            String imagemUrl = produtoImagemStoragePort.salvar(produtoId, file.getOriginalFilename(), file.getContentType(), file.getBytes());
+            String imagemUrl = produtoImagemStoragePort.salvar(produtoId, arquivo.getNomeOriginal(), arquivo.getTipoConteudo(), arquivo.getConteudo());
             produto.setImagem(imagemUrl);
             produtoRepositoryPort.salvar(produto);
             atualizarJob(jobId, UploadJobStatus.DONE, imagemUrl, null);
@@ -81,18 +81,18 @@ public class ProdutoImagemUploadUseCase implements IniciarUploadImagemProdutoPor
         return jobs.values().stream().map(this::toDTO).toList();
     }
 
-    private void validarArquivo(MultipartFile file) {
-        if (file == null || file.isEmpty()) {
+    private void validarArquivo(ArquivoUpload arquivo) {
+        if (arquivo == null || arquivo.isVazio()) {
             throw new FichaTecnicaException("Arquivo de imagem não pode ser vazio.");
         }
-        if (file.getSize() > 10L * 1024 * 1024) {
+        if (arquivo.getTamanho() > 10L * 1024 * 1024) {
             throw new FichaTecnicaException("Arquivo excede o tamanho máximo permitido de 10 MB.");
         }
-        String contentType = file.getContentType();
+        String contentType = arquivo.getTipoConteudo();
         if (contentType == null || !(contentType.equalsIgnoreCase("image/jpeg") || contentType.equalsIgnoreCase("image/png") || contentType.equalsIgnoreCase("image/webp"))) {
             throw new FichaTecnicaException("Tipo de arquivo não suportado: " + contentType + ". Permitidos: jpg, jpeg, png, webp.");
         }
-        String original = file.getOriginalFilename();
+        String original = arquivo.getNomeOriginal();
         String ext = original == null || !original.contains(".") ? "jpg" : original.substring(original.lastIndexOf('.') + 1);
         if (!(ext.equalsIgnoreCase("jpg") || ext.equalsIgnoreCase("jpeg") || ext.equalsIgnoreCase("png") || ext.equalsIgnoreCase("webp"))) {
             throw new FichaTecnicaException("Extensão não permitida: " + ext + ". Permitidas: jpg, jpeg, png, webp.");

@@ -1,28 +1,40 @@
-package com.fabriciosanches.fichatecnica.controllers;
+package com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web;
 
 import com.fabriciosanches.fichatecnica.constants.Constants;
+import com.fabriciosanches.fichatecnica.core.ports.in.AtualizarUsuarioPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.BuscarUsuarioPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.CriarUsuarioPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.ExcluirUsuarioPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.GerenciarBloqueioPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.PrimeiroAcessoPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.ControleAcessoPort;
 import com.fabriciosanches.fichatecnica.dtos.AtualizarUsuarioRequestDTO;
 import com.fabriciosanches.fichatecnica.dtos.BloqueiosRequestDTO;
 import com.fabriciosanches.fichatecnica.dtos.BloqueiosResponseDTO;
 import com.fabriciosanches.fichatecnica.dtos.RegisterDTO;
-import com.fabriciosanches.fichatecnica.dtos.UserRolesDTO;
 import com.fabriciosanches.fichatecnica.dtos.RoleOptionDTO;
+import com.fabriciosanches.fichatecnica.dtos.UserRolesDTO;
 import com.fabriciosanches.fichatecnica.dtos.UsuarioListagemDTO;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
-import com.fabriciosanches.fichatecnica.services.SegurancaService;
 import com.fabriciosanches.fichatecnica.enums.UserRole;
-import jakarta.mail.MessagingException;
+import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.mail.MessagingException;
+import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import jakarta.transaction.Transactional;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
@@ -37,19 +49,30 @@ public class UsuarioController {
 
     private static final Logger logger = LogManager.getLogger(UsuarioController.class);
 
-    private final SegurancaService segurancaService;
+    private final CriarUsuarioPort criarUsuarioPort;
+    private final ExcluirUsuarioPort excluirUsuarioPort;
+    private final PrimeiroAcessoPort primeiroAcessoPort;
+    private final GerenciarBloqueioPort gerenciarBloqueioPort;
+    private final AtualizarUsuarioPort atualizarUsuarioPort;
+    private final BuscarUsuarioPort buscarUsuarioPort;
+    private final ControleAcessoPort controleAcessoPort;
 
-    public UsuarioController(SegurancaService segurancaService) {
-        this.segurancaService = segurancaService;
+    public UsuarioController(CriarUsuarioPort criarUsuarioPort,
+                             ExcluirUsuarioPort excluirUsuarioPort,
+                             PrimeiroAcessoPort primeiroAcessoPort,
+                             GerenciarBloqueioPort gerenciarBloqueioPort,
+                             AtualizarUsuarioPort atualizarUsuarioPort,
+                             BuscarUsuarioPort buscarUsuarioPort,
+                             ControleAcessoPort controleAcessoPort) {
+        this.criarUsuarioPort = criarUsuarioPort;
+        this.excluirUsuarioPort = excluirUsuarioPort;
+        this.primeiroAcessoPort = primeiroAcessoPort;
+        this.gerenciarBloqueioPort = gerenciarBloqueioPort;
+        this.atualizarUsuarioPort = atualizarUsuarioPort;
+        this.buscarUsuarioPort = buscarUsuarioPort;
+        this.controleAcessoPort = controleAcessoPort;
     }
 
-    /**
-     * Retorna a lista de roles disponíveis como objetos { value, label, labelKey }.
-     * - value: nome da enum (ex: ADMIN)
-     * - label: label amigável em pt-BR (ex: Administrador)
-     * - labelKey: chave para i18n (ex: role.ADMIN)
-     * A lista é ordenada alfabeticamente pelo atributo label.
-     */
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/roles")
     @Operation(summary = "Lista roles disponíveis", description = "Retorna as roles do sistema para uso em cadastros e filtros.")
@@ -58,9 +81,7 @@ public class UsuarioController {
             @ApiResponse(responseCode = "400", description = "Erro ao listar roles")
     })
     public ResponseEntity<UserRolesDTO> listarRoles() {
-        logger.info("Inicio do método listarRoles - UsuarioController");
         try {
-            // Mapeamento default de label em pt-BR; frontend pode usar labelKey para i18n
             Map<UserRole, String> defaultLabels = Map.of(
                     UserRole.ADMIN, "Administrador",
                     UserRole.USER, "Usuário",
@@ -72,16 +93,13 @@ public class UsuarioController {
                     .sorted((a, b) -> a.label().compareToIgnoreCase(b.label()))
                     .collect(Collectors.toList());
 
-            UserRolesDTO dto = new UserRolesDTO(options);
-            logger.info("Fim do método listarRoles - UsuarioController");
-            return ResponseEntity.ok(dto);
+            return ResponseEntity.ok(new UserRolesDTO(options));
         } catch (Exception e) {
             logger.error("Erro ao listar roles", e);
             return ResponseEntity.badRequest().build();
         }
     }
 
-    //Testado
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/registrar-usuario")
     @Transactional
@@ -91,40 +109,25 @@ public class UsuarioController {
             @ApiResponse(responseCode = "400", description = "Dados inválidos para registro")
     })
     public ResponseEntity<?> registrarUsuario(@RequestBody RegisterDTO dados) {
-        logger.info("Inicio do método registrarUsuario - UsuarioController");
-        logger.info("Parâmetros de entrada: {}", dados);
         try {
-            segurancaService.registrarUsuario(dados);
-            logger.info("Usuário registrado com sucesso");
-            logger.info("Fim do método registrarUsuario");
+            criarUsuarioPort.registrarUsuario(dados);
             return ResponseEntity.ok().build();
         } catch (FichaTecnicaException e) {
-            logger.error("Erro ao registrar usuário", e);
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         }
     }
 
-    //Testado
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/excluir-usuario")
     @Transactional
     @Operation(summary = "Exclui usuário", description = "Remove um usuário do sistema pelo e-mail informado.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Usuário excluído com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Erro ao excluir usuário")
-    })
     public ResponseEntity<?> excluirUsuario(@RequestBody BloqueiosRequestDTO dados) {
-        logger.info("Inicio do método excluirUsuario - UsuarioController");
-        logger.info("Parâmetros de entrada: {}", dados);
         try {
-            segurancaService.excluirUsuario(dados.email());
-            logger.info("Usuário excluído com sucesso");
-            logger.info("Fim do método excluirUsuario");
+            excluirUsuarioPort.excluirUsuario(dados.email());
             return ResponseEntity.ok().build();
         } catch (FichaTecnicaException e) {
-            logger.error("Erro ao excluir usuário", e);
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -133,91 +136,50 @@ public class UsuarioController {
     @PostMapping("/primeiro-acesso/{email}")
     @Transactional
     @Operation(summary = "Executa primeiro acesso", description = "Dispara o fluxo de primeiro acesso para o e-mail informado.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Fluxo executado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Erro ao executar o primeiro acesso")
-    })
     public ResponseEntity<?> primeiroAcesso(@PathVariable String email) {
-        logger.info("Inicio do método primeiroAcesso - UsuarioController");
-        logger.info("Parâmetro de entrada - email: {}", email);
         try {
-            segurancaService.primeiroAcesso(email);
-            logger.info("Fluxo de primeiro acesso executado com sucesso");
-            logger.info("Fim do método primeiroAcesso");
+            primeiroAcessoPort.primeiroAcesso(email);
             return ResponseEntity.ok().build();
         } catch (FichaTecnicaException e) {
-            logger.error("Erro ao executar primeiro acesso", e);
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         }
     }
 
-    //Testado
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/resetar-senha")
     @Transactional
     @Operation(summary = "Reseta senha", description = "Expira a senha do usuário para forçar a redefinição no próximo login.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Senha resetada com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Erro ao resetar senha")
-    })
     public ResponseEntity<?> resetarSenhaUsuario(@RequestBody BloqueiosRequestDTO dados) {
-        logger.info("Inicio do método resetarSenhaUsuario - UsuarioController");
-        logger.info("Parâmetros de entrada: {}", dados);
         try {
-            segurancaService.expirarSenha(dados.email());
-            logger.info("Senha do usuário expirada com sucesso");
-            logger.info("Fim do método resetarSenhaUsuario");
+            controleAcessoPort.expirarSenha(dados.email());
             return ResponseEntity.ok().build();
         } catch (FichaTecnicaException e) {
-            logger.error("Erro ao resetar senha do usuário", e);
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    //Testado
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/bloqueio-administrativo")
     @Transactional
     @Operation(summary = "Bloqueia usuário", description = "Executa o bloqueio administrativo de um usuário.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Usuário bloqueado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Erro ao bloquear usuário")
-    })
     public ResponseEntity<BloqueiosResponseDTO> bloqueioAdministrativo(@RequestBody BloqueiosRequestDTO bloqueiosRequestDTO) {
-        logger.info("Inicio do método bloqueioAdministrativo - UsuarioController");
-        logger.info("Parâmetros de entrada: {}", bloqueiosRequestDTO);
         try {
-            BloqueiosResponseDTO bloqueiosResponseDTO =  segurancaService.bloqueioAdmSeguranca(bloqueiosRequestDTO);
-            logger.info("Bloqueio administrativo realizado com sucesso");
-            logger.info("Fim do método bloqueioAdministrativo");
-            return ResponseEntity.ok(bloqueiosResponseDTO);
+            return ResponseEntity.ok(gerenciarBloqueioPort.bloquear(bloqueiosRequestDTO));
         } catch (FichaTecnicaException e) {
-            logger.error("Erro ao realizar Bloqueio Administrativo", e);
             return ResponseEntity.badRequest().body(new BloqueiosResponseDTO(Constants.MSG_ERRO_BLOQUEIO));
         }
     }
 
-    //Testado
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/desbloqueio-administrativo")
     @Transactional
     @Operation(summary = "Desbloqueia usuário", description = "Remove o bloqueio administrativo de um usuário.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Usuário desbloqueado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Erro ao desbloquear usuário")
-    })
     public ResponseEntity<BloqueiosResponseDTO> desbloqueioAdministrativo(@RequestBody BloqueiosRequestDTO bloqueiosRequestDTO) {
-        logger.info("Inicio do método desbloqueioAdministrativo - UsuarioController");
-        logger.info("Parâmetros de entrada: {}", bloqueiosRequestDTO);
         try {
-            BloqueiosResponseDTO bloqueiosResponseDTO =  segurancaService.desbloqueioAdmSeguranca(bloqueiosRequestDTO);
-            logger.info("Desbloqueio administrativo realizado com sucesso");
-            logger.info("Fim do método desbloqueioAdministrativo");
-            return ResponseEntity.ok(bloqueiosResponseDTO);
+            return ResponseEntity.ok(gerenciarBloqueioPort.desbloquear(bloqueiosRequestDTO));
         } catch (FichaTecnicaException e) {
-            logger.error("Erro ao realizar Desbloqueio Administrativo", e);
             return ResponseEntity.badRequest().body(new BloqueiosResponseDTO(Constants.MSG_ERRO_BLOQUEIO));
         }
     }
@@ -226,22 +188,11 @@ public class UsuarioController {
     @PutMapping("/atualizar-usuario/{email}")
     @Transactional
     @Operation(summary = "Atualiza usuário", description = "Altera os dados de um usuário identificado pelo e-mail.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Usuário atualizado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Erro ao atualizar usuário")
-    })
     public ResponseEntity<UsuarioListagemDTO> atualizarUsuario(@PathVariable String email,
                                                                @RequestBody AtualizarUsuarioRequestDTO dados) {
-        logger.info("Inicio do método atualizarUsuario - UsuarioController");
-        logger.info("Parâmetro de entrada - email: {}", email);
-        logger.info("Parâmetros de entrada - body: {}", dados);
         try {
-            UsuarioListagemDTO atualizado = segurancaService.atualizarUsuario(email, dados);
-            logger.info("Usuário atualizado com sucesso");
-            logger.info("Fim do método atualizarUsuario");
-            return ResponseEntity.ok(atualizado);
+            return ResponseEntity.ok(atualizarUsuarioPort.atualizarUsuario(email, dados));
         } catch (FichaTecnicaException e) {
-            logger.error("Erro ao atualizar usuário", e);
             return ResponseEntity.badRequest().build();
         }
     }
@@ -249,24 +200,14 @@ public class UsuarioController {
     @GetMapping("/listar-todos-usuarios")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Lista usuários", description = "Retorna todos os usuários cadastrados no sistema.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Usuários retornados com sucesso"),
-            @ApiResponse(responseCode = "204", description = "Nenhum usuário encontrado"),
-            @ApiResponse(responseCode = "400", description = "Erro ao listar usuários")
-    })
     public ResponseEntity<List<UsuarioListagemDTO>> listarTodosUsuarios() {
-        logger.info("Inicio do método listarTodosUsuarios - UsuarioController");
         try {
-            List<UsuarioListagemDTO> response = segurancaService.findAllComDadosUsuario();
-            logger.info("Lista de usuários obtida com sucesso");
+            List<UsuarioListagemDTO> response = buscarUsuarioPort.listarTodosUsuarios();
             if (response.isEmpty()) {
-                logger.info("Nenhum usuário encontrado");
                 return ResponseEntity.noContent().build();
             }
-            logger.info("Fim do método listarTodosUsuarios");
             return ResponseEntity.ok(response);
         } catch (FichaTecnicaException e) {
-            logger.error("Erro ao listar usuários", e);
             return ResponseEntity.badRequest().build();
         }
     }
@@ -274,26 +215,16 @@ public class UsuarioController {
     @PreAuthorize("hasAnyRole('ADMIN', 'SYSTEM')")
     @GetMapping("/buscar-usuario/{email}")
     @Operation(summary = "Busca usuário por e-mail", description = "Retorna os dados de um usuário específico a partir do e-mail.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Usuário encontrado"),
-            @ApiResponse(responseCode = "404", description = "Usuário não encontrado"),
-            @ApiResponse(responseCode = "400", description = "Erro ao buscar usuário")
-    })
     public ResponseEntity<UsuarioListagemDTO> buscarUsuarioPorEmail(@PathVariable String email) {
-        logger.info("Inicio do método buscarUsuarioPorEmail - UsuarioController");
-        logger.info("Parâmetro de entrada: {}", email);
         try {
-            UsuarioListagemDTO usuarioListagemDTO = segurancaService.findByEmailComDadosUsuario(email);
+            UsuarioListagemDTO usuarioListagemDTO = buscarUsuarioPort.buscarUsuarioPorEmail(email);
             if (usuarioListagemDTO == null) {
-                logger.warn("Usuário não encontrado para o email: {}", email);
                 return ResponseEntity.notFound().build();
             }
-            logger.info("Usuário encontrado com sucesso");
-            logger.info("Fim do método buscarUsuarioPorEmail");
             return ResponseEntity.ok(usuarioListagemDTO);
         } catch (FichaTecnicaException e) {
-            logger.error("Erro ao buscar usuário por email", e);
             return ResponseEntity.badRequest().build();
         }
     }
 }
+

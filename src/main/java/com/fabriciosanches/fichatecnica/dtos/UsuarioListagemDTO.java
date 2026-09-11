@@ -1,7 +1,7 @@
 package com.fabriciosanches.fichatecnica.dtos;
 
-import com.fabriciosanches.fichatecnica.domains.Seguranca;
-import com.fabriciosanches.fichatecnica.domains.Usuario;
+import com.fabriciosanches.fichatecnica.core.domain.Seguranca;
+import com.fabriciosanches.fichatecnica.core.domain.Usuario;
 import com.fabriciosanches.fichatecnica.enums.UserRole;
 
 import java.time.LocalDateTime;

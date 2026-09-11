@@ -1,11 +1,11 @@
 package com.fabriciosanches.fichatecnica.core.usecase;
 
 import com.fabriciosanches.fichatecnica.core.domain.Item;
+import com.fabriciosanches.fichatecnica.core.domain.UnidadeMedida;
 import com.fabriciosanches.fichatecnica.core.ports.in.CriarItemPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.RegistrarHistoricoItemPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.ItemRepositoryPort;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
-import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.UnidadeMedidaEntity;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -21,7 +21,7 @@ public class CriarItemUseCase implements CriarItemPort {
     }
 
     @Override
-    public Item criar(String nome, UnidadeMedidaEntity unidadeMedida, BigDecimal valor) {
+    public Item criar(String nome, UnidadeMedida unidadeMedida, BigDecimal valor) {
         validar(nome, unidadeMedida, valor);
 
         if (itemRepositoryPort.contarPorNome(nome) > 0) {
@@ -35,7 +35,7 @@ public class CriarItemUseCase implements CriarItemPort {
         return itemSalvo;
     }
 
-    private void validar(String nome, UnidadeMedidaEntity unidadeMedida, BigDecimal valor) {
+    private void validar(String nome, UnidadeMedida unidadeMedida, BigDecimal valor) {
         Objects.requireNonNull(nome, "Nome do item não pode ser nulo");
         Objects.requireNonNull(unidadeMedida, "Unidade de medida não pode ser nula");
         Objects.requireNonNull(valor, "Valor do item não pode ser nulo");

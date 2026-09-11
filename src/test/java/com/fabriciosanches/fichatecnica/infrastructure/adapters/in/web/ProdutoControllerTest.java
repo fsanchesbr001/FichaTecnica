@@ -152,7 +152,7 @@ class ProdutoControllerTest {
         ReflectionTestUtils.setField(controller, "publicUrl", "http://localhost/uploads");
 
         Produto produto = new Produto(1L, "Bolo", "Desc", "http://localhost/uploads/produtos/1/foto.jpg", new BigDecimal("19.90"), new BigDecimal("7.50"), List.of());
-        Item item = new Item(10L, "Farinha", new com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.UnidadeMedidaEntity(1L, "Quilo", "kg"), new BigDecimal("10.00"));
+        Item item = new Item(10L, "Farinha", new UnidadeMedida(1L, "Quilo", "kg"), new BigDecimal("10.00"));
         ItemProduto itemProduto = new ItemProduto(new ItemProdutoId(1L, 10L), item, produto, new UnidadeMedida(1L, "Quilo", "kg"), 2.0, new BigDecimal("5.00"));
         when(buscarProdutoPort.buscarPorId(1L)).thenReturn(new ProdutoDTO(1L, "Bolo", "Desc", "http://localhost/uploads/produtos/1/foto.jpg", new BigDecimal("19.90"), new BigDecimal("7.50")));
         when(listarItensDoProdutoPort.listar(1L)).thenReturn(List.of(itemProduto));

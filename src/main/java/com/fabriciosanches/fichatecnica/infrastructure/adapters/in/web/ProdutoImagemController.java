@@ -4,6 +4,7 @@ import com.fabriciosanches.fichatecnica.core.ports.in.ConsultarUploadImagemProdu
 import com.fabriciosanches.fichatecnica.core.ports.in.IniciarUploadImagemProdutoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.ListarJobsUploadImagemProdutoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.RemoverImagemProdutoPort;
+import com.fabriciosanches.fichatecnica.core.domain.ArquivoUpload;
 import com.fabriciosanches.fichatecnica.dtos.UploadJobDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -68,7 +69,8 @@ public class ProdutoImagemController {
                 id, file.getOriginalFilename(), file.getSize());
 
         try {
-            UploadJobDTO job = iniciarUploadImagemProdutoPort.iniciar(id, file);
+            ArquivoUpload arquivo = new ArquivoUpload(file.getOriginalFilename(), file.getContentType(), file.getBytes());
+            UploadJobDTO job = iniciarUploadImagemProdutoPort.iniciar(id, arquivo);
             logger.info("[ProdutoImagemController] Job {} registrado para produto id={}", job.jobId(), id);
             return ResponseEntity.accepted().body(job);
         } catch (FichaTecnicaException e) {
