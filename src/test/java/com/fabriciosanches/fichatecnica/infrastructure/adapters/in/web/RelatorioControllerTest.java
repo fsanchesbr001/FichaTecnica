@@ -1,6 +1,7 @@
-package com.fabriciosanches.fichatecnica.services;
+package com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web;
 
-import com.fabriciosanches.fichatecnica.controllers.RelatorioController;
+import com.fabriciosanches.fichatecnica.core.ports.in.GerarGraficoPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.GerarRelatorioPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -17,18 +18,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class RelatorioControllerTest {
 
     private MockMvc mockMvc;
-    private RelatorioService relatorioService;
+    private GerarRelatorioPort gerarRelatorioPort;
 
     @BeforeEach
     void setUp() {
-        relatorioService = Mockito.mock(RelatorioService.class);
-        RelatorioController controller = new RelatorioController(relatorioService);
+        gerarRelatorioPort = Mockito.mock(GerarRelatorioPort.class);
+        GerarGraficoPort gerarGraficoPort = Mockito.mock(GerarGraficoPort.class);
+        RelatorioController controller = new RelatorioController(gerarRelatorioPort, gerarGraficoPort);
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }
 
     @Test
     void gerarPdf_DeveRetornarOkQuandoServicoGerarComSucesso() throws Exception {
-        when(relatorioService.gerarRelatorioPDF(any())).thenReturn(new byte[]{1, 2, 3});
+        when(gerarRelatorioPort.gerarRelatorioPDF(any())).thenReturn(new byte[]{1, 2, 3});
 
         mockMvc.perform(post("/ficha-tecnica/relatorios/gerar-pdf")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -49,7 +51,7 @@ class RelatorioControllerTest {
 
     @Test
     void gerarPdf_DeveRetornarBadRequestQuandoServicoLancarIllegalArgumentException() throws Exception {
-        when(relatorioService.gerarRelatorioPDF(any())).thenThrow(new IllegalArgumentException("dados invalidos"));
+        when(gerarRelatorioPort.gerarRelatorioPDF(any())).thenThrow(new IllegalArgumentException("dados invalidos"));
 
         mockMvc.perform(post("/ficha-tecnica/relatorios/gerar-pdf")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -66,7 +68,7 @@ class RelatorioControllerTest {
 
     @Test
     void gerarPdf_DeveRetornarInternalServerErrorQuandoServicoLancarErroInesperado() throws Exception {
-        when(relatorioService.gerarRelatorioPDF(any())).thenThrow(new RuntimeException("erro interno"));
+        when(gerarRelatorioPort.gerarRelatorioPDF(any())).thenThrow(new RuntimeException("erro interno"));
 
         mockMvc.perform(post("/ficha-tecnica/relatorios/gerar-pdf")
                         .contentType(MediaType.APPLICATION_JSON)

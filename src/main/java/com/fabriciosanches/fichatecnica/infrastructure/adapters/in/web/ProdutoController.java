@@ -5,7 +5,9 @@ import com.fabriciosanches.fichatecnica.core.ports.in.AtualizarProdutoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.BuscarProdutoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.CriarProdutoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.DeletarProdutoPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.GerarGraficoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarGraficoPizzaProdutoPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.GerarRelatorioPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.ListarItensDoProdutoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.ObterDescricoesUnidadePort;
 import com.fabriciosanches.fichatecnica.dtos.GraficoPizzaDTO;
@@ -16,8 +18,6 @@ import com.fabriciosanches.fichatecnica.enums.ImagemPosicao;
 import com.fabriciosanches.fichatecnica.enums.OrientacaoRelatorio;
 import com.fabriciosanches.fichatecnica.enums.TipoRelatorio;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
-import com.fabriciosanches.fichatecnica.services.GraficoService;
-import com.fabriciosanches.fichatecnica.services.RelatorioService;
 import com.google.gson.Gson;
 import jakarta.transaction.Transactional;
 import io.swagger.v3.oas.annotations.Operation;
@@ -67,8 +67,8 @@ public class ProdutoController {
     private final ListarItensDoProdutoPort listarItensDoProdutoPort;
     private final ObterDescricoesUnidadePort obterDescricoesUnidadePort;
     private final GerarGraficoPizzaProdutoPort gerarGraficoPizzaProdutoPort;
-    private final RelatorioService relatorioService;
-    private final GraficoService graficoService;
+    private final GerarRelatorioPort gerarRelatorioPort;
+    private final GerarGraficoPort gerarGraficoPort;
 
     @Value("${digitalocean.storage.base-path:/olivander/ficha_tecnica/imagens}")
     private String storagePath;
@@ -84,8 +84,8 @@ public class ProdutoController {
             ListarItensDoProdutoPort listarItensDoProdutoPort,
             ObterDescricoesUnidadePort obterDescricoesUnidadePort,
             GerarGraficoPizzaProdutoPort gerarGraficoPizzaProdutoPort,
-            RelatorioService relatorioService,
-            GraficoService graficoService) {
+            GerarRelatorioPort gerarRelatorioPort,
+            GerarGraficoPort gerarGraficoPort) {
         this.buscarProdutoPort = buscarProdutoPort;
         this.criarProdutoPort = criarProdutoPort;
         this.atualizarProdutoPort = atualizarProdutoPort;
@@ -93,8 +93,8 @@ public class ProdutoController {
         this.listarItensDoProdutoPort = listarItensDoProdutoPort;
         this.obterDescricoesUnidadePort = obterDescricoesUnidadePort;
         this.gerarGraficoPizzaProdutoPort = gerarGraficoPizzaProdutoPort;
-        this.relatorioService = relatorioService;
-        this.graficoService = graficoService;
+        this.gerarRelatorioPort = gerarRelatorioPort;
+        this.gerarGraficoPort = gerarGraficoPort;
     }
 
     @GetMapping("/produtos")
@@ -168,7 +168,7 @@ public class ProdutoController {
                     true
             );
 
-            byte[] pdfBytes = relatorioService.gerarRelatorioPDF(request);
+            byte[] pdfBytes = gerarRelatorioPort.gerarRelatorioPDF(request);
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss"));
             String filename = "Lista-Produtos-" + timestamp + ".pdf";
 
@@ -221,7 +221,7 @@ public class ProdutoController {
             try {
                 GraficoPizzaDTO graficoDTO = gerarGraficoPizzaProdutoPort.gerar(id);
                 if (graficoDTO != null && graficoDTO.valores() != null && !graficoDTO.valores().isEmpty()) {
-                    graficoPngBytes = graficoService.gerarGraficoPizzaPNG(graficoDTO);
+                    graficoPngBytes = gerarGraficoPort.gerarGraficoPizzaPNG(graficoDTO);
                     logger.info("Gráfico de composição de custo gerado para produto id={}", id);
                 }
             } catch (FichaTecnicaException ex) {
@@ -284,7 +284,7 @@ public class ProdutoController {
                 );
             }
 
-            byte[] pdfBytes = relatorioService.gerarRelatorioPDF(request);
+            byte[] pdfBytes = gerarRelatorioPort.gerarRelatorioPDF(request);
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss"));
             String filename = "Detalhe-Produto-" + id + "-" + timestamp + ".pdf";
 

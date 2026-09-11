@@ -4,11 +4,11 @@ import com.fabriciosanches.fichatecnica.core.ports.in.AutenticarUsuarioPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.ControleAcessoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarTokenPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.RecuperacaoSenhaPort;
+import com.fabriciosanches.fichatecnica.core.ports.out.EnviarEmailPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.SegurancaRepositoryPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.UsuarioRepositoryPort;
 import com.fabriciosanches.fichatecnica.core.usecase.AutenticacaoUseCase;
 import com.fabriciosanches.fichatecnica.core.usecase.SegurancaUseCase;
-import com.fabriciosanches.fichatecnica.mail.EmailService;
 import com.fabriciosanches.fichatecnica.security.TokenService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -20,8 +20,8 @@ public class SegurancaConfig {
     @Bean
     public SegurancaUseCase segurancaUseCase(SegurancaRepositoryPort segurancaRepositoryPort,
                                              UsuarioRepositoryPort usuarioRepositoryPort,
-                                             EmailService emailService) {
-        return new SegurancaUseCase(segurancaRepositoryPort, usuarioRepositoryPort, emailService);
+                                             EnviarEmailPort enviarEmailPort) {
+        return new SegurancaUseCase(segurancaRepositoryPort, usuarioRepositoryPort, enviarEmailPort);
     }
 
     @Bean
@@ -49,4 +49,3 @@ public class SegurancaConfig {
         return autenticacaoUseCase;
     }
 }
-

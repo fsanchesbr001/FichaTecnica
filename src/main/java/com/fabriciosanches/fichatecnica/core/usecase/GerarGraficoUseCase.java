@@ -1,5 +1,6 @@
-package com.fabriciosanches.fichatecnica.services;
+package com.fabriciosanches.fichatecnica.core.usecase;
 
+import com.fabriciosanches.fichatecnica.core.ports.in.GerarGraficoPort;
 import com.fabriciosanches.fichatecnica.dtos.GraficoPizzaDTO;
 import com.fabriciosanches.fichatecnica.dtos.GraficoPrecoItemDTO;
 import org.apache.logging.log4j.LogManager;
@@ -17,7 +18,6 @@ import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.chart.title.TextTitle;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
-import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
@@ -33,10 +33,9 @@ import java.util.regex.Pattern;
  * Serviço responsável pela geração de gráficos como imagens PNG.
  * Utiliza JFreeChart para renderização.
  */
-@Service
-public class GraficoService {
+public class GerarGraficoUseCase implements GerarGraficoPort {
 
-    private static final Logger logger = LogManager.getLogger(GraficoService.class);
+    private static final Logger logger = LogManager.getLogger(GerarGraficoUseCase.class);
 
     /** Largura padrão da imagem gerada (pixels). */
     private static final int CHART_WIDTH  = 900;
@@ -240,4 +239,5 @@ public class GraficoService {
         }
     }
 }
+
 

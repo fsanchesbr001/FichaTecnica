@@ -209,3 +209,4 @@ sum(rate(http_server_requests_seconds_count{uri=~"/ficha-tecnica/unidades-medida
 - 06/09/2026 - Versão 2.0.6 - Migração para Clean Architecture (Arquitetura Hexagonal) - CRUD Item e Historico Item Completo.
 - 08/09/2026 - Versão 2.0.7 - Migração para Clean Architecture (Arquitetura Hexagonal) - CRUD Produto e ItemProduto Completo.
 - 09/09/2026 - Versão 2.0.8 - Migração para Clean Architecture (Arquitetura Hexagonal) - CRUD Usuario e Segurança Completo.
+- 10/09/2026 - Versão 2.0.9 - Migração para Clean Architecture (Arquitetura Hexagonal) - Organizando Estrutura.

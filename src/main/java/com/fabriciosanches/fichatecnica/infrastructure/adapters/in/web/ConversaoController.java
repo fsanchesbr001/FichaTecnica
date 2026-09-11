@@ -6,12 +6,12 @@ import com.fabriciosanches.fichatecnica.core.ports.in.BuscarConversaoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.CriarConversaoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.DeletarConversaoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarRelatorioConversaoPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.GerarRelatorioPort;
 import com.fabriciosanches.fichatecnica.dtos.ConversaoDTO;
 import com.fabriciosanches.fichatecnica.dtos.ConversaoRelatorioDTO;
 import com.fabriciosanches.fichatecnica.dtos.RelatorioRequestDTO;
 import com.fabriciosanches.fichatecnica.enums.OrientacaoRelatorio;
 import com.fabriciosanches.fichatecnica.enums.TipoRelatorio;
-import com.fabriciosanches.fichatecnica.services.RelatorioService;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonPrimitive;
@@ -60,20 +60,20 @@ public class ConversaoController {
     private final AtualizarConversaoPort atualizarConversaoPort;
     private final DeletarConversaoPort deletarConversaoPort;
     private final GerarRelatorioConversaoPort gerarRelatorioConversaoPort;
-    private final RelatorioService relatorioService;
+    private final GerarRelatorioPort gerarRelatorioPort;
 
     public ConversaoController(BuscarConversaoPort buscarConversaoPort,
                                CriarConversaoPort criarConversaoPort,
                                AtualizarConversaoPort atualizarConversaoPort,
                                DeletarConversaoPort deletarConversaoPort,
                                GerarRelatorioConversaoPort gerarRelatorioConversaoPort,
-                               RelatorioService relatorioService) {
+                               GerarRelatorioPort gerarRelatorioPort) {
         this.buscarConversaoPort = buscarConversaoPort;
         this.criarConversaoPort = criarConversaoPort;
         this.atualizarConversaoPort = atualizarConversaoPort;
         this.deletarConversaoPort = deletarConversaoPort;
         this.gerarRelatorioConversaoPort = gerarRelatorioConversaoPort;
-        this.relatorioService = relatorioService;
+        this.gerarRelatorioPort = gerarRelatorioPort;
     }
 
     @GetMapping("/conversoes")
@@ -198,7 +198,7 @@ public class ConversaoController {
                     true
             );
 
-            byte[] pdfBytes = relatorioService.gerarRelatorioPDF(request);
+            byte[] pdfBytes = gerarRelatorioPort.gerarRelatorioPDF(request);
 
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss"));
             String filename = "Lista-Conversoes-" + timestamp + ".pdf";
@@ -244,7 +244,7 @@ public class ConversaoController {
                     false
             );
 
-            byte[] pdfBytes = relatorioService.gerarRelatorioPDF(request);
+            byte[] pdfBytes = gerarRelatorioPort.gerarRelatorioPDF(request);
 
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss"));
             String filename = "Detalhe-Conversao-" + id + "-" + timestamp + ".pdf";
