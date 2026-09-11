@@ -2,11 +2,11 @@ package com.fabriciosanches.fichatecnica.core.usecase;
 
 import com.fabriciosanches.fichatecnica.core.domain.HistoricoItem;
 import com.fabriciosanches.fichatecnica.core.domain.Item;
+import com.fabriciosanches.fichatecnica.core.domain.UnidadeMedida;
 import com.fabriciosanches.fichatecnica.core.ports.out.HistoricoItemRepositoryPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.ItemRepositoryPort;
 import com.fabriciosanches.fichatecnica.dtos.GraficoPrecoItemDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
-import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.UnidadeMedidaEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -56,7 +56,7 @@ class ListarHistoricoItemUseCaseTest {
 
         when(historicoItemRepositoryPort.buscarPorCodigoItemOrdenadoPorDataInicio(10L)).thenReturn(historico);
         when(itemRepositoryPort.buscarPorId(10L)).thenReturn(Optional.of(
-                new Item(10L, "Farinha", new UnidadeMedidaEntity(1L, "Quilo", "kg"), new BigDecimal("100.00"))
+                new Item(10L, "Farinha", new UnidadeMedida(1L, "Quilo", "kg"), new BigDecimal("100.00"))
         ));
 
         GraficoPrecoItemDTO dto = useCase.gerarGraficoPreco(10L);

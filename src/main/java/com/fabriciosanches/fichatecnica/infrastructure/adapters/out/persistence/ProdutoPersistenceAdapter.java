@@ -3,6 +3,7 @@ package com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence
 import com.fabriciosanches.fichatecnica.core.domain.ItemProduto;
 import com.fabriciosanches.fichatecnica.core.domain.ItemProdutoId;
 import com.fabriciosanches.fichatecnica.core.domain.Produto;
+import com.fabriciosanches.fichatecnica.core.domain.UnidadeMedida;
 import com.fabriciosanches.fichatecnica.core.ports.out.ProdutoRepositoryPort;
 import org.springframework.stereotype.Component;
 
@@ -75,7 +76,10 @@ public class ProdutoPersistenceAdapter implements ProdutoRepositoryPort {
                 entidade.getItem() == null ? null : new com.fabriciosanches.fichatecnica.core.domain.Item(
                         entidade.getItem().getCodigo(),
                         entidade.getItem().getNome(),
-                        entidade.getItem().getUnidadeMedida(),
+                        entidade.getItem().getUnidadeMedida() == null ? null : new UnidadeMedida(
+                                entidade.getItem().getUnidadeMedida().getCodigo(),
+                                entidade.getItem().getUnidadeMedida().getNome(),
+                                entidade.getItem().getUnidadeMedida().getSigla()),
                         entidade.getItem().getValor()),
                 entidade.getProduto() == null ? null : new Produto(
                         entidade.getProduto().getCodigo(),

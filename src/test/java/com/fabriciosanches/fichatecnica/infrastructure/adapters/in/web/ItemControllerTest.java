@@ -1,6 +1,7 @@
 package com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web;
 
 import com.fabriciosanches.fichatecnica.core.domain.Item;
+import com.fabriciosanches.fichatecnica.core.domain.UnidadeMedida;
 import com.fabriciosanches.fichatecnica.core.ports.in.AtualizarItemPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.BuscarItemPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.CriarItemPort;
@@ -69,7 +70,7 @@ class ItemControllerTest {
     @Test
     void buscarLista_DeveRetornarOkQuandoHouverDados() throws Exception {
         when(buscarItemPort.listar()).thenReturn(List.of(
-                new Item(1L, "Farinha", new UnidadeMedidaEntity(1L, "Quilo", "kg"), new BigDecimal("7.50"))
+                new Item(1L, "Farinha", new UnidadeMedida(1L, "Quilo", "kg"), new BigDecimal("7.50"))
         ));
 
         mockMvc.perform(get("/ficha-tecnica/itens"))
@@ -88,8 +89,8 @@ class ItemControllerTest {
     @Test
     void atualizarItem_DeveRetornarOk() throws Exception {
         UnidadeMedidaEntity unidade = new UnidadeMedidaEntity(1L, "Quilo", "kg");
-        when(atualizarItemPort.atualizar(eq(1L), eq("Farinha Especial"), any(), any()))
-                .thenReturn(new Item(1L, "Farinha Especial", unidade, new BigDecimal("9.90")));
+        when(atualizarItemPort.atualizar(eq(1L), eq("Farinha Especial"), any(UnidadeMedida.class), any(BigDecimal.class)))
+                .thenReturn(new Item(1L, "Farinha Especial", new UnidadeMedida(1L, "Quilo", "kg"), new BigDecimal("9.90")));
 
         mockMvc.perform(put("/ficha-tecnica/itens/{id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -107,7 +108,7 @@ class ItemControllerTest {
     @Test
     void gerarPdfDetalhe_DeveRetornarPdfComGrafico() throws Exception {
         UnidadeMedidaEntity unidade = new UnidadeMedidaEntity(1L, "Quilo", "kg");
-        when(buscarItemPort.buscarPorId(1L)).thenReturn(new Item(1L, "Farinha", unidade, new BigDecimal("7.50")));
+        when(buscarItemPort.buscarPorId(1L)).thenReturn(new Item(1L, "Farinha", new UnidadeMedida(1L, "Quilo", "kg"), new BigDecimal("7.50")));
         when(listarHistoricoItemPort.gerarGraficoPreco(1L)).thenReturn(new GraficoPrecoItemDTO(
                 "Variacao de Preco - Farinha",
                 "Farinha",

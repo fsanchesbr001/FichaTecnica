@@ -3,6 +3,7 @@ package com.fabriciosanches.fichatecnica.core.usecase;
 import com.fabriciosanches.fichatecnica.core.domain.Item;
 import com.fabriciosanches.fichatecnica.core.domain.ItemProduto;
 import com.fabriciosanches.fichatecnica.core.domain.Produto;
+import com.fabriciosanches.fichatecnica.core.domain.UnidadeMedida;
 import com.fabriciosanches.fichatecnica.core.ports.in.AtualizarItemPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.ObterValoresConversaoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.RegistrarHistoricoItemPort;
@@ -12,7 +13,6 @@ import com.fabriciosanches.fichatecnica.core.ports.out.ProdutoRepositoryPort;
 import com.fabriciosanches.fichatecnica.dtos.ConversaoValoresDTO;
 import com.fabriciosanches.fichatecnica.dtos.QuantidadeValorDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
-import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.UnidadeMedidaEntity;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -40,7 +40,7 @@ public class AtualizarItemUseCase implements AtualizarItemPort {
     }
 
     @Override
-    public Item atualizar(Long id, String nome, UnidadeMedidaEntity unidadeMedida, BigDecimal valor) {
+    public Item atualizar(Long id, String nome, UnidadeMedida unidadeMedida, BigDecimal valor) {
         if (id == null) {
             throw new IllegalArgumentException("Id não pode ser nulo");
         }

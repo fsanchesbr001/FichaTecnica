@@ -34,7 +34,7 @@ class ItemProdutoPersistenceAdapterTest {
     void salvar_DeveMapearDominioParaEntidadeERetornarDominio() {
         ItemProduto domain = new ItemProduto(
                 new ItemProdutoId(1L, 10L),
-                new Item(10L, "Farinha", new UnidadeMedidaEntity(2L, "Quilo", "kg"), new BigDecimal("10.00")),
+                new Item(10L, "Farinha", new UnidadeMedida(2L, "Quilo", "kg"), new BigDecimal("10.00")),
                 new Produto(1L, "Bolo", "Desc", null, new BigDecimal("19.90"), BigDecimal.ZERO, List.of()),
                 new UnidadeMedida(3L, "Grama", "g"),
                 2.5,

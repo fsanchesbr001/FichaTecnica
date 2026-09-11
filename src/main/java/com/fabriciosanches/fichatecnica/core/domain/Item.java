@@ -1,27 +1,25 @@
 package com.fabriciosanches.fichatecnica.core.domain;
 
-import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.UnidadeMedidaEntity;
-
 import java.math.BigDecimal;
 import java.util.List;
 
 public class Item {
     private Long codigo;
     private String nome;
-    private UnidadeMedidaEntity unidadeMedida;
+    private UnidadeMedida unidadeMedida;
     private BigDecimal valor;
 
     public Item() {
     }
 
-    public Item(Long codigo, String nome, UnidadeMedidaEntity unidadeMedida, BigDecimal valor) {
+    public Item(Long codigo, String nome, UnidadeMedida unidadeMedida, BigDecimal valor) {
         this.codigo = codigo;
         this.nome = nome;
         this.unidadeMedida = unidadeMedida;
         this.valor = valor;
     }
 
-    public Item(Long codigo, String nome, UnidadeMedidaEntity unidadeMedida, List<?> ignoredItemProdutoList, BigDecimal valor) {
+    public Item(Long codigo, String nome, UnidadeMedida unidadeMedida, List<?> ignoredItemProdutoList, BigDecimal valor) {
         this(codigo, nome, unidadeMedida, valor);
     }
 
@@ -41,11 +39,11 @@ public class Item {
         this.nome = nome;
     }
 
-    public UnidadeMedidaEntity getUnidadeMedida() {
+    public UnidadeMedida getUnidadeMedida() {
         return unidadeMedida;
     }
 
-    public void setUnidadeMedida(UnidadeMedidaEntity unidadeMedida) {
+    public void setUnidadeMedida(UnidadeMedida unidadeMedida) {
         this.unidadeMedida = unidadeMedida;
     }
 

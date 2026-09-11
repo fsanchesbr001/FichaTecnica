@@ -1,6 +1,7 @@
 package com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence;
 
 import com.fabriciosanches.fichatecnica.core.domain.Item;
+import com.fabriciosanches.fichatecnica.core.domain.UnidadeMedida;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -28,11 +29,12 @@ class ItemPersistenceAdapterTest {
 
     @Test
     void salvar_DeveMapearDominioParaEntidadeERetornarDominio() {
-        UnidadeMedidaEntity unidade = new UnidadeMedidaEntity(1L, "Quilo", "kg");
+        UnidadeMedida unidade = new UnidadeMedida(1L, "Quilo", "kg");
         Item domain = new Item(1L, "Farinha", unidade, new BigDecimal("10.00"));
+        UnidadeMedidaEntity unidadeEntity = new UnidadeMedidaEntity(1L, "Quilo", "kg");
 
         when(repository.save(any(ItemEntity.class)))
-                .thenReturn(new ItemEntity(1L, "Farinha", unidade, new BigDecimal("10.00")));
+                .thenReturn(new ItemEntity(1L, "Farinha", unidadeEntity, new BigDecimal("10.00")));
 
         Item salvo = adapter.salvar(domain);
 
@@ -44,9 +46,9 @@ class ItemPersistenceAdapterTest {
 
     @Test
     void buscarTodosEBuscarPorId_DeveMapearParaDominio() {
-        UnidadeMedidaEntity unidade = new UnidadeMedidaEntity(1L, "Quilo", "kg");
-        when(repository.findAll()).thenReturn(List.of(new ItemEntity(1L, "Farinha", unidade, new BigDecimal("10.00"))));
-        when(repository.findById(1L)).thenReturn(Optional.of(new ItemEntity(1L, "Farinha", unidade, new BigDecimal("10.00"))));
+        UnidadeMedidaEntity unidadeEntity = new UnidadeMedidaEntity(1L, "Quilo", "kg");
+        when(repository.findAll()).thenReturn(List.of(new ItemEntity(1L, "Farinha", unidadeEntity, new BigDecimal("10.00"))));
+        when(repository.findById(1L)).thenReturn(Optional.of(new ItemEntity(1L, "Farinha", unidadeEntity, new BigDecimal("10.00"))));
 
         List<Item> todos = adapter.buscarTodos();
         Item porId = adapter.buscarPorId(1L).orElseThrow();

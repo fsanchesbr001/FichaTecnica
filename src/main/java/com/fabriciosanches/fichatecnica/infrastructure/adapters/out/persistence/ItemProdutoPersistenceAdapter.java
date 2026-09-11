@@ -61,7 +61,10 @@ public class ItemProdutoPersistenceAdapter implements ItemProdutoRepositoryPort 
                 entidade.getItem() == null ? null : new Item(
                         entidade.getItem().getCodigo(),
                         entidade.getItem().getNome(),
-                        entidade.getItem().getUnidadeMedida(),
+                        entidade.getItem().getUnidadeMedida() == null ? null : new UnidadeMedida(
+                                entidade.getItem().getUnidadeMedida().getCodigo(),
+                                entidade.getItem().getUnidadeMedida().getNome(),
+                                entidade.getItem().getUnidadeMedida().getSigla()),
                         entidade.getItem().getValor()),
                 entidade.getProduto() == null ? null : new Produto(
                         entidade.getProduto().getCodigo(),
@@ -93,10 +96,11 @@ public class ItemProdutoPersistenceAdapter implements ItemProdutoRepositoryPort 
         if (item == null) {
             return null;
         }
+        UnidadeMedida unidade = item.getUnidadeMedida();
         return new ItemEntity(
                 item.getCodigo(),
                 item.getNome(),
-                item.getUnidadeMedida(),
+                unidade == null ? null : new UnidadeMedidaEntity(unidade.getCodigo(), unidade.getNome(), unidade.getSigla()),
                 item.getValor());
     }
 
@@ -121,4 +125,3 @@ public class ItemProdutoPersistenceAdapter implements ItemProdutoRepositoryPort 
         return new UnidadeMedidaEntity(unidadeMedida.getCodigo(), unidadeMedida.getNome(), unidadeMedida.getSigla());
     }
 }
-

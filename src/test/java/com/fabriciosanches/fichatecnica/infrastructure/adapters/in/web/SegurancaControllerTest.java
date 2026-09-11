@@ -1,12 +1,14 @@
-package com.fabriciosanches.fichatecnica.services;
+package com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web;
 
-import com.fabriciosanches.fichatecnica.controllers.SegurancaController;
-import com.fabriciosanches.fichatecnica.domains.Usuario;
+import com.fabriciosanches.fichatecnica.core.domain.Usuario;
+import com.fabriciosanches.fichatecnica.core.ports.in.GerarTokenPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.RecuperacaoSenhaPort;
 import com.fabriciosanches.fichatecnica.dtos.EnviarEmailSegurancaResponseDTO;
 import com.fabriciosanches.fichatecnica.enums.UserRole;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.properties.FichaTecnicaProperty;
-import com.fabriciosanches.fichatecnica.security.TokenService;
+import com.fabriciosanches.fichatecnica.security.DadosTokenJWT;
+import com.fabriciosanches.fichatecnica.security.UsuarioSecurityDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -30,20 +32,25 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class SegurancaControllerTest {
 
     private MockMvc mockMvc;
-    private SegurancaService segurancaService;
+    private RecuperacaoSenhaPort recuperacaoSenhaPort;
     private AuthenticationManager authenticationManager;
-    private TokenService tokenService;
+    private GerarTokenPort gerarTokenPort;
     private FichaTecnicaProperty fichaTecnicaProperty;
 
     @BeforeEach
     void setUp() {
-        segurancaService = Mockito.mock(SegurancaService.class);
+        recuperacaoSenhaPort = Mockito.mock(RecuperacaoSenhaPort.class);
         authenticationManager = Mockito.mock(AuthenticationManager.class);
-        tokenService = Mockito.mock(TokenService.class);
+        gerarTokenPort = Mockito.mock(GerarTokenPort.class);
         fichaTecnicaProperty = new FichaTecnicaProperty();
+
         SegurancaController controller = new SegurancaController(
-                segurancaService, authenticationManager, tokenService, fichaTecnicaProperty
+                recuperacaoSenhaPort,
+                authenticationManager,
+                gerarTokenPort,
+                fichaTecnicaProperty
         );
+
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }
 
@@ -63,7 +70,8 @@ class SegurancaControllerTest {
         fichaTecnicaProperty.getSystem().setPassword("123");
 
         Usuario usuario = new Usuario(1L, "system@email.com", "senha", UserRole.ADMIN, "Admin");
-        Authentication authentication = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
+        UsuarioSecurityDetails details = new UsuarioSecurityDetails(usuario);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(details, null, details.getAuthorities());
         when(authenticationManager.authenticate(any())).thenReturn(authentication);
 
         mockMvc.perform(post("/ficha-tecnica/login-recuperacao-senha"))
@@ -77,11 +85,17 @@ class SegurancaControllerTest {
         fichaTecnicaProperty.getSystem().setPassword("123");
 
         Usuario usuario = new Usuario(1L, "system@email.com", "senha", UserRole.SYSTEM, "Sistema");
-        Authentication authentication = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
+        UsuarioSecurityDetails details = new UsuarioSecurityDetails(usuario);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(details, null, details.getAuthorities());
         when(authenticationManager.authenticate(any())).thenReturn(authentication);
-        when(tokenService.gerarToken(usuario)).thenReturn("jwt-token");
-        when(tokenService.getExpirationMinutes()).thenReturn(120L);
-        when(tokenService.getTokenExpiresAt()).thenReturn(OffsetDateTime.parse("2026-03-13T06:51:41.2063929-03:00"));
+        when(gerarTokenPort.gerarToken(any(Usuario.class))).thenReturn(new DadosTokenJWT(
+                "jwt-token",
+                120L,
+                OffsetDateTime.parse("2026-03-13T06:51:41.2063929-03:00"),
+                "system@email.com",
+                "Sistema",
+                "ROLE_SYSTEM"
+        ));
 
         mockMvc.perform(post("/ficha-tecnica/login-recuperacao-senha"))
                 .andExpect(status().isOk())
@@ -103,7 +117,7 @@ class SegurancaControllerTest {
 
     @Test
     void enviarEmailSeguranca_DeveRetornarOk() throws Exception {
-        when(segurancaService.enviarEmailSeguranca(eq("user@email.com")))
+        when(recuperacaoSenhaPort.enviarEmailSeguranca(eq("user@email.com")))
                 .thenReturn(new EnviarEmailSegurancaResponseDTO("user@email.com", "52998224725", "12345678", "01/01/2026 10:00:00"));
 
         mockMvc.perform(post("/ficha-tecnica/enviar-email-seguranca")
@@ -117,7 +131,7 @@ class SegurancaControllerTest {
 
     @Test
     void enviarEmailSeguranca_DeveRetornarBadRequestQuandoRegraNegocioFalhar() throws Exception {
-        when(segurancaService.enviarEmailSeguranca(eq("user@email.com")))
+        when(recuperacaoSenhaPort.enviarEmailSeguranca(eq("user@email.com")))
                 .thenThrow(new FichaTecnicaException("erro"));
 
         mockMvc.perform(post("/ficha-tecnica/enviar-email-seguranca")
@@ -147,7 +161,7 @@ class SegurancaControllerTest {
     @Test
     void trocarSenha_DeveRetornarBadRequestQuandoServicoLancarExcecao() throws Exception {
         Mockito.doThrow(new FichaTecnicaException("erro"))
-                .when(segurancaService)
+                .when(recuperacaoSenhaPort)
                 .trocarSenhaSeguranca(any(), any(), any(), any(), any());
 
         mockMvc.perform(post("/ficha-tecnica/trocar-senha")

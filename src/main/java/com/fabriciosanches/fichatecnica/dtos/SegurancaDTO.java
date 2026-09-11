@@ -1,6 +1,6 @@
 package com.fabriciosanches.fichatecnica.dtos;
 
-import com.fabriciosanches.fichatecnica.domains.Seguranca;
+import com.fabriciosanches.fichatecnica.core.domain.Seguranca;
 
 import java.time.LocalDateTime;
 

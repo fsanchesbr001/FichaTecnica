@@ -1,6 +1,6 @@
 package com.fabriciosanches.fichatecnica.security;
 
-import com.fabriciosanches.fichatecnica.repository.UsuarioRepository;
+import com.fabriciosanches.fichatecnica.core.ports.in.AutenticarUsuarioPort;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -26,13 +26,13 @@ public class SecurityFilter extends OncePerRequestFilter {
     private static final Logger log = LogManager.getLogger(SecurityFilter.class);
 
     private final TokenService tokenService;
-    private final UsuarioRepository repository;
+    private final AutenticarUsuarioPort autenticarUsuarioPort;
     private final TokenBlacklistService tokenBlacklistService;
 
-    public SecurityFilter(TokenService tokenService, UsuarioRepository repository,
+    public SecurityFilter(TokenService tokenService, AutenticarUsuarioPort autenticarUsuarioPort,
                           TokenBlacklistService tokenBlacklistService) {
         this.tokenService = tokenService;
-        this.repository = repository;
+        this.autenticarUsuarioPort = autenticarUsuarioPort;
         this.tokenBlacklistService = tokenBlacklistService;
     }
 
@@ -89,7 +89,7 @@ public class SecurityFilter extends OncePerRequestFilter {
             }
 
             var authority      = new SimpleGrantedAuthority(role);
-            var usuario        = repository.findByLogin(subject);
+            var usuario        = autenticarUsuarioPort.buscarPorLogin(subject);
             var authentication = new UsernamePasswordAuthenticationToken(usuario, tokenJWT,
                     Collections.singletonList(authority));
             SecurityContextHolder.getContext().setAuthentication(authentication);

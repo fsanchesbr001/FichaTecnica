@@ -18,7 +18,6 @@ import com.fabriciosanches.fichatecnica.dtos.ProdutoCompletoDTO;
 import com.fabriciosanches.fichatecnica.dtos.ProdutosPorItemDTO;
 import com.fabriciosanches.fichatecnica.dtos.QuantidadeValorDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
-import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.UnidadeMedidaEntity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -206,7 +205,7 @@ public class ItemProdutoController {
                 new Item(
                         dto.cdItem(),
                         null,
-                        new UnidadeMedidaEntity(dto.cdUnidadeMedida(), "TEMP", "TEMP"),
+                        new UnidadeMedida(dto.cdUnidadeMedida(), "TEMP", "TEMP"),
                         null),
                 new Produto(idProduto, null, null, null, null, null, List.of()),
                 new UnidadeMedida(dto.cdUnidadeMedida(), "TEMP", "TEMP"),

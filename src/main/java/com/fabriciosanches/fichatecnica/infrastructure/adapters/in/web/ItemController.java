@@ -1,6 +1,7 @@
 package com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web;
 
 import com.fabriciosanches.fichatecnica.core.domain.Item;
+import com.fabriciosanches.fichatecnica.core.domain.UnidadeMedida;
 import com.fabriciosanches.fichatecnica.core.ports.in.AtualizarItemPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.BuscarItemPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.CriarItemPort;
@@ -15,6 +16,7 @@ import com.fabriciosanches.fichatecnica.enums.TipoRelatorio;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.services.GraficoService;
 import com.fabriciosanches.fichatecnica.services.RelatorioService;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.UnidadeMedidaEntity;
 import com.google.gson.Gson;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -137,7 +139,7 @@ public class ItemController {
     })
     public ResponseEntity<ItemDTO> atualizarItem(@PathVariable Long id, @RequestBody ItemDTO itemDTO) {
         try {
-            Item item = atualizarItemPort.atualizar(id, itemDTO.nome(), itemDTO.unidadeMedida(), itemDTO.valor());
+            Item item = atualizarItemPort.atualizar(id, itemDTO.nome(), toDomainUnidade(itemDTO.unidadeMedida()), itemDTO.valor());
             return ResponseEntity.ok(toDto(item));
         } catch (FichaTecnicaException e) {
             return ResponseEntity.notFound().build();
@@ -153,7 +155,7 @@ public class ItemController {
     })
     public ResponseEntity<ItemDTO> cadastrarItem(@RequestBody ItemDTO itemDTO) {
         try {
-            Item item = criarItemPort.criar(itemDTO.nome(), itemDTO.unidadeMedida(), itemDTO.valor());
+            Item item = criarItemPort.criar(itemDTO.nome(), toDomainUnidade(itemDTO.unidadeMedida()), itemDTO.valor());
             return ResponseEntity.ok(toDto(item));
         } catch (FichaTecnicaException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
@@ -268,7 +270,27 @@ public class ItemController {
     }
 
     private ItemDTO toDto(Item item) {
-        return new ItemDTO(item.getCodigo(), item.getNome(), item.getUnidadeMedida(), item.getValor());
+        return new ItemDTO(item.getCodigo(), item.getNome(), toEntityUnidade(item.getUnidadeMedida()), item.getValor());
+    }
+
+    private UnidadeMedida toDomainUnidade(UnidadeMedidaEntity unidadeMedidaEntity) {
+        if (unidadeMedidaEntity == null) {
+            return null;
+        }
+        return new UnidadeMedida(
+                unidadeMedidaEntity.getCodigo(),
+                unidadeMedidaEntity.getNome(),
+                unidadeMedidaEntity.getSigla());
+    }
+
+    private UnidadeMedidaEntity toEntityUnidade(UnidadeMedida unidadeMedida) {
+        if (unidadeMedida == null) {
+            return null;
+        }
+        return new UnidadeMedidaEntity(
+                unidadeMedida.getCodigo(),
+                unidadeMedida.getNome(),
+                unidadeMedida.getSigla());
     }
 }
 

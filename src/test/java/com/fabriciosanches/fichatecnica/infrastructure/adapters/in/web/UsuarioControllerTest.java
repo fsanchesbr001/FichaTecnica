@@ -1,6 +1,12 @@
-package com.fabriciosanches.fichatecnica.services;
+package com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web;
 
-import com.fabriciosanches.fichatecnica.controllers.UsuarioController;
+import com.fabriciosanches.fichatecnica.core.ports.in.AtualizarUsuarioPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.BuscarUsuarioPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.ControleAcessoPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.CriarUsuarioPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.ExcluirUsuarioPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.GerenciarBloqueioPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.PrimeiroAcessoPort;
 import com.fabriciosanches.fichatecnica.dtos.AtualizarUsuarioRequestDTO;
 import com.fabriciosanches.fichatecnica.dtos.UsuarioListagemDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
@@ -24,12 +30,33 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class UsuarioControllerTest {
 
     private MockMvc mockMvc;
-    private SegurancaService segurancaService;
+    private CriarUsuarioPort criarUsuarioPort;
+    private ExcluirUsuarioPort excluirUsuarioPort;
+    private PrimeiroAcessoPort primeiroAcessoPort;
+    private GerenciarBloqueioPort gerenciarBloqueioPort;
+    private AtualizarUsuarioPort atualizarUsuarioPort;
+    private BuscarUsuarioPort buscarUsuarioPort;
+    private ControleAcessoPort controleAcessoPort;
 
     @BeforeEach
     void setUp() {
-        segurancaService = Mockito.mock(SegurancaService.class);
-        UsuarioController controller = new UsuarioController(segurancaService);
+        criarUsuarioPort = Mockito.mock(CriarUsuarioPort.class);
+        excluirUsuarioPort = Mockito.mock(ExcluirUsuarioPort.class);
+        primeiroAcessoPort = Mockito.mock(PrimeiroAcessoPort.class);
+        gerenciarBloqueioPort = Mockito.mock(GerenciarBloqueioPort.class);
+        atualizarUsuarioPort = Mockito.mock(AtualizarUsuarioPort.class);
+        buscarUsuarioPort = Mockito.mock(BuscarUsuarioPort.class);
+        controleAcessoPort = Mockito.mock(ControleAcessoPort.class);
+
+        UsuarioController controller = new UsuarioController(
+                criarUsuarioPort,
+                excluirUsuarioPort,
+                primeiroAcessoPort,
+                gerenciarBloqueioPort,
+                atualizarUsuarioPort,
+                buscarUsuarioPort,
+                controleAcessoPort
+        );
         mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }
 
@@ -44,7 +71,7 @@ class UsuarioControllerTest {
 
     @Test
     void listarTodosUsuarios_DeveRetornarNoContentQuandoListaVazia() throws Exception {
-        when(segurancaService.findAllComDadosUsuario()).thenReturn(List.of());
+        when(buscarUsuarioPort.listarTodosUsuarios()).thenReturn(List.of());
 
         mockMvc.perform(get("/ficha-tecnica/usuarios/listar-todos-usuarios"))
                 .andExpect(status().isNoContent());
@@ -52,7 +79,7 @@ class UsuarioControllerTest {
 
     @Test
     void listarTodosUsuarios_DeveRetornarOkQuandoHouverDados() throws Exception {
-        when(segurancaService.findAllComDadosUsuario()).thenReturn(List.of(
+        when(buscarUsuarioPort.listarTodosUsuarios()).thenReturn(List.of(
                 new UsuarioListagemDTO("user@email.com", "52998224725", null, 5,
                         false, false, false, false, null, null, null,
                         "Usuário Teste", "ADMIN")
@@ -65,7 +92,7 @@ class UsuarioControllerTest {
 
     @Test
     void buscarUsuarioPorEmail_DeveRetornarNotFoundQuandoNaoEncontrar() throws Exception {
-        when(segurancaService.findByEmailComDadosUsuario("user@email.com")).thenReturn(null);
+        when(buscarUsuarioPort.buscarUsuarioPorEmail("user@email.com")).thenReturn(null);
 
         mockMvc.perform(get("/ficha-tecnica/usuarios/buscar-usuario/{email}", "user@email.com"))
                 .andExpect(status().isNotFound());
@@ -73,7 +100,7 @@ class UsuarioControllerTest {
 
     @Test
     void buscarUsuarioPorEmail_DeveRetornarOkQuandoEncontrar() throws Exception {
-        when(segurancaService.findByEmailComDadosUsuario("user@email.com"))
+        when(buscarUsuarioPort.buscarUsuarioPorEmail("user@email.com"))
                 .thenReturn(new UsuarioListagemDTO("user@email.com", "52998224725", null, 5,
                         false, false, false, false, null, null, null,
                         "Usuário Teste", "ADMIN"));
@@ -85,7 +112,7 @@ class UsuarioControllerTest {
 
     @Test
     void atualizarUsuario_DeveRetornarOkQuandoAtualizar() throws Exception {
-        when(segurancaService.atualizarUsuario(eq("user@email.com"), any(AtualizarUsuarioRequestDTO.class)))
+        when(atualizarUsuarioPort.atualizarUsuario(eq("user@email.com"), any(AtualizarUsuarioRequestDTO.class)))
                 .thenReturn(new UsuarioListagemDTO("user@email.com", "52998224725", null, 5,
                         false, false, false, false, null, null, null,
                         "Nome Atualizado", "SYSTEM"));
@@ -108,7 +135,7 @@ class UsuarioControllerTest {
 
     @Test
     void atualizarUsuario_DeveRetornarBadRequestQuandoFalhar() throws Exception {
-        when(segurancaService.atualizarUsuario(eq("user@email.com"), any(AtualizarUsuarioRequestDTO.class)))
+        when(atualizarUsuarioPort.atualizarUsuario(eq("user@email.com"), any(AtualizarUsuarioRequestDTO.class)))
                 .thenThrow(new FichaTecnicaException("erro"));
 
         mockMvc.perform(put("/ficha-tecnica/usuarios/atualizar-usuario/{email}", "user@email.com")

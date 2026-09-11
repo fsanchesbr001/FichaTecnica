@@ -70,7 +70,7 @@ class ItemProdutoControllerTest {
 
     @Test
     void salvarItemProduto_DeveRetornarOk() throws Exception {
-        Item item = new Item(1L, "Farinha", new com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.UnidadeMedidaEntity(1L, "Quilo", "kg"), new BigDecimal("10.00"));
+        Item item = new Item(1L, "Farinha", new UnidadeMedida(1L, "Quilo", "kg"), new BigDecimal("10.00"));
         Produto produto = new Produto(1L, "Bolo", "Desc", null, new BigDecimal("19.90"), BigDecimal.ZERO, List.of());
         ItemProduto itemProduto = new ItemProduto(new ItemProdutoId(1L, 1L), item, produto, new UnidadeMedida(1L, "Quilo", "kg"), 2.0, new BigDecimal("5.00"));
         when(adicionarItemAoProdutoPort.adicionar(any(), any())).thenReturn(List.of(itemProduto));
@@ -86,7 +86,7 @@ class ItemProdutoControllerTest {
 
     @Test
     void buscarItensProduto_DeveRetornarOk() throws Exception {
-        Item item = new Item(1L, "Farinha", new com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.UnidadeMedidaEntity(1L, "Quilo", "kg"), new BigDecimal("10.00"));
+        Item item = new Item(1L, "Farinha", new UnidadeMedida(1L, "Quilo", "kg"), new BigDecimal("10.00"));
         Produto produto = new Produto(1L, "Bolo", "Desc", null, new BigDecimal("19.90"), BigDecimal.ZERO, List.of());
         when(listarItensDoProdutoPort.listar(1L)).thenReturn(List.of(new ItemProduto(new ItemProdutoId(1L, 1L), item, produto, new UnidadeMedida(1L, "Quilo", "kg"), 2.0, new BigDecimal("5.00"))));
 

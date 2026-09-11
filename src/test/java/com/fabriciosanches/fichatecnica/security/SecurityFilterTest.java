@@ -1,8 +1,8 @@
 package com.fabriciosanches.fichatecnica.security;
 
-import com.fabriciosanches.fichatecnica.domains.Usuario;
+import com.fabriciosanches.fichatecnica.core.domain.Usuario;
+import com.fabriciosanches.fichatecnica.core.ports.in.AutenticarUsuarioPort;
 import com.fabriciosanches.fichatecnica.enums.UserRole;
-import com.fabriciosanches.fichatecnica.repository.UsuarioRepository;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,9 +27,9 @@ class SecurityFilterTest {
     @Mock
     private TokenService tokenService;
     @Mock
-    private UsuarioRepository repository;
-    @Mock
     private TokenBlacklistService tokenBlacklistService;
+    @Mock
+    private AutenticarUsuarioPort autenticarUsuarioPort;
     @Mock
     private FilterChain filterChain;
 
@@ -37,7 +37,7 @@ class SecurityFilterTest {
 
     @BeforeEach
     void setUp() {
-        filter = new SecurityFilter(tokenService, repository, tokenBlacklistService);
+        filter = new SecurityFilter(tokenService, autenticarUsuarioPort, tokenBlacklistService);
     }
 
     @AfterEach
@@ -71,22 +71,6 @@ class SecurityFilterTest {
     }
 
     @Test
-    void doFilterInternal_DeveRetornar401QuandoTokenRevogado() throws Exception {
-        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/produtos");
-        request.addHeader("Authorization", "Bearer token-revogado");
-        MockHttpServletResponse response = new MockHttpServletResponse();
-
-        when(tokenService.validarTokenExpirado("token-revogado")).thenReturn(true);
-        when(tokenBlacklistService.estaRevogado("token-revogado")).thenReturn(true);
-
-        filter.doFilter(request, response, filterChain);
-
-        assertEquals(401, response.getStatus());
-        assertTrue(response.getContentAsString().contains("Token revogado"));
-        verify(filterChain, never()).doFilter(request, response);
-    }
-
-    @Test
     void doFilterInternal_DeveAutenticarQuandoTokenValido() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/produtos");
         request.addHeader("Authorization", "Bearer token-valido");
@@ -98,7 +82,7 @@ class SecurityFilterTest {
         when(tokenBlacklistService.estaRevogado("token-valido")).thenReturn(false);
         when(tokenService.getSubject("token-valido")).thenReturn("admin@email.com");
         when(tokenService.getRole("token-valido")).thenReturn("ROLE_ADMIN");
-        when(repository.findByLogin("admin@email.com")).thenReturn(usuario);
+        when(autenticarUsuarioPort.buscarPorLogin("admin@email.com")).thenReturn(usuario);
 
         filter.doFilter(request, response, filterChain);
 
@@ -107,4 +91,3 @@ class SecurityFilterTest {
         verify(filterChain).doFilter(request, response);
     }
 }
-

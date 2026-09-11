@@ -1,6 +1,6 @@
 package com.fabriciosanches.fichatecnica.services;
 
-import com.fabriciosanches.fichatecnica.domains.Usuario;
+import com.fabriciosanches.fichatecnica.core.domain.Usuario;
 import com.fabriciosanches.fichatecnica.enums.UserRole;
 import com.fabriciosanches.fichatecnica.security.TokenService;
 import org.junit.jupiter.api.BeforeEach;

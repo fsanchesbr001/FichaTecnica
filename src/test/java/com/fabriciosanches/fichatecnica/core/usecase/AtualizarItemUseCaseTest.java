@@ -9,9 +9,9 @@ import com.fabriciosanches.fichatecnica.core.ports.out.ProdutoRepositoryPort;
 import com.fabriciosanches.fichatecnica.core.domain.ItemProduto;
 import com.fabriciosanches.fichatecnica.core.domain.ItemProdutoId;
 import com.fabriciosanches.fichatecnica.core.domain.Produto;
+import com.fabriciosanches.fichatecnica.core.domain.UnidadeMedida;
 import com.fabriciosanches.fichatecnica.dtos.ConversaoValoresDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
-import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.UnidadeMedidaEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -51,7 +51,7 @@ class AtualizarItemUseCaseTest {
 
     @Test
     void atualizar_DeveLancarExcecaoQuandoItemNaoExiste() {
-        UnidadeMedidaEntity unidade = new UnidadeMedidaEntity(1L, "Quilo", "kg");
+        UnidadeMedida unidade = new UnidadeMedida(1L, "Quilo", "kg");
         when(itemRepositoryPort.buscarPorId(1L)).thenReturn(Optional.empty());
 
         FichaTecnicaException ex = assertThrows(
@@ -64,7 +64,7 @@ class AtualizarItemUseCaseTest {
 
     @Test
     void atualizar_DeveSalvarERegistrarHistoricoQuandoSemProdutosAssociados() {
-        UnidadeMedidaEntity unidade = new UnidadeMedidaEntity(1L, "Quilo", "kg");
+        UnidadeMedida unidade = new UnidadeMedida(1L, "Quilo", "kg");
         Item item = new Item(1L, "Farinha", unidade, new BigDecimal("7.50"));
 
         when(itemRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(item));
@@ -80,7 +80,7 @@ class AtualizarItemUseCaseTest {
 
     @Test
     void atualizar_DeveRecalcularProdutoQuandoExistemItensProduto() {
-        UnidadeMedidaEntity unidadeBase = new UnidadeMedidaEntity(1L, "Quilo", "kg");
+        UnidadeMedida unidadeBase = new UnidadeMedida(1L, "Quilo", "kg");
         Item item = new Item(1L, "Farinha", unidadeBase, new BigDecimal("7.50"));
 
         Produto produto = new Produto(10L, "Bolo", "Desc", null, new BigDecimal("20.00"), BigDecimal.ZERO, null);
