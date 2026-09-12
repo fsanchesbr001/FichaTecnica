@@ -1,6 +1,6 @@
 package com.fabriciosanches.fichatecnica.core.ports.in;
 
-import com.fabriciosanches.fichatecnica.dtos.ProdutoDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ProdutoDTO;
 
 import java.util.List;
 
@@ -9,3 +9,4 @@ public interface BuscarProdutoPort {
 
     ProdutoDTO buscarPorId(Long id);
 }
+

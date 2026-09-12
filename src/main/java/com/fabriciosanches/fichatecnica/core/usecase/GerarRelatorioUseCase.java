@@ -1,10 +1,10 @@
 package com.fabriciosanches.fichatecnica.core.usecase;
 
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarRelatorioPort;
-import com.fabriciosanches.fichatecnica.dtos.RelatorioRequestDTO;
-import com.fabriciosanches.fichatecnica.enums.ImagemPosicao;
-import com.fabriciosanches.fichatecnica.enums.OrientacaoRelatorio;
-import com.fabriciosanches.fichatecnica.enums.TipoRelatorio;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.RelatorioRequestDTO;
+import com.fabriciosanches.fichatecnica.core.domain.enums.ImagemPosicao;
+import com.fabriciosanches.fichatecnica.core.domain.enums.OrientacaoRelatorio;
+import com.fabriciosanches.fichatecnica.core.domain.enums.TipoRelatorio;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -47,34 +47,34 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 
 /**
- * Serviço responsável pela geração de relatórios em formato PDF (A4 retrato).
+ * ServiÃ§o responsÃ¡vel pela geraÃ§Ã£o de relatÃ³rios em formato PDF (A4 retrato).
  *
  * <p>Estrutura do PDF:</p>
  * <ul>
- *   <li><b>Cabeçalho</b> (repete em todas as páginas): título centralizado em negrito 14pt,
- *       número da página alinhado à direita, nomes das colunas em negrito 12pt e
+ *   <li><b>CabeÃ§alho</b> (repete em todas as pÃ¡ginas): tÃ­tulo centralizado em negrito 14pt,
+ *       nÃºmero da pÃ¡gina alinhado Ã  direita, nomes das colunas em negrito 12pt e
  *       linha separadora.</li>
- *   <li><b>Detalhe</b>: registros extraídos do JSON, um por linha, 12pt.</li>
- *   <li><b>Rodapé</b> (repete em todas as páginas): linha separadora, data/hora
- *       alinhada à esquerda e texto "Emitido pelo Ficha Técnica Ollivander" centralizado.</li>
+ *   <li><b>Detalhe</b>: registros extraÃ­dos do JSON, um por linha, 12pt.</li>
+ *   <li><b>RodapÃ©</b> (repete em todas as pÃ¡ginas): linha separadora, data/hora
+ *       alinhada Ã  esquerda e texto "Emitido pelo Ficha TÃ©cnica Ollivander" centralizado.</li>
  * </ul>
  */
 public class GerarRelatorioUseCase implements GerarRelatorioPort {
 
     private static final Logger logger = LogManager.getLogger(GerarRelatorioUseCase.class);
 
-    // ── Layout constants ──────────────────────────────────────────────────────
+    // â”€â”€ Layout constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     /** Margem horizontal (esquerda e direita) em pontos. */
     private static final float MARGIN_HORIZ   = 36f;
-    /** Margem superior do corpo do documento (reserva espaço para o cabeçalho). */
+    /** Margem superior do corpo do documento (reserva espaÃ§o para o cabeÃ§alho). */
     private static final float MARGIN_TOP     = 95f;
-    /** Margem inferior do corpo do documento (reserva espaço para o rodapé). */
+    /** Margem inferior do corpo do documento (reserva espaÃ§o para o rodapÃ©). */
     private static final float MARGIN_BOTTOM  = 72f;
-    /** Tamanho da fonte do título (pt). */
+    /** Tamanho da fonte do tÃ­tulo (pt). */
     private static final float FONT_TITLE     = 14f;
     /** Tamanho da fonte do corpo (pt). */
     private static final float FONT_BODY      = 12f;
-    /** Preenchimento interno de cada célula da tabela de dados (pt). */
+    /** Preenchimento interno de cada cÃ©lula da tabela de dados (pt). */
     private static final float CELL_PADDING   = 4f;
     /** Cor de fundo usada nas linhas pares quando alternarCores = true (LISTA). */
     private static final DeviceRgb LISTA_ROW_ALT_COLOR = new DeviceRgb(230, 244, 234);
@@ -82,17 +82,17 @@ public class GerarRelatorioUseCase implements GerarRelatorioPort {
     private static final float DETAIL_MIN_FIELD_WIDTH = 240f;
     /** Limite maximo de campos por linha no DETALHE para manter legibilidade. */
     private static final int DETAIL_MAX_FIELDS_PER_ROW = 3;
-    /** Altura máxima da imagem no relatório (pt). Garante escala proporcional sem prejudicar o layout. */
+    /** Altura mÃ¡xima da imagem no relatÃ³rio (pt). Garante escala proporcional sem prejudicar o layout. */
     private static final float MAX_IMAGE_HEIGHT = 200f;
-    /** Cor de fundo do cabeçalho de tabelas auxiliares no DETALHE. */
+    /** Cor de fundo do cabeÃ§alho de tabelas auxiliares no DETALHE. */
     private static final DeviceRgb DETAIL_AUX_HEADER_COLOR = new DeviceRgb(240, 240, 240);
 
-    // ─────────────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     /**
-     * Gera o relatório PDF em memória e retorna o conteúdo como array de bytes.
+     * Gera o relatÃ³rio PDF em memÃ³ria e retorna o conteÃºdo como array de bytes.
      *
-     * @param request dados da requisição: JSON, título e mapeamento de colunas
+     * @param request dados da requisiÃ§Ã£o: JSON, tÃ­tulo e mapeamento de colunas
      * @return array de bytes do PDF gerado
      * @throws IOException se ocorrer erro ao criar as fontes ou escrever o PDF
      */
@@ -106,11 +106,11 @@ public class GerarRelatorioUseCase implements GerarRelatorioPort {
     }
 
     /**
-     * Gera o relatório PDF em memória e retorna o conteúdo como array de bytes.
+     * Gera o relatÃ³rio PDF em memÃ³ria e retorna o conteÃºdo como array de bytes.
      *
-     * @param request dados da requisição: JSON, título e mapeamento de colunas
-     * @param tipoRelatorio tipo do relatório (LISTA/DETALHE)
-     * @param orientacao orientação do relatório (RETRATO/PAISAGEM)
+     * @param request dados da requisiÃ§Ã£o: JSON, tÃ­tulo e mapeamento de colunas
+     * @param tipoRelatorio tipo do relatÃ³rio (LISTA/DETALHE)
+     * @param orientacao orientaÃ§Ã£o do relatÃ³rio (RETRATO/PAISAGEM)
      * @param alternarCores alterna cores das linhas (apenas LISTA)
      * @return array de bytes do PDF gerado
      * @throws IOException se ocorrer erro ao criar as fontes ou escrever o PDF
@@ -119,7 +119,7 @@ public class GerarRelatorioUseCase implements GerarRelatorioPort {
                                     TipoRelatorio tipoRelatorio,
                                     OrientacaoRelatorio orientacao,
                                     Boolean alternarCores) throws IOException {
-        logger.info("Iniciando geração de relatório PDF – título: '{}'", request.titulo());
+        logger.info("Iniciando geraÃ§Ã£o de relatÃ³rio PDF â€“ tÃ­tulo: '{}'", request.titulo());
 
         TipoRelatorio tipo = (tipoRelatorio != null) ? tipoRelatorio : TipoRelatorio.LISTA;
         OrientacaoRelatorio orient = (orientacao != null) ? orientacao : OrientacaoRelatorio.RETRATO;
@@ -128,12 +128,12 @@ public class GerarRelatorioUseCase implements GerarRelatorioPort {
         if (tipo == TipoRelatorio.DETALHE) {
             if (alternar) {
                 throw new IllegalArgumentException(
-                        "AlternarCores só pode ser true quando tipoRelatorio = LISTA.");
+                        "AlternarCores sÃ³ pode ser true quando tipoRelatorio = LISTA.");
             }
             orient = OrientacaoRelatorio.PAISAGEM;
         }
 
-        // Validações de imagem
+        // ValidaÃ§Ãµes de imagem
         boolean comImagem = Boolean.TRUE.equals(request.usarImagem());
         if (comImagem) {
             if (request.imagem() == null || request.imagem().length == 0) {
@@ -149,7 +149,7 @@ public class GerarRelatorioUseCase implements GerarRelatorioPort {
         boolean comImagemSecundaria = request.imagemSecundaria() != null;
         if (comImagemSecundaria) {
             if (request.imagemSecundaria().length == 0) {
-                throw new IllegalArgumentException("'imagemSecundaria' foi informada, mas está vazia.");
+                throw new IllegalArgumentException("'imagemSecundaria' foi informada, mas estÃ¡ vazia.");
             }
             if (request.imagemSecundariaPosicao() == null) {
                 throw new IllegalArgumentException(
@@ -162,7 +162,7 @@ public class GerarRelatorioUseCase implements GerarRelatorioPort {
         logger.info("Total de registros encontrados: {}", registros.size());
 
         if (registros.isEmpty()) {
-            throw new IllegalArgumentException("Nenhum registro encontrado para gerar o relatório.");
+            throw new IllegalArgumentException("Nenhum registro encontrado para gerar o relatÃ³rio.");
         }
 
         // 2. Colunas (LinkedHashMap garante a ordem declarada pelo cliente)
@@ -175,11 +175,11 @@ public class GerarRelatorioUseCase implements GerarRelatorioPort {
             throw new IllegalArgumentException("Para LISTA, o mapa de colunas deve ser informado.");
         }
 
-        // 3. Criar fontes padrão (Helvetica ≈ Arial, embutida no PDF spec)
+        // 3. Criar fontes padrÃ£o (Helvetica â‰ˆ Arial, embutida no PDF spec)
         PdfFont fontNormal = PdfFontFactory.createFont(StandardFonts.HELVETICA);
         PdfFont fontBold   = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD);
 
-        // 4. Gerar PDF em memória
+        // 4. Gerar PDF em memÃ³ria
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
         PdfWriter   writer  = new PdfWriter(baos);
@@ -188,7 +188,7 @@ public class GerarRelatorioUseCase implements GerarRelatorioPort {
         Document    document = new Document(pdfDoc, pageSize);
         document.setMargins(MARGIN_TOP, MARGIN_HORIZ, MARGIN_BOTTOM, MARGIN_HORIZ);
 
-        // Registrar handler de cabeçalho/rodapé (dispara ao encerrar cada página)
+        // Registrar handler de cabeÃ§alho/rodapÃ© (dispara ao encerrar cada pÃ¡gina)
         List<String> headerLabels = (tipo == TipoRelatorio.LISTA)
                 ? new ArrayList<>(colunas.values())
                 : Collections.emptyList();
@@ -207,7 +207,7 @@ public class GerarRelatorioUseCase implements GerarRelatorioPort {
             // Imagem no INICIO (antes da tabela)
             adicionarImagensNaPosicao(document, request, pageSize, ImagemPosicao.INICIO, comImagem, comImagemSecundaria);
 
-            // 5. Montar tabela de dados (sem linha de cabeçalho – fica no evento de página)
+            // 5. Montar tabela de dados (sem linha de cabeÃ§alho â€“ fica no evento de pÃ¡gina)
             int numCols = colunas.size();
             float[] colWidths = new float[numCols];
             Arrays.fill(colWidths, 1f); // colunas de largura igual
@@ -243,7 +243,7 @@ public class GerarRelatorioUseCase implements GerarRelatorioPort {
 
             document.add(table);
 
-            // Imagem no FIM (após a tabela)
+            // Imagem no FIM (apÃ³s a tabela)
             adicionarImagensNaPosicao(document, request, pageSize, ImagemPosicao.FIM, comImagem, comImagemSecundaria);
         } else {
             Map<String, String> base = registros.get(0);
@@ -282,27 +282,27 @@ public class GerarRelatorioUseCase implements GerarRelatorioPort {
                 document.add(itensComposicaoTable);
             }
 
-            // Imagem no FIM (após a ficha de detalhe)
+            // Imagem no FIM (apÃ³s a ficha de detalhe)
             adicionarImagensNaPosicao(document, request, pageSize, ImagemPosicao.FIM, comImagem, comImagemSecundaria);
         }
-        document.close(); // também fecha pdfDoc e writer
+        document.close(); // tambÃ©m fecha pdfDoc e writer
 
-        logger.info("PDF gerado com sucesso – tamanho: {} bytes", baos.size());
+        logger.info("PDF gerado com sucesso â€“ tamanho: {} bytes", baos.size());
         return baos.toByteArray();
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     //  Imagem
-    // ─────────────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     /**
      * Cria um elemento {@link Image} centralizado horizontalmente.
-     * A imagem é redimensionada proporcionalmente para caber na largura útil da página
-     * e não ultrapassar {@link #MAX_IMAGE_HEIGHT} pontos de altura,
+     * A imagem Ã© redimensionada proporcionalmente para caber na largura Ãºtil da pÃ¡gina
+     * e nÃ£o ultrapassar {@link #MAX_IMAGE_HEIGHT} pontos de altura,
      * preservando o aspect-ratio original.
      *
      * @param imageBytes bytes da imagem (PNG, JPEG etc.)
-     * @param pageSize   tamanho da página atual
+     * @param pageSize   tamanho da pÃ¡gina atual
      * @return elemento {@link Image} pronto para ser adicionado ao {@link Document}
      */
     private Image criarImagemCentralizada(byte[] imageBytes, PageSize pageSize) throws IOException {
@@ -310,13 +310,13 @@ public class GerarRelatorioUseCase implements GerarRelatorioPort {
         ImageData imageData = ImageDataFactory.create(imageBytes);
         Image img = new Image(imageData);
 
-        // scaleToFit redimensiona proporcionalmente para caber na caixa maxWidth × MAX_IMAGE_HEIGHT
+        // scaleToFit redimensiona proporcionalmente para caber na caixa maxWidth Ã— MAX_IMAGE_HEIGHT
         img.scaleToFit(maxWidth, MAX_IMAGE_HEIGHT);
 
         img.setHorizontalAlignment(HorizontalAlignment.CENTER);
         img.setMarginTop(8f);
         img.setMarginBottom(8f);
-        logger.debug("Imagem adicionada ao relatório – largura: {}pt, altura: {}pt",
+        logger.debug("Imagem adicionada ao relatÃ³rio â€“ largura: {}pt, altura: {}pt",
                 img.getImageScaledWidth(), img.getImageScaledHeight());
         return img;
     }
@@ -335,17 +335,17 @@ public class GerarRelatorioUseCase implements GerarRelatorioPort {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Extração do JSON
-    // ─────────────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    //  ExtraÃ§Ã£o do JSON
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     /**
      * Navega pelo JSON e retorna a lista de registros como
      * {@code List<Map<String,String>>}.
      *
      * @param jsonData  JSON em formato String
-     * @param listPath  Caminho separado por "." até o array (vazio = raiz)
-     * @return lista de registros como mapas chave→valor (ambos String)
+     * @param listPath  Caminho separado por "." atÃ© o array (vazio = raiz)
+     * @return lista de registros como mapas chaveâ†’valor (ambos String)
      */
     private List<Map<String, String>> extrairLista(String jsonData, String listPath) {
         JsonElement root = JsonParser.parseString(jsonData);
@@ -354,7 +354,7 @@ public class GerarRelatorioUseCase implements GerarRelatorioPort {
         if (listPath == null || listPath.trim().isEmpty()) {
             if (!root.isJsonArray()) {
                 throw new IllegalArgumentException(
-                        "O JSON raiz não é um array e nenhum listPath foi informado.");
+                        "O JSON raiz nÃ£o Ã© um array e nenhum listPath foi informado.");
             }
             jsonArray = root.getAsJsonArray();
         } else {
@@ -362,17 +362,17 @@ public class GerarRelatorioUseCase implements GerarRelatorioPort {
             for (String key : listPath.split("\\.")) {
                 if (!current.isJsonObject()) {
                     throw new IllegalArgumentException(
-                            "Não foi possível navegar pelo caminho: " + listPath);
+                            "NÃ£o foi possÃ­vel navegar pelo caminho: " + listPath);
                 }
                 current = current.getAsJsonObject().get(key);
                 if (current == null) {
                     throw new IllegalArgumentException(
-                            "Chave '" + key + "' não encontrada no JSON.");
+                            "Chave '" + key + "' nÃ£o encontrada no JSON.");
                 }
             }
             if (!current.isJsonArray()) {
                 throw new IllegalArgumentException(
-                        "O caminho '" + listPath + "' não aponta para um array.");
+                        "O caminho '" + listPath + "' nÃ£o aponta para um array.");
             }
             jsonArray = current.getAsJsonArray();
         }
@@ -398,10 +398,10 @@ public class GerarRelatorioUseCase implements GerarRelatorioPort {
         }
 
         if (val.isJsonPrimitive() && val.getAsJsonPrimitive().isBoolean()) {
-            return val.getAsBoolean() ? "Sim" : "Não";
+            return val.getAsBoolean() ? "Sim" : "NÃ£o";
         }
 
-        // Objetos aninhados (ex.: UnidadeMedida): tenta extrair campo "nome", senão "sigla", senão toString compacto
+        // Objetos aninhados (ex.: UnidadeMedida): tenta extrair campo "nome", senÃ£o "sigla", senÃ£o toString compacto
         if (val.isJsonObject()) {
             JsonObject nested = val.getAsJsonObject();
             if (nested.has("nome") && !nested.get("nome").isJsonNull()) {
@@ -410,7 +410,7 @@ public class GerarRelatorioUseCase implements GerarRelatorioPort {
             if (nested.has("sigla") && !nested.get("sigla").isJsonNull()) {
                 return nested.get("sigla").getAsString();
             }
-            // fallback: representação compacta do objeto
+            // fallback: representaÃ§Ã£o compacta do objeto
             return val.toString();
         }
 
@@ -574,7 +574,7 @@ public class GerarRelatorioUseCase implements GerarRelatorioPort {
             }
             return tabela;
         } catch (Exception e) {
-            logger.warn("Não foi possível montar tabela de itens de composição: {}", e.getMessage());
+            logger.warn("NÃ£o foi possÃ­vel montar tabela de itens de composiÃ§Ã£o: {}", e.getMessage());
             return null;
         }
     }
@@ -601,26 +601,26 @@ public class GerarRelatorioUseCase implements GerarRelatorioPort {
         return value.getAsString();
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    //  Event handler: Cabeçalho e Rodapé
-    // ─────────────────────────────────────────────────────────────────────────
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    //  Event handler: CabeÃ§alho e RodapÃ©
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     /**
-     * Handler de eventos de página que desenha o cabeçalho e o rodapé em cada
-     * página do documento PDF.
+     * Handler de eventos de pÃ¡gina que desenha o cabeÃ§alho e o rodapÃ© em cada
+     * pÃ¡gina do documento PDF.
      *
-     * <p><b>Cabeçalho:</b></p>
+     * <p><b>CabeÃ§alho:</b></p>
      * <ul>
-     *   <li>Título centralizado em negrito 14pt + "Página: N" alinhado à direita</li>
+     *   <li>TÃ­tulo centralizado em negrito 14pt + "PÃ¡gina: N" alinhado Ã  direita</li>
      *   <li>Nomes das colunas em negrito 12pt, centralizados em cada coluna</li>
      *   <li>Linha separadora horizontal</li>
      * </ul>
      *
-     * <p><b>Rodapé:</b></p>
+     * <p><b>RodapÃ©:</b></p>
      * <ul>
      *   <li>Linha separadora horizontal</li>
-     *   <li>Data/hora alinhada à esquerda (fuso America/Sao_Paulo)</li>
-     *   <li>"Emitido pelo Ficha Técnica Ollivander" centralizado</li>
+     *   <li>Data/hora alinhada Ã  esquerda (fuso America/Sao_Paulo)</li>
+     *   <li>"Emitido pelo Ficha TÃ©cnica Ollivander" centralizado</li>
      * </ul>
      */
     private static class HeaderFooterHandler implements IEventHandler {
@@ -653,7 +653,7 @@ public class GerarRelatorioUseCase implements GerarRelatorioPort {
             float contentWidth = rightX - leftX;
 
             try {
-                // Novo content stream inserido ANTES do conteúdo da página
+                // Novo content stream inserido ANTES do conteÃºdo da pÃ¡gina
                 PdfCanvas canvas = new PdfCanvas(
                         page.newContentStreamBefore(),
                         page.getResources(),
@@ -661,13 +661,13 @@ public class GerarRelatorioUseCase implements GerarRelatorioPort {
                 );
                 canvas.saveState();
 
-                // ── CABEÇALHO ────────────────────────────────────────────────
+                // â”€â”€ CABEÃ‡ALHO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-                // y base do cabeçalho (imediatamente abaixo da margem superior da folha)
+                // y base do cabeÃ§alho (imediatamente abaixo da margem superior da folha)
                 float headerTop  = pageSize.getTop() - MARGIN_HORIZ;
                 float titleY     = headerTop - FONT_TITLE - 4f;
 
-                // Título – centralizado, negrito 14pt
+                // TÃ­tulo â€“ centralizado, negrito 14pt
                 float titleTextWidth = fontBold.getWidth(titulo, FONT_TITLE);
                 float titleX         = leftX + (contentWidth - titleTextWidth) / 2f;
                 canvas.beginText()
@@ -676,8 +676,8 @@ public class GerarRelatorioUseCase implements GerarRelatorioPort {
                         .showText(titulo)
                         .endText();
 
-                // "Página: N" – alinhado à direita, normal 12pt
-                String pageText      = "Página: " + pageNumber;
+                // "PÃ¡gina: N" â€“ alinhado Ã  direita, normal 12pt
+                String pageText      = "PÃ¡gina: " + pageNumber;
                 float  pageTextWidth = fontNormal.getWidth(pageText, FONT_BODY);
                 canvas.beginText()
                         .setFontAndSize(fontNormal, FONT_BODY)
@@ -686,7 +686,7 @@ public class GerarRelatorioUseCase implements GerarRelatorioPort {
                         .endText();
 
                 if (!columnLabels.isEmpty()) {
-                    // Cabeçalhos das colunas – negrito 12pt, centralizados em cada coluna
+                    // CabeÃ§alhos das colunas â€“ negrito 12pt, centralizados em cada coluna
                     float colHeaderY = titleY - FONT_BODY - 10f;
                     int   numCols    = columnLabels.size();
                     float colWidth   = contentWidth / numCols;
@@ -701,7 +701,7 @@ public class GerarRelatorioUseCase implements GerarRelatorioPort {
                                 .endText();
                     }
 
-                    // Linha separadora abaixo dos cabeçalhos das colunas
+                    // Linha separadora abaixo dos cabeÃ§alhos das colunas
                     float headerLineY = colHeaderY - 8f;
                     canvas.setLineWidth(0.5f)
                             .moveTo(leftX,  headerLineY)
@@ -709,19 +709,19 @@ public class GerarRelatorioUseCase implements GerarRelatorioPort {
                             .stroke();
                 }
 
-                // ── RODAPÉ ───────────────────────────────────────────────────
+                // â”€â”€ RODAPÃ‰ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-                // Linha separadora do rodapé
+                // Linha separadora do rodapÃ©
                 float footerLineY = MARGIN_HORIZ + 30f;
                 canvas.setLineWidth(0.5f)
                         .moveTo(leftX,  footerLineY)
                         .lineTo(rightX, footerLineY)
                         .stroke();
 
-                // Textos do rodapé
+                // Textos do rodapÃ©
                 float footerTextY = footerLineY - FONT_BODY - 4f;
 
-                // Data/hora – alinhada à esquerda
+                // Data/hora â€“ alinhada Ã  esquerda
                 String dataAtual = formatarDataAtual();
                 canvas.beginText()
                         .setFontAndSize(fontNormal, FONT_BODY)
@@ -729,8 +729,8 @@ public class GerarRelatorioUseCase implements GerarRelatorioPort {
                         .showText(dataAtual)
                         .endText();
 
-                // "Emitido pelo..." – centralizado
-                String emitterText  = "Emitido pelo Ficha Técnica Ollivander";
+                // "Emitido pelo..." â€“ centralizado
+                String emitterText  = "Emitido pelo Ficha TÃ©cnica Ollivander";
                 float  emitterWidth = fontNormal.getWidth(emitterText, FONT_BODY);
                 float  emitterX     = leftX + (contentWidth - emitterWidth) / 2f;
                 canvas.beginText()
@@ -743,13 +743,13 @@ public class GerarRelatorioUseCase implements GerarRelatorioPort {
                 canvas.release();
 
             } catch (Exception e) {
-                log.error("Erro ao desenhar cabeçalho/rodapé na página {}", pageNumber, e);
+                log.error("Erro ao desenhar cabeÃ§alho/rodapÃ© na pÃ¡gina {}", pageNumber, e);
             }
         }
 
         /**
-         * Retorna a data/hora atual formatada com o dia da semana em português,
-         * usando o fuso horário America/Sao_Paulo.
+         * Retorna a data/hora atual formatada com o dia da semana em portuguÃªs,
+         * usando o fuso horÃ¡rio America/Sao_Paulo.
          * Exemplo: "Quinta-feira, 13/03/2026 14:30:00"
          */
         private String formatarDataAtual() {
@@ -758,4 +758,5 @@ public class GerarRelatorioUseCase implements GerarRelatorioPort {
         }
     }
 }
+
 

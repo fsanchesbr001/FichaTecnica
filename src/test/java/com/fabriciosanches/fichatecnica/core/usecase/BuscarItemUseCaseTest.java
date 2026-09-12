@@ -3,7 +3,7 @@ package com.fabriciosanches.fichatecnica.core.usecase;
 import com.fabriciosanches.fichatecnica.core.domain.Item;
 import com.fabriciosanches.fichatecnica.core.domain.UnidadeMedida;
 import com.fabriciosanches.fichatecnica.core.ports.out.ItemRepositoryPort;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -46,7 +46,8 @@ class BuscarItemUseCaseTest {
 
         FichaTecnicaException ex = assertThrows(FichaTecnicaException.class, () -> useCase.buscarPorId(99L));
 
-        assertEquals("Item com ID 99 não encontrado", ex.getMessage());
+        assertEquals("Item com ID 99 nÃ£o encontrado", ex.getMessage());
     }
 }
+
 

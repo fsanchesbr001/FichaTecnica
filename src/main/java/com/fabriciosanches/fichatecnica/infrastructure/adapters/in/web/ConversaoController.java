@@ -7,11 +7,11 @@ import com.fabriciosanches.fichatecnica.core.ports.in.CriarConversaoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.DeletarConversaoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarRelatorioConversaoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarRelatorioPort;
-import com.fabriciosanches.fichatecnica.dtos.ConversaoDTO;
-import com.fabriciosanches.fichatecnica.dtos.ConversaoRelatorioDTO;
-import com.fabriciosanches.fichatecnica.dtos.RelatorioRequestDTO;
-import com.fabriciosanches.fichatecnica.enums.OrientacaoRelatorio;
-import com.fabriciosanches.fichatecnica.enums.TipoRelatorio;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ConversaoDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ConversaoRelatorioDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.RelatorioRequestDTO;
+import com.fabriciosanches.fichatecnica.core.domain.enums.OrientacaoRelatorio;
+import com.fabriciosanches.fichatecnica.core.domain.enums.TipoRelatorio;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonPrimitive;
@@ -41,7 +41,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("ficha-tecnica")
-@Tag(name = "Conversões", description = "Cadastro, consulta, atualização, exclusão e relatórios de conversões de unidades")
+@Tag(name = "ConversÃµes", description = "Cadastro, consulta, atualizaÃ§Ã£o, exclusÃ£o e relatÃ³rios de conversÃµes de unidades")
 @SecurityRequirement(name = "bearerAuth")
 public class ConversaoController {
     private static final Logger logger = LogManager.getLogger(ConversaoController.class);
@@ -77,33 +77,33 @@ public class ConversaoController {
     }
 
     @GetMapping("/conversoes")
-    @Operation(summary = "Lista conversões", description = "Retorna todas as conversões cadastradas.")
+    @Operation(summary = "Lista conversÃµes", description = "Retorna todas as conversÃµes cadastradas.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso"),
-            @ApiResponse(responseCode = "204", description = "Nenhuma conversão encontrada")
+            @ApiResponse(responseCode = "204", description = "Nenhuma conversÃ£o encontrada")
     })
     public ResponseEntity<List<ConversaoRelatorioDTO>> buscarLista() {
-        logger.info("Inicio do método buscarLista");
+        logger.info("Inicio do mÃ©todo buscarLista");
         List<ConversaoRelatorioDTO> conversoes = gerarRelatorioConversaoPort.buscarTodosComNomes();
         if (conversoes.isEmpty()) {
-            logger.warn("Lista de conversões não encontrada");
+            logger.warn("Lista de conversÃµes nÃ£o encontrada");
             return ResponseEntity.noContent().build();
         }
-        logger.info("Fim do método buscarLista");
+        logger.info("Fim do mÃ©todo buscarLista");
         return ResponseEntity.ok(conversoes);
     }
 
     @GetMapping("/conversoes/{id:[0-9]+}")
-    @Operation(summary = "Busca conversão por ID", description = "Retorna os dados de uma conversão específica.")
+    @Operation(summary = "Busca conversÃ£o por ID", description = "Retorna os dados de uma conversÃ£o especÃ­fica.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Conversão encontrada"),
-            @ApiResponse(responseCode = "404", description = "Conversão não encontrada")
+            @ApiResponse(responseCode = "200", description = "ConversÃ£o encontrada"),
+            @ApiResponse(responseCode = "404", description = "ConversÃ£o nÃ£o encontrada")
     })
     public ResponseEntity<ConversaoDTO> buscarPorId(@PathVariable Long id) {
-        logger.info("Inicio do método buscarPorId");
+        logger.info("Inicio do mÃ©todo buscarPorId");
         try {
             Conversao conversao = buscarConversaoPort.buscarPorId(id);
-            logger.info("Fim do método buscarPorId");
+            logger.info("Fim do mÃ©todo buscarPorId");
             return ResponseEntity.ok(toDto(conversao));
         } catch (java.util.NoSuchElementException e) {
             return ResponseEntity.notFound().build();
@@ -111,15 +111,15 @@ public class ConversaoController {
     }
 
     @DeleteMapping("/conversoes/{id:[0-9]+}")
-    @Operation(summary = "Remove conversão", description = "Exclui uma conversão existente pelo ID.")
+    @Operation(summary = "Remove conversÃ£o", description = "Exclui uma conversÃ£o existente pelo ID.")
     @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Conversão removida com sucesso")
+            @ApiResponse(responseCode = "204", description = "ConversÃ£o removida com sucesso")
     })
     public ResponseEntity<Void> apagar(@PathVariable Long id) {
-        logger.info("Inicio do método apagar");
+        logger.info("Inicio do mÃ©todo apagar");
         try {
             deletarConversaoPort.deletar(id);
-            logger.info("Fim do método apagar");
+            logger.info("Fim do mÃ©todo apagar");
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
@@ -128,16 +128,16 @@ public class ConversaoController {
 
     @PutMapping("/conversoes/{id:[0-9]+}")
     @Transactional
-    @Operation(summary = "Atualiza conversão", description = "Altera os dados de uma conversão existente.")
+    @Operation(summary = "Atualiza conversÃ£o", description = "Altera os dados de uma conversÃ£o existente.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Conversão atualizada com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Conversão não encontrada")
+            @ApiResponse(responseCode = "200", description = "ConversÃ£o atualizada com sucesso"),
+            @ApiResponse(responseCode = "404", description = "ConversÃ£o nÃ£o encontrada")
     })
     public ResponseEntity<ConversaoDTO> atualizarConversao(@PathVariable Long id, @RequestBody ConversaoDTO conversao) {
-        logger.info("Inicio do método atualizarConversao");
+        logger.info("Inicio do mÃ©todo atualizarConversao");
         try {
             Conversao conversaoAtualizada = atualizarConversaoPort.atualizar(id, toDomain(conversao));
-            logger.info("Fim do método atualizarConversao");
+            logger.info("Fim do mÃ©todo atualizarConversao");
             return ResponseEntity.ok(toDto(conversaoAtualizada));
         } catch (java.util.NoSuchElementException e) {
             return ResponseEntity.notFound().build();
@@ -146,16 +146,16 @@ public class ConversaoController {
 
     @PostMapping("/conversoes")
     @Transactional
-    @Operation(summary = "Cadastra conversão", description = "Cria uma nova conversão entre unidades.")
+    @Operation(summary = "Cadastra conversÃ£o", description = "Cria uma nova conversÃ£o entre unidades.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Conversão cadastrada com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos para cadastro")
+            @ApiResponse(responseCode = "200", description = "ConversÃ£o cadastrada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados invÃ¡lidos para cadastro")
     })
     public ResponseEntity<ConversaoDTO> cadastrarConversao(@RequestBody ConversaoDTO conversao) {
-        logger.info("Inicio do método cadastrarConversao");
+        logger.info("Inicio do mÃ©todo cadastrarConversao");
         try {
             Conversao conversaoCriada = criarConversaoPort.criar(toDomain(conversao));
-            logger.info("Fim do método cadastrarConversao");
+            logger.info("Fim do mÃ©todo cadastrarConversao");
             return ResponseEntity.ok(toDto(conversaoCriada));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
@@ -164,20 +164,20 @@ public class ConversaoController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/conversoes/gerar-pdf-lista")
-    @Operation(summary = "Gera PDF da lista de conversões", description = "Exporta a lista completa de conversões em PDF.")
+    @Operation(summary = "Gera PDF da lista de conversÃµes", description = "Exporta a lista completa de conversÃµes em PDF.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "PDF gerado com sucesso"),
-            @ApiResponse(responseCode = "204", description = "Nenhuma conversão encontrada para o relatório"),
-            @ApiResponse(responseCode = "400", description = "Parâmetros inválidos para geração do PDF"),
-            @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o relatório")
+            @ApiResponse(responseCode = "204", description = "Nenhuma conversÃ£o encontrada para o relatÃ³rio"),
+            @ApiResponse(responseCode = "400", description = "ParÃ¢metros invÃ¡lidos para geraÃ§Ã£o do PDF"),
+            @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o relatÃ³rio")
     })
     public ResponseEntity<byte[]> gerarPdfLista() {
-        logger.info("Início do método gerarPdfLista – ConversaoController");
+        logger.info("InÃ­cio do mÃ©todo gerarPdfLista â€“ ConversaoController");
         try {
             List<ConversaoRelatorioDTO> lista = gerarRelatorioConversaoPort.buscarTodosComNomes();
 
             if (lista.isEmpty()) {
-                logger.warn("Nenhuma conversão encontrada para gerar o relatório");
+                logger.warn("Nenhuma conversÃ£o encontrada para gerar o relatÃ³rio");
                 return ResponseEntity.noContent().build();
             }
 
@@ -186,12 +186,12 @@ public class ConversaoController {
             Map<String, String> colunas = new LinkedHashMap<>();
             colunas.put("unidadeDe", "De");
             colunas.put("unidadePara", "Para");
-            colunas.put("operacao", "Operação");
+            colunas.put("operacao", "OperaÃ§Ã£o");
             colunas.put("valor", "Valor");
 
             RelatorioRequestDTO request = new RelatorioRequestDTO(
                     jsonData, "",
-                    "Lista de Conversões",
+                    "Lista de ConversÃµes",
                     colunas,
                     TipoRelatorio.LISTA,
                     OrientacaoRelatorio.RETRATO,
@@ -217,15 +217,15 @@ public class ConversaoController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/conversoes/gerar-pdf-detalhe/{id:[0-9]+}")
-    @Operation(summary = "Gera PDF detalhado da conversão", description = "Exporta a ficha detalhada de uma conversão específica em PDF.")
+    @Operation(summary = "Gera PDF detalhado da conversÃ£o", description = "Exporta a ficha detalhada de uma conversÃ£o especÃ­fica em PDF.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "PDF gerado com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Conversão não encontrada"),
-            @ApiResponse(responseCode = "400", description = "Parâmetros inválidos para geração do PDF"),
-            @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o relatório")
+            @ApiResponse(responseCode = "404", description = "ConversÃ£o nÃ£o encontrada"),
+            @ApiResponse(responseCode = "400", description = "ParÃ¢metros invÃ¡lidos para geraÃ§Ã£o do PDF"),
+            @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o relatÃ³rio")
     })
     public ResponseEntity<byte[]> gerarPdfDetalhe(@PathVariable Long id) {
-        logger.info("Início do método gerarPdfDetalhe – ConversaoController – id: {}", id);
+        logger.info("InÃ­cio do mÃ©todo gerarPdfDetalhe â€“ ConversaoController â€“ id: {}", id);
         try {
             ConversaoRelatorioDTO conversao = gerarRelatorioConversaoPort.buscarPorIdComNomes(id);
 
@@ -234,11 +234,11 @@ public class ConversaoController {
             Map<String, String> colunas = new LinkedHashMap<>();
             colunas.put("unidadeDe", "Unidade De");
             colunas.put("unidadePara", "Unidade Para");
-            colunas.put("operacao", "Operação");
+            colunas.put("operacao", "OperaÃ§Ã£o");
             colunas.put("valor", "Valor");
 
             RelatorioRequestDTO request = new RelatorioRequestDTO(
-                    jsonData, "", "Detalhe da Conversão", colunas,
+                    jsonData, "", "Detalhe da ConversÃ£o", colunas,
                     TipoRelatorio.DETALHE,
                     OrientacaoRelatorio.PAISAGEM,
                     false
@@ -277,3 +277,4 @@ public class ConversaoController {
         );
     }
 }
+

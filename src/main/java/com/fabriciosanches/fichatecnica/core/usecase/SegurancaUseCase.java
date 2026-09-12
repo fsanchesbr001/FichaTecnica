@@ -1,6 +1,6 @@
 package com.fabriciosanches.fichatecnica.core.usecase;
 
-import com.fabriciosanches.fichatecnica.constants.Constants;
+import com.fabriciosanches.fichatecnica.infrastructure.constants.Constants;
 import com.fabriciosanches.fichatecnica.core.domain.Seguranca;
 import com.fabriciosanches.fichatecnica.core.domain.Usuario;
 import com.fabriciosanches.fichatecnica.core.ports.in.ControleAcessoPort;
@@ -8,11 +8,11 @@ import com.fabriciosanches.fichatecnica.core.ports.in.RecuperacaoSenhaPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.EnviarEmailPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.SegurancaRepositoryPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.UsuarioRepositoryPort;
-import com.fabriciosanches.fichatecnica.dtos.EnviarEmailPrimeiroAcessoRequestDTO;
-import com.fabriciosanches.fichatecnica.dtos.EnviarEmailSegurancaResponseDTO;
-import com.fabriciosanches.fichatecnica.dtos.SegurancaDTO;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
-import com.fabriciosanches.fichatecnica.util.Utilidades;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.EnviarEmailPrimeiroAcessoRequestDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.EnviarEmailSegurancaResponseDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.SegurancaDTO;
+import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.infrastructure.util.Utilidades;
 import jakarta.mail.MessagingException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,20 +32,20 @@ public class SegurancaUseCase implements RecuperacaoSenhaPort, ControleAcessoPor
     public SegurancaUseCase(SegurancaRepositoryPort segurancaRepositoryPort,
                             UsuarioRepositoryPort usuarioRepositoryPort,
                             EnviarEmailPort enviarEmailPort) {
-        this.segurancaRepositoryPort = Objects.requireNonNull(segurancaRepositoryPort, "SegurancaRepositoryPort não pode ser nulo");
-        this.usuarioRepositoryPort = Objects.requireNonNull(usuarioRepositoryPort, "UsuarioRepositoryPort não pode ser nulo");
-        this.enviarEmailPort = Objects.requireNonNull(enviarEmailPort, "EnviarEmailPort não pode ser nulo");
+        this.segurancaRepositoryPort = Objects.requireNonNull(segurancaRepositoryPort, "SegurancaRepositoryPort nÃ£o pode ser nulo");
+        this.usuarioRepositoryPort = Objects.requireNonNull(usuarioRepositoryPort, "UsuarioRepositoryPort nÃ£o pode ser nulo");
+        this.enviarEmailPort = Objects.requireNonNull(enviarEmailPort, "EnviarEmailPort nÃ£o pode ser nulo");
     }
 
     @Override
     public EnviarEmailSegurancaResponseDTO enviarEmailSeguranca(String email) throws MessagingException {
         String cpf = segurancaRepositoryPort.buscarCpfPorEmail(email);
         if (cpf == null) {
-            throw new FichaTecnicaException("Email não encontrado");
+            throw new FichaTecnicaException("Email nÃ£o encontrado");
         }
 
         if (!Utilidades.validarCPF(cpf)) {
-            throw new FichaTecnicaException("CPF inválido");
+            throw new FichaTecnicaException("CPF invÃ¡lido");
         }
 
         Seguranca seguranca = buscarSegurancaPorEmailOuFalhar(email);
@@ -58,9 +58,9 @@ public class SegurancaUseCase implements RecuperacaoSenhaPort, ControleAcessoPor
         String dataExpiracaoTokenFormatada = seguranca.getDataExpiracaoToken().format(formatter);
 
         SegurancaDTO segurancaDTO = new SegurancaDTO(seguranca);
-        String corpo = "Token de segurança: " + token + "\n"
+        String corpo = "Token de seguranÃ§a: " + token + "\n"
                 + "Validade: " + dataExpiracaoTokenFormatada + "\n"
-                + "Se você não solicitou, ignore este email.";
+                + "Se vocÃª nÃ£o solicitou, ignore este email.";
         enviarEmailPort.enviar(segurancaDTO.email(), Constants.SUBJECT_EMAIL_RECUPERACAO_SENHA, corpo);
 
         return new EnviarEmailSegurancaResponseDTO(segurancaDTO, dataExpiracaoTokenFormatada);
@@ -68,8 +68,8 @@ public class SegurancaUseCase implements RecuperacaoSenhaPort, ControleAcessoPor
 
     @Override
     public void enviarEmailPrimeiroAcesso(EnviarEmailPrimeiroAcessoRequestDTO dados) throws MessagingException {
-        String corpo = "Olá, " + dados.nomeUsuario() + "!\n"
-                + "Sua senha temporária é: " + dados.senhaAleatoria() + "\n"
+        String corpo = "OlÃ¡, " + dados.nomeUsuario() + "!\n"
+                + "Sua senha temporÃ¡ria Ã©: " + dados.senhaAleatoria() + "\n"
                 + "Altere a senha no primeiro acesso.";
         enviarEmailPort.enviar(dados.email(), Constants.SUBJECT_EMAIL_PRIMEIRO_ACESSO, corpo);
     }
@@ -79,13 +79,13 @@ public class SegurancaUseCase implements RecuperacaoSenhaPort, ControleAcessoPor
         Seguranca seguranca = buscarSegurancaPorEmailOuFalhar(email);
 
         if (!seguranca.getCpf().equals(cpf)) {
-            throw new FichaTecnicaException("CPF não corresponde ao email");
+            throw new FichaTecnicaException("CPF nÃ£o corresponde ao email");
         }
         if (!validarTokenSeguranca(seguranca, tokenSeguranca)) {
-            throw new FichaTecnicaException("Token de segurança inválido ou expirado");
+            throw new FichaTecnicaException("Token de seguranÃ§a invÃ¡lido ou expirado");
         }
         if (!validarSenha(senha, confirmacaoSenha)) {
-            throw new FichaTecnicaException("Senhas não coincidem ou são inválidas");
+            throw new FichaTecnicaException("Senhas nÃ£o coincidem ou sÃ£o invÃ¡lidas");
         }
 
         seguranca.setTokenSeguranca(null);
@@ -102,7 +102,7 @@ public class SegurancaUseCase implements RecuperacaoSenhaPort, ControleAcessoPor
         String senhaCriptografada = Utilidades.encriptaSenha(senhaNormal);
 
         Usuario usuario = usuarioRepositoryPort.buscarPorLogin(email)
-                .orElseThrow(() -> new FichaTecnicaException("Usuário não encontrado"));
+                .orElseThrow(() -> new FichaTecnicaException("UsuÃ¡rio nÃ£o encontrado"));
         usuario.setSenha(senhaCriptografada);
         usuarioRepositoryPort.salvar(usuario);
     }
@@ -134,7 +134,7 @@ public class SegurancaUseCase implements RecuperacaoSenhaPort, ControleAcessoPor
             seguranca.setBloqueado_expiracao(Boolean.FALSE);
             seguranca.setPrimeiro_acesso(Boolean.FALSE);
             segurancaRepositoryPort.salvar(seguranca);
-            throw new FichaTecnicaException("Usuário bloqueado por tentativas excedidas");
+            throw new FichaTecnicaException("UsuÃ¡rio bloqueado por tentativas excedidas");
         }
 
         segurancaRepositoryPort.salvar(seguranca);
@@ -160,7 +160,7 @@ public class SegurancaUseCase implements RecuperacaoSenhaPort, ControleAcessoPor
         if (seguranca.getDataExpiracaoSenha() != null && LocalDateTime.now().isAfter(seguranca.getDataExpiracaoSenha())) {
             expirarSenha(seguranca.getEmail());
         }
-        logger.info("Senha válida para o email: {}", email);
+        logger.info("Senha vÃ¡lida para o email: {}", email);
     }
 
     private Seguranca buscarSegurancaPorEmailOuFalhar(String email) {
@@ -188,4 +188,5 @@ public class SegurancaUseCase implements RecuperacaoSenhaPort, ControleAcessoPor
         return token.toString();
     }
 }
+
 

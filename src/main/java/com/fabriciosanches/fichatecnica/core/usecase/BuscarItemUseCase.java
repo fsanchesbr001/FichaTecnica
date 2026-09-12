@@ -3,7 +3,7 @@ package com.fabriciosanches.fichatecnica.core.usecase;
 import com.fabriciosanches.fichatecnica.core.domain.Item;
 import com.fabriciosanches.fichatecnica.core.ports.in.BuscarItemPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.ItemRepositoryPort;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
 
 import java.util.Comparator;
 import java.util.List;
@@ -13,7 +13,7 @@ public class BuscarItemUseCase implements BuscarItemPort {
     private final ItemRepositoryPort repositoryPort;
 
     public BuscarItemUseCase(ItemRepositoryPort repositoryPort) {
-        this.repositoryPort = Objects.requireNonNull(repositoryPort, "Repository port não pode ser nulo");
+        this.repositoryPort = Objects.requireNonNull(repositoryPort, "Repository port nÃ£o pode ser nulo");
     }
 
     @Override
@@ -26,11 +26,12 @@ public class BuscarItemUseCase implements BuscarItemPort {
     @Override
     public Item buscarPorId(Long id) {
         if (id == null) {
-            throw new IllegalArgumentException("Id não pode ser nulo");
+            throw new IllegalArgumentException("Id nÃ£o pode ser nulo");
         }
 
         return repositoryPort.buscarPorId(id)
-                .orElseThrow(() -> new FichaTecnicaException("Item com ID " + id + " não encontrado"));
+                .orElseThrow(() -> new FichaTecnicaException("Item com ID " + id + " nÃ£o encontrado"));
     }
 }
+
 

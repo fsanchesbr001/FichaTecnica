@@ -4,3 +4,4 @@ public interface AtualizarQuantidadeItemDoProdutoPort {
     void atualizarQuantidade(Long produtoId, Long itemId, Double novaQuantidade);
 }
 
+

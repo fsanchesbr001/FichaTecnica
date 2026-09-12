@@ -5,9 +5,9 @@ import com.fabriciosanches.fichatecnica.core.ports.in.ConsultarUploadImagemProdu
 import com.fabriciosanches.fichatecnica.core.ports.in.IniciarUploadImagemProdutoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.ListarJobsUploadImagemProdutoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.RemoverImagemProdutoPort;
-import com.fabriciosanches.fichatecnica.dtos.UploadJobDTO;
-import com.fabriciosanches.fichatecnica.enums.UploadJobStatus;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.UploadJobDTO;
+import com.fabriciosanches.fichatecnica.core.domain.enums.UploadJobStatus;
+import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -120,4 +120,5 @@ class ProdutoImagemControllerTest {
                 .andExpect(jsonPath("$[0].jobId").value("job-1"));
     }
 }
+
 

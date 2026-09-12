@@ -125,3 +125,4 @@ public class ItemProdutoPersistenceAdapter implements ItemProdutoRepositoryPort 
         return new UnidadeMedidaEntity(unidadeMedida.getCodigo(), unidadeMedida.getNome(), unidadeMedida.getSigla());
     }
 }
+

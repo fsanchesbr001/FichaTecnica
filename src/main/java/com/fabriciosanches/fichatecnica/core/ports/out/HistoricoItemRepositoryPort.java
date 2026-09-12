@@ -19,3 +19,4 @@ public interface HistoricoItemRepositoryPort {
     void deletarPorCodigoItem(Long codigoItem);
 }
 
+

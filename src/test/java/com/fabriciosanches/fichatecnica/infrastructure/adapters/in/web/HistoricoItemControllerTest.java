@@ -2,8 +2,8 @@ package com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web;
 
 import com.fabriciosanches.fichatecnica.core.domain.HistoricoItem;
 import com.fabriciosanches.fichatecnica.core.ports.in.ListarHistoricoItemPort;
-import com.fabriciosanches.fichatecnica.dtos.GraficoPrecoItemDTO;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.GraficoPrecoItemDTO;
+import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -77,4 +77,5 @@ class HistoricoItemControllerTest {
                 .andExpect(jsonPath("$.nomeItem").value("Farinha"));
     }
 }
+
 

@@ -9,8 +9,8 @@ import com.fabriciosanches.fichatecnica.core.ports.in.DeletarItemPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarGraficoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarRelatorioPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.ListarHistoricoItemPort;
-import com.fabriciosanches.fichatecnica.dtos.GraficoPrecoItemDTO;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.GraficoPrecoItemDTO;
+import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -119,4 +119,5 @@ class ItemControllerTest {
                 .andExpect(header().string("Content-Type", "application/pdf"));
     }
 }
+
 

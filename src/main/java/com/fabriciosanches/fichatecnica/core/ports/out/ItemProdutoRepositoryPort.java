@@ -21,3 +21,4 @@ public interface ItemProdutoRepositoryPort {
 
     void deletarPorProdutoIdEItemId(Long produtoId, Long itemId);
 }
+

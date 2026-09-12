@@ -9,3 +9,4 @@ public interface GeradorRelatorioUnidadeMedidaPort {
 
     byte[] gerarRelatorioDetalhe(UnidadeMedida unidade);
 }
+

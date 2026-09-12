@@ -12,12 +12,12 @@ import com.fabriciosanches.fichatecnica.core.ports.in.GerarGraficoPizzaProdutoPo
 import com.fabriciosanches.fichatecnica.core.ports.in.ListarItensDoProdutoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.ListarProdutosPorItemPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.RemoverItemDoProdutoPort;
-import com.fabriciosanches.fichatecnica.dtos.GraficoPizzaDTO;
-import com.fabriciosanches.fichatecnica.dtos.ItemProdutoDTO;
-import com.fabriciosanches.fichatecnica.dtos.ProdutoCompletoDTO;
-import com.fabriciosanches.fichatecnica.dtos.ProdutosPorItemDTO;
-import com.fabriciosanches.fichatecnica.dtos.QuantidadeValorDTO;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.GraficoPizzaDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ItemProdutoDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ProdutoCompletoDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ProdutosPorItemDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.QuantidadeValorDTO;
+import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -40,7 +40,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("ficha-tecnica")
-@Tag(name = "Itens de Produto", description = "Associação entre itens e produtos, valores totais e gráfico de composição")
+@Tag(name = "Itens de Produto", description = "AssociaÃ§Ã£o entre itens e produtos, valores totais e grÃ¡fico de composiÃ§Ã£o")
 @SecurityRequirement(name = "bearerAuth")
 public class ItemProdutoController {
 
@@ -79,7 +79,7 @@ public class ItemProdutoController {
     })
     public ResponseEntity<List<ProdutoCompletoDTO>> salvarItemProduto(@PathVariable("idProduto") Long idProduto,
                                                                       @RequestBody List<ItemProdutoDTO> itemProduto) {
-        logger.info("Inicio do método salvarItemProduto");
+        logger.info("Inicio do mÃ©todo salvarItemProduto");
         try {
             List<ItemProduto> itensDominio = itemProduto.stream().map(dto -> toDomain(idProduto, dto)).toList();
             List<ProdutoCompletoDTO> produtoCompletoList = adicionarItemAoProdutoPort.adicionar(idProduto, itensDominio)
@@ -94,13 +94,13 @@ public class ItemProdutoController {
     }
 
     @GetMapping("/produtos/{idProduto}/itens")
-    @Operation(summary = "Lista itens de um produto", description = "Retorna a composição completa de um produto.")
+    @Operation(summary = "Lista itens de um produto", description = "Retorna a composiÃ§Ã£o completa de um produto.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Composição retornada com sucesso"),
+            @ApiResponse(responseCode = "200", description = "ComposiÃ§Ã£o retornada com sucesso"),
             @ApiResponse(responseCode = "400", description = "Erro ao buscar itens do produto")
     })
     public ResponseEntity<List<ProdutoCompletoDTO>> buscarItensProduto(@PathVariable("idProduto") Long idProduto) {
-        logger.info("Inicio do método buscarItensProduto");
+        logger.info("Inicio do mÃ©todo buscarItensProduto");
         try {
             List<ProdutoCompletoDTO> produtoCompletoList = listarItensDoProdutoPort.listar(idProduto).stream()
                     .map(this::toDto)
@@ -119,7 +119,7 @@ public class ItemProdutoController {
             @ApiResponse(responseCode = "400", description = "Erro ao calcular valores")
     })
     public ResponseEntity<QuantidadeValorDTO> obterValoresItens(@PathVariable("idProduto") Long idProduto) {
-        logger.info("Inicio do método obterValoresItens");
+        logger.info("Inicio do mÃ©todo obterValoresItens");
         try {
             QuantidadeValorDTO valores = calcularValoresItensProdutoPort.calcular(idProduto);
             return ResponseEntity.ok(valores);
@@ -136,7 +136,7 @@ public class ItemProdutoController {
             @ApiResponse(responseCode = "400", description = "Erro ao obter produtos")
     })
     public ResponseEntity<List<ProdutosPorItemDTO>> ListarProdutosPorItem(@PathVariable("idItem") Long idItem) {
-        logger.info("Inicio do método ListarProdutosPorItem");
+        logger.info("Inicio do mÃ©todo ListarProdutosPorItem");
         try {
             List<ProdutosPorItemDTO> produtos = listarProdutosPorItemPort.listarPorItem(idItem);
             return ResponseEntity.ok(produtos);
@@ -147,14 +147,14 @@ public class ItemProdutoController {
     }
 
     @DeleteMapping("/produtos/{idProduto}/itens/{idItem}")
-    @Operation(summary = "Remove item do produto", description = "Desfaz a associação entre um item e um produto.")
+    @Operation(summary = "Remove item do produto", description = "Desfaz a associaÃ§Ã£o entre um item e um produto.")
     @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Associação removida com sucesso"),
+            @ApiResponse(responseCode = "204", description = "AssociaÃ§Ã£o removida com sucesso"),
             @ApiResponse(responseCode = "400", description = "Erro ao deletar item do produto")
     })
     public ResponseEntity<Void> deletarItemProduto(@PathVariable("idProduto") Long idProduto,
                                                     @PathVariable("idItem") Long idItem) {
-        logger.info("Inicio do método deletarItemProduto");
+        logger.info("Inicio do mÃ©todo deletarItemProduto");
         try {
             removerItemDoProdutoPort.remover(idProduto, idItem);
             return ResponseEntity.noContent().build();
@@ -165,7 +165,7 @@ public class ItemProdutoController {
     }
 
     @PutMapping("/{idProduto}/{idItem}/quantidade")
-    @Operation(summary = "Atualiza quantidade do item no produto", description = "Altera a quantidade de um item em um produto específico.")
+    @Operation(summary = "Atualiza quantidade do item no produto", description = "Altera a quantidade de um item em um produto especÃ­fico.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Quantidade atualizada com sucesso")
     })
@@ -178,23 +178,23 @@ public class ItemProdutoController {
     }
 
     @GetMapping("/produtos/{idProduto}/grafico-pizza")
-    @Operation(summary = "Gera gráfico de pizza", description = "Retorna os dados da composição percentual de custo do produto.")
+    @Operation(summary = "Gera grÃ¡fico de pizza", description = "Retorna os dados da composiÃ§Ã£o percentual de custo do produto.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Gráfico gerado com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Dados insuficientes para gerar o gráfico"),
-            @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o gráfico")
+            @ApiResponse(responseCode = "200", description = "GrÃ¡fico gerado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Dados insuficientes para gerar o grÃ¡fico"),
+            @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o grÃ¡fico")
     })
     public ResponseEntity<GraficoPizzaDTO> gerarGraficoPizza(@PathVariable Long idProduto) {
-        logger.info("Início do método gerarGraficoPizza – idProduto={}", idProduto);
+        logger.info("InÃ­cio do mÃ©todo gerarGraficoPizza â€“ idProduto={}", idProduto);
         try {
             GraficoPizzaDTO grafico = gerarGraficoPizzaProdutoPort.gerar(idProduto);
-            logger.info("Gráfico de pizza gerado com sucesso para idProduto={}", idProduto);
+            logger.info("GrÃ¡fico de pizza gerado com sucesso para idProduto={}", idProduto);
             return ResponseEntity.ok(grafico);
         } catch (FichaTecnicaException e) {
-            logger.warn("Dados insuficientes para gerar gráfico de pizza – idProduto={}: {}", idProduto, e.getMessage());
+            logger.warn("Dados insuficientes para gerar grÃ¡fico de pizza â€“ idProduto={}: {}", idProduto, e.getMessage());
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
-            logger.error("Erro inesperado ao gerar gráfico de pizza para idProduto={}", idProduto, e);
+            logger.error("Erro inesperado ao gerar grÃ¡fico de pizza para idProduto={}", idProduto, e);
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -223,4 +223,5 @@ public class ItemProdutoController {
                 itemProduto.getValor());
     }
 }
+
 

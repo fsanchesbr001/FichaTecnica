@@ -7,3 +7,4 @@ public interface GerarTokenPort {
     DadosTokenJWT gerarToken(Usuario usuario);
 }
 
+

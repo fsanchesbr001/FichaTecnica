@@ -7,7 +7,7 @@ import com.fabriciosanches.fichatecnica.core.ports.in.CriarConversaoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.DeletarConversaoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarRelatorioConversaoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarRelatorioPort;
-import com.fabriciosanches.fichatecnica.dtos.ConversaoRelatorioDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ConversaoRelatorioDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -132,4 +132,5 @@ class ConversaoControllerTest {
                 .andExpect(status().isBadRequest());
     }
 }
+
 

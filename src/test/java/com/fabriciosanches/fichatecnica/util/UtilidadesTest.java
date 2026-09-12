@@ -1,4 +1,4 @@
-package com.fabriciosanches.fichatecnica.util;
+package com.fabriciosanches.fichatecnica.infrastructure.util;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -68,4 +68,5 @@ class UtilidadesTest {
         assertTrue(hasSpecial);
     }
 }
+
 

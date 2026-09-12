@@ -1,7 +1,7 @@
 package com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence;
 
 import com.fabriciosanches.fichatecnica.core.domain.Conversao;
-import com.fabriciosanches.fichatecnica.dtos.ConversaoRelatorioDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ConversaoRelatorioDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -76,3 +76,4 @@ class ConversaoPersistenceAdapterTest {
         assertEquals("Grama", resultado.get(0).unidadePara());
     }
 }
+

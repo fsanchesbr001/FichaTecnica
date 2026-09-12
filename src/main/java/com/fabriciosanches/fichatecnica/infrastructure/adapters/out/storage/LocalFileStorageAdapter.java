@@ -48,3 +48,4 @@ public class LocalFileStorageAdapter implements ArmazenamentoArquivoPort {
         Files.deleteIfExists(filePath);
     }
 }
+

@@ -12,7 +12,7 @@ public class BuscarUnidadeMedidaUseCase implements BuscarUnidadeMedidaPort {
     private final UnidadeMedidaRepositoryPort repositoryPort;
 
     public BuscarUnidadeMedidaUseCase(UnidadeMedidaRepositoryPort repositoryPort) {
-        this.repositoryPort = Objects.requireNonNull(repositoryPort, "Repository port não pode ser nulo");
+        this.repositoryPort = Objects.requireNonNull(repositoryPort, "Repository port nÃ£o pode ser nulo");
     }
 
     @Override
@@ -25,10 +25,11 @@ public class BuscarUnidadeMedidaUseCase implements BuscarUnidadeMedidaPort {
     @Override
     public UnidadeMedida buscarPorId(Long id) {
         if (id == null) {
-            throw new IllegalArgumentException("Id não pode ser nulo");
+            throw new IllegalArgumentException("Id nÃ£o pode ser nulo");
         }
 
         return repositoryPort.buscarPorId(id)
-                .orElseThrow(() -> new java.util.NoSuchElementException("Unidade de medida não encontrada"));
+                .orElseThrow(() -> new java.util.NoSuchElementException("Unidade de medida nÃ£o encontrada"));
     }
 }
+

@@ -29,12 +29,12 @@ class BuscarUnidadeMedidaUseCaseTest {
     void buscarTodos_DeveRetornarListaOrdenadaPorNome() {
         when(repositoryPort.buscarTodos()).thenReturn(List.of(
                 new UnidadeMedida(2L, "Metro", "M"),
-                new UnidadeMedida(1L, "Centímetro", "CM")
+                new UnidadeMedida(1L, "CentÃ­metro", "CM")
         ));
 
         List<UnidadeMedida> resultado = useCase.buscarTodos();
 
-        assertEquals(List.of("Centímetro", "Metro"), resultado.stream().map(UnidadeMedida::getNome).toList());
+        assertEquals(List.of("CentÃ­metro", "Metro"), resultado.stream().map(UnidadeMedida::getNome).toList());
     }
 
     @Test
@@ -53,6 +53,7 @@ class BuscarUnidadeMedidaUseCaseTest {
         NoSuchElementException exception =
                 assertThrows(NoSuchElementException.class, () -> useCase.buscarPorId(1L));
 
-        assertEquals("Unidade de medida não encontrada", exception.getMessage());
+        assertEquals("Unidade de medida nÃ£o encontrada", exception.getMessage());
     }
 }
+

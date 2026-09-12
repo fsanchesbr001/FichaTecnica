@@ -17,3 +17,4 @@ public interface SegurancaRepositoryPort {
     List<Seguranca> buscarTodos();
 }
 
+

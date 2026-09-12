@@ -17,8 +17,8 @@ public class GerarRelatorioListaUnidadeMedidaUseCase implements GerarRelatorioLi
 
     public GerarRelatorioListaUnidadeMedidaUseCase(UnidadeMedidaRepositoryPort repositoryPort,
                                                     GeradorRelatorioUnidadeMedidaPort reportPort) {
-        this.repositoryPort = Objects.requireNonNull(repositoryPort, "Repository port não pode ser nulo");
-        this.reportPort = Objects.requireNonNull(reportPort, "Report port não pode ser nulo");
+        this.repositoryPort = Objects.requireNonNull(repositoryPort, "Repository port nÃ£o pode ser nulo");
+        this.reportPort = Objects.requireNonNull(reportPort, "Report port nÃ£o pode ser nulo");
     }
 
     @Override
@@ -28,9 +28,10 @@ public class GerarRelatorioListaUnidadeMedidaUseCase implements GerarRelatorioLi
                 .toList();
 
         if (unidades.isEmpty()) {
-            throw new NoSuchElementException("Nenhuma unidade de medida encontrada para gerar relatório");
+            throw new NoSuchElementException("Nenhuma unidade de medida encontrada para gerar relatÃ³rio");
         }
 
         return reportPort.gerarRelatorioLista(unidades);
     }
 }
+

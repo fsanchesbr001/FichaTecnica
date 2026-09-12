@@ -61,3 +61,4 @@ public class HistoricoItemPersistenceAdapter implements HistoricoItemRepositoryP
     }
 }
 
+

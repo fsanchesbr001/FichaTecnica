@@ -1,6 +1,6 @@
 package com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence;
 
-import com.fabriciosanches.fichatecnica.dtos.ConversaoRelatorioDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ConversaoRelatorioDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,7 +15,7 @@ public interface SpringDataConversaoRepository extends JpaRepository<ConversaoEn
     Optional<ConversaoEntity> findByUnidadeDeAndUnidadePara(Long unidadeDe, Long unidadePara);
 
     @Query("""
-            SELECT new com.fabriciosanches.fichatecnica.dtos.ConversaoRelatorioDTO(
+            SELECT new com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ConversaoRelatorioDTO(
                 c.codigo, ud.nome, up.nome, c.operacao, c.valor)
             FROM Conversao c, UnidadeMedida ud, UnidadeMedida up
             WHERE ud.codigo = c.unidadeDe
@@ -25,7 +25,7 @@ public interface SpringDataConversaoRepository extends JpaRepository<ConversaoEn
     List<ConversaoRelatorioDTO> findAllComNomes();
 
     @Query("""
-            SELECT new com.fabriciosanches.fichatecnica.dtos.ConversaoRelatorioDTO(
+            SELECT new com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ConversaoRelatorioDTO(
                 c.codigo, ud.nome, up.nome, c.operacao, c.valor)
             FROM Conversao c, UnidadeMedida ud, UnidadeMedida up
             WHERE ud.codigo = c.unidadeDe
@@ -34,3 +34,4 @@ public interface SpringDataConversaoRepository extends JpaRepository<ConversaoEn
             """)
     Optional<ConversaoRelatorioDTO> findByIdComNomes(@Param("id") Long id);
 }
+

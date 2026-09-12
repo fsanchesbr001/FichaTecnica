@@ -2,7 +2,7 @@ package com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence
 
 import com.fabriciosanches.fichatecnica.core.domain.Conversao;
 import com.fabriciosanches.fichatecnica.core.ports.out.ConversaoRepositoryPort;
-import com.fabriciosanches.fichatecnica.dtos.ConversaoRelatorioDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ConversaoRelatorioDTO;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -78,3 +78,4 @@ public class ConversaoPersistenceAdapter implements ConversaoRepositoryPort {
         );
     }
 }
+

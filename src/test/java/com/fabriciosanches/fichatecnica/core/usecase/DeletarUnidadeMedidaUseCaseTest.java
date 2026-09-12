@@ -41,6 +41,7 @@ class DeletarUnidadeMedidaUseCaseTest {
         NoSuchElementException exception =
                 assertThrows(NoSuchElementException.class, () -> useCase.deletar(1L));
 
-        assertEquals("Unidade de medida não encontrada", exception.getMessage());
+        assertEquals("Unidade de medida nÃ£o encontrada", exception.getMessage());
     }
 }
+

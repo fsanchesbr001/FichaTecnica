@@ -5,8 +5,8 @@ import com.fabriciosanches.fichatecnica.core.ports.in.IniciarUploadImagemProduto
 import com.fabriciosanches.fichatecnica.core.ports.in.ListarJobsUploadImagemProdutoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.RemoverImagemProdutoPort;
 import com.fabriciosanches.fichatecnica.core.domain.ArquivoUpload;
-import com.fabriciosanches.fichatecnica.dtos.UploadJobDTO;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.UploadJobDTO;
+import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -32,7 +32,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("ficha-tecnica/produtos")
-@Tag(name = "Imagens de Produto", description = "Upload assíncrono, monitoramento de jobs e remoção de imagens de produto")
+@Tag(name = "Imagens de Produto", description = "Upload assÃ­ncrono, monitoramento de jobs e remoÃ§Ã£o de imagens de produto")
 @SecurityRequirement(name = "bearerAuth")
 public class ProdutoImagemController {
 
@@ -56,10 +56,10 @@ public class ProdutoImagemController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(value = "/{id}/imagem/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Inicia upload de imagem", description = "Inicia o upload assíncrono da imagem de um produto e retorna o job de processamento.")
+    @Operation(summary = "Inicia upload de imagem", description = "Inicia o upload assÃ­ncrono da imagem de um produto e retorna o job de processamento.")
     @ApiResponses({
             @ApiResponse(responseCode = "202", description = "Upload iniciado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Imagem inválida ou dados incorretos"),
+            @ApiResponse(responseCode = "400", description = "Imagem invÃ¡lida ou dados incorretos"),
             @ApiResponse(responseCode = "500", description = "Erro inesperado ao iniciar o upload")
     })
     public ResponseEntity<?> iniciarUpload(
@@ -88,8 +88,8 @@ public class ProdutoImagemController {
     @Operation(summary = "Consulta status do upload", description = "Verifica o andamento de um job de upload de imagem.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Status retornado com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Job não encontrado"),
-            @ApiResponse(responseCode = "409", description = "Job não pertence ao produto informado"),
+            @ApiResponse(responseCode = "404", description = "Job nÃ£o encontrado"),
+            @ApiResponse(responseCode = "409", description = "Job nÃ£o pertence ao produto informado"),
             @ApiResponse(responseCode = "500", description = "Erro inesperado ao consultar o status")
     })
     public ResponseEntity<?> consultarStatus(
@@ -101,11 +101,11 @@ public class ProdutoImagemController {
             UploadJobDTO job = consultarUploadImagemProdutoPort.consultar(jobId);
             if (!id.equals(job.produtoId())) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
-                        .body(Map.of("error", "O job " + jobId + " não pertence ao produto id=" + id));
+                        .body(Map.of("error", "O job " + jobId + " nÃ£o pertence ao produto id=" + id));
             }
             return ResponseEntity.ok(job);
         } catch (FichaTecnicaException e) {
-            logger.warn("[ProdutoImagemController] Job não encontrado: {}", jobId);
+            logger.warn("[ProdutoImagemController] Job nÃ£o encontrado: {}", jobId);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             logger.error("[ProdutoImagemController] Erro ao consultar status do job {}", jobId, e);
@@ -119,7 +119,7 @@ public class ProdutoImagemController {
     @Operation(summary = "Remove imagem do produto", description = "Apaga a imagem vinculada ao produto e limpa o registro no banco.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Imagem removida com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Produto não encontrado"),
+            @ApiResponse(responseCode = "404", description = "Produto nÃ£o encontrado"),
             @ApiResponse(responseCode = "500", description = "Erro inesperado ao remover a imagem")
     })
     public ResponseEntity<?> removerImagem(@PathVariable Long id) {
@@ -130,7 +130,7 @@ public class ProdutoImagemController {
             logger.info("[ProdutoImagemController] Imagem removida com sucesso para produto id={}", id);
             return ResponseEntity.noContent().build();
         } catch (FichaTecnicaException e) {
-            logger.warn("[ProdutoImagemController] Produto não encontrado ao remover imagem id={}: {}", id, e.getMessage());
+            logger.warn("[ProdutoImagemController] Produto nÃ£o encontrado ao remover imagem id={}: {}", id, e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             logger.error("[ProdutoImagemController] Erro inesperado ao remover imagem do produto id={}", id, e);
@@ -141,7 +141,7 @@ public class ProdutoImagemController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/imagem/jobs")
-    @Operation(summary = "Lista jobs de upload", description = "Retorna todos os jobs de upload registrados na sessão atual da aplicação.")
+    @Operation(summary = "Lista jobs de upload", description = "Retorna todos os jobs de upload registrados na sessÃ£o atual da aplicaÃ§Ã£o.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Jobs retornados com sucesso")
     })
@@ -150,4 +150,5 @@ public class ProdutoImagemController {
         return ResponseEntity.ok(listarJobsUploadImagemProdutoPort.listar());
     }
 }
+
 

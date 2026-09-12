@@ -29,3 +29,4 @@ public class ConversaoEntity {
     @Column(name = "valor", precision = 10, scale = 2)
     private BigDecimal valor;
 }
+

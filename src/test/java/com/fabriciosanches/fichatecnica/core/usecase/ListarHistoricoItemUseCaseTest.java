@@ -5,8 +5,8 @@ import com.fabriciosanches.fichatecnica.core.domain.Item;
 import com.fabriciosanches.fichatecnica.core.domain.UnidadeMedida;
 import com.fabriciosanches.fichatecnica.core.ports.out.HistoricoItemRepositoryPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.ItemRepositoryPort;
-import com.fabriciosanches.fichatecnica.dtos.GraficoPrecoItemDTO;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.GraficoPrecoItemDTO;
+import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -43,7 +43,7 @@ class ListarHistoricoItemUseCaseTest {
                 () -> useCase.listarPorCodigoItemOrdenadoPorDataInicio(10L)
         );
 
-        assertEquals("Nenhum histórico encontrado para o item codigo=10", ex.getMessage());
+        assertEquals("Nenhum histÃ³rico encontrado para o item codigo=10", ex.getMessage());
     }
 
     @Test
@@ -71,4 +71,5 @@ class ListarHistoricoItemUseCaseTest {
         assertEquals("+17,7%", dto.variacoes().get(2));
     }
 }
+
 

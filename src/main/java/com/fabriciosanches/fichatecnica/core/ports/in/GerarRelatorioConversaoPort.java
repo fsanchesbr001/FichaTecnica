@@ -1,6 +1,6 @@
 package com.fabriciosanches.fichatecnica.core.ports.in;
 
-import com.fabriciosanches.fichatecnica.dtos.ConversaoRelatorioDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ConversaoRelatorioDTO;
 
 import java.util.List;
 
@@ -9,3 +9,4 @@ public interface GerarRelatorioConversaoPort {
 
     ConversaoRelatorioDTO buscarPorIdComNomes(Long id);
 }
+

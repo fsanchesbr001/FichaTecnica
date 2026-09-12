@@ -14,8 +14,9 @@ class OpenApiConfigTest {
         OpenAPI openAPI = config.fichaTecnicaOpenAPI();
 
         assertNotNull(openAPI);
-        assertEquals("Ficha Técnica API", openAPI.getInfo().getTitle());
+        assertEquals("Ficha TÃ©cnica API", openAPI.getInfo().getTitle());
         assertEquals("1.9.8", openAPI.getInfo().getVersion());
         assertNotNull(openAPI.getComponents().getSecuritySchemes().get(OpenApiConfig.SECURITY_SCHEME_NAME));
     }
 }
+

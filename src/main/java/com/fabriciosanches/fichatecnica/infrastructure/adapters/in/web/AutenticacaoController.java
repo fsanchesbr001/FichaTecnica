@@ -1,13 +1,13 @@
 package com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web;
 
-import com.fabriciosanches.fichatecnica.constants.Constants;
+import com.fabriciosanches.fichatecnica.infrastructure.constants.Constants;
 import com.fabriciosanches.fichatecnica.core.domain.Usuario;
 import com.fabriciosanches.fichatecnica.core.ports.in.ControleAcessoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarTokenPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.GerenciadorBlacklistTokenPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.ValidadorTokenPort;
-import com.fabriciosanches.fichatecnica.dtos.AutenticacaoDTO;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.AutenticacaoDTO;
+import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.infrastructure.config.security.DadosTokenJWT;
 import com.fabriciosanches.fichatecnica.infrastructure.config.security.UsuarioSecurityDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,7 +33,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
-@Tag(name = "Autenticação", description = "Login, logout e emissão de JWT para acesso à API")
+@Tag(name = "AutenticaÃ§Ã£o", description = "Login, logout e emissÃ£o de JWT para acesso Ã  API")
 public class AutenticacaoController {
 
     private final AuthenticationManager manager;
@@ -55,14 +55,14 @@ public class AutenticacaoController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Efetua login", description = "Autentica o usuário e retorna o token JWT com dados de expiração e perfil.")
+    @Operation(summary = "Efetua login", description = "Autentica o usuÃ¡rio e retorna o token JWT com dados de expiraÃ§Ã£o e perfil.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Login realizado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Credenciais inválidas ou dados obrigatórios ausentes"),
+            @ApiResponse(responseCode = "400", description = "Credenciais invÃ¡lidas ou dados obrigatÃ³rios ausentes"),
             @ApiResponse(responseCode = "500", description = "Erro inesperado ao autenticar")
     })
     public ResponseEntity<DadosTokenJWT> efetuarLogin(@RequestBody @Valid AutenticacaoDTO dados) {
-        LoggerFactory.getLogger(this.getClass()).info("Fluxo entrou no método efetuarLogin - Usuário: {}", dados.login());
+        LoggerFactory.getLogger(this.getClass()).info("Fluxo entrou no mÃ©todo efetuarLogin - UsuÃ¡rio: {}", dados.login());
 
         if (dados.login() == null || dados.senha() == null) {
             return ResponseEntity.badRequest().build();
@@ -87,29 +87,29 @@ public class AutenticacaoController {
     }
 
     @PostMapping("/logout")
-    @Operation(summary = "Efetua logout", description = "Revoga o token JWT atual e encerra a sessão do usuário.")
+    @Operation(summary = "Efetua logout", description = "Revoga o token JWT atual e encerra a sessÃ£o do usuÃ¡rio.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Logout realizado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Não há sessão ativa ou o token não pôde ser validado"),
-            @ApiResponse(responseCode = "401", description = "Token ausente ou inválido")
+            @ApiResponse(responseCode = "400", description = "NÃ£o hÃ¡ sessÃ£o ativa ou o token nÃ£o pÃ´de ser validado"),
+            @ApiResponse(responseCode = "401", description = "Token ausente ou invÃ¡lido")
     })
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<Map<String, String>> efetuarLogout() {
         var auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || auth.getCredentials() == null) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Nenhuma sessão ativa encontrada"));
+            return ResponseEntity.badRequest().body(Map.of("error", "Nenhuma sessÃ£o ativa encontrada"));
         }
 
         String token = (String) auth.getCredentials();
         Instant expiracao = validadorTokenPort.getExpiration(token);
         if (expiracao == null) {
             return ResponseEntity.badRequest()
-                    .body(Map.of("error", "Token inválido ou não foi possível determinar sua expiração"));
+                    .body(Map.of("error", "Token invÃ¡lido ou nÃ£o foi possÃ­vel determinar sua expiraÃ§Ã£o"));
         }
 
         gerenciadorBlacklistTokenPort.revogar(token, expiracao);
         SecurityContextHolder.clearContext();
-        return ResponseEntity.ok(Map.of("message", "Logout realizado com sucesso. Sessão encerrada."));
+        return ResponseEntity.ok(Map.of("message", "Logout realizado com sucesso. SessÃ£o encerrada."));
     }
 
     private Usuario toUsuario(UserDetails userDetails) {
@@ -124,4 +124,5 @@ public class AutenticacaoController {
         return usuario;
     }
 }
+
 

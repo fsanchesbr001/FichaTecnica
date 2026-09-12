@@ -6,3 +6,4 @@ import java.util.Map;
 public interface ObterDescricoesUnidadePort {
     Map<Long, String> obter(List<Long> codigosUnidade);
 }
+

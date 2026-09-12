@@ -2,8 +2,8 @@ package com.fabriciosanches.fichatecnica.core.usecase;
 
 import com.fabriciosanches.fichatecnica.core.domain.Produto;
 import com.fabriciosanches.fichatecnica.core.ports.out.ProdutoRepositoryPort;
-import com.fabriciosanches.fichatecnica.dtos.ProdutoDTO;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ProdutoDTO;
+import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -67,7 +67,7 @@ class ProdutoUseCaseTest {
 
         FichaTecnicaException exception = assertThrows(FichaTecnicaException.class, () -> useCase.buscarPorId(99L));
 
-        assertEquals("Produto não encontrada", exception.getMessage());
+        assertEquals("Produto nÃ£o encontrada", exception.getMessage());
     }
 
     @Test
@@ -89,7 +89,7 @@ class ProdutoUseCaseTest {
 
         FichaTecnicaException exception = assertThrows(FichaTecnicaException.class, () -> useCase.cadastrarProduto(produtoDTO));
 
-        assertEquals("Produto já cadastrado", exception.getMessage());
+        assertEquals("Produto jÃ¡ cadastrado", exception.getMessage());
         verify(produtoRepositoryPort, never()).salvar(any());
     }
 
@@ -112,4 +112,5 @@ class ProdutoUseCaseTest {
         verify(produtoRepositoryPort).deletarPorId(1L);
     }
 }
+
 

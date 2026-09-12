@@ -1,7 +1,7 @@
 package com.fabriciosanches.fichatecnica.core.usecase;
 
 import com.fabriciosanches.fichatecnica.core.ports.out.ConversaoRepositoryPort;
-import com.fabriciosanches.fichatecnica.dtos.ConversaoRelatorioDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ConversaoRelatorioDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -44,6 +44,7 @@ class GerarRelatorioConversaoUseCaseTest {
         java.util.NoSuchElementException exception =
                 assertThrows(java.util.NoSuchElementException.class, () -> useCase.buscarPorIdComNomes(1L));
 
-        assertEquals("Conversão com ID 1 não encontrada", exception.getMessage());
+        assertEquals("ConversÃ£o com ID 1 nÃ£o encontrada", exception.getMessage());
     }
 }
+

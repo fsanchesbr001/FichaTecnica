@@ -1,7 +1,7 @@
 package com.fabriciosanches.fichatecnica.core.ports.out;
 
 import com.fabriciosanches.fichatecnica.core.domain.Conversao;
-import com.fabriciosanches.fichatecnica.dtos.ConversaoRelatorioDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ConversaoRelatorioDTO;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,3 +23,4 @@ public interface ConversaoRepositoryPort {
 
     void deletar(Long id);
 }
+

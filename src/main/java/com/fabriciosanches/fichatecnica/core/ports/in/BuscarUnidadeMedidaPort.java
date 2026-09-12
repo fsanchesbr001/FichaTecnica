@@ -9,3 +9,4 @@ public interface BuscarUnidadeMedidaPort {
 
     UnidadeMedida buscarPorId(Long id);
 }
+

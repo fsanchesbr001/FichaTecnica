@@ -16,3 +16,4 @@ public interface SpringDataHistoricoItemRepository extends JpaRepository<Histori
     List<HistoricoItemEntity> findByCdItemOrderByCdItemAscDataInicioAscCodigoAsc(Long codigoItem);
 }
 
+

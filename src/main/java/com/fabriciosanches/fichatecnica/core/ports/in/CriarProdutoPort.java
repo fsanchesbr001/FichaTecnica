@@ -1,7 +1,8 @@
 package com.fabriciosanches.fichatecnica.core.ports.in;
 
-import com.fabriciosanches.fichatecnica.dtos.ProdutoDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ProdutoDTO;
 
 public interface CriarProdutoPort {
     ProdutoDTO cadastrarProduto(ProdutoDTO produtoDTO);
 }
+

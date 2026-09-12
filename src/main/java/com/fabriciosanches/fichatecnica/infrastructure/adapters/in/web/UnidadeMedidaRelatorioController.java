@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("ficha-tecnica/unidades-medida/relatorios")
-@Tag(name = "Relatórios de Unidades de Medida", description = "Geração de relatórios PDF de lista e detalhe de unidades de medida")
+@Tag(name = "RelatÃ³rios de Unidades de Medida", description = "GeraÃ§Ã£o de relatÃ³rios PDF de lista e detalhe de unidades de medida")
 @SecurityRequirement(name = "bearerAuth")
 public class UnidadeMedidaRelatorioController {
 
@@ -31,11 +31,11 @@ public class UnidadeMedidaRelatorioController {
     }
 
     @GetMapping("/lista")
-    @Operation(summary = "Gera relatório de lista", description = "Gera e retorna o PDF com todas as unidades de medida.")
+    @Operation(summary = "Gera relatÃ³rio de lista", description = "Gera e retorna o PDF com todas as unidades de medida.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Relatório gerado com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Nenhuma unidade encontrada para relatório"),
-            @ApiResponse(responseCode = "500", description = "Erro ao gerar relatório")
+            @ApiResponse(responseCode = "200", description = "RelatÃ³rio gerado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Nenhuma unidade encontrada para relatÃ³rio"),
+            @ApiResponse(responseCode = "500", description = "Erro ao gerar relatÃ³rio")
     })
     public ResponseEntity<byte[]> relatorioLista() {
         try {
@@ -53,12 +53,12 @@ public class UnidadeMedidaRelatorioController {
     }
 
     @GetMapping("/{sigla}/detalhe")
-    @Operation(summary = "Gera relatório de detalhe", description = "Gera e retorna o PDF de detalhe de uma unidade de medida por sigla.")
+    @Operation(summary = "Gera relatÃ³rio de detalhe", description = "Gera e retorna o PDF de detalhe de uma unidade de medida por sigla.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Relatório gerado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Sigla inválida"),
-            @ApiResponse(responseCode = "404", description = "Unidade não encontrada"),
-            @ApiResponse(responseCode = "500", description = "Erro ao gerar relatório")
+            @ApiResponse(responseCode = "200", description = "RelatÃ³rio gerado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Sigla invÃ¡lida"),
+            @ApiResponse(responseCode = "404", description = "Unidade nÃ£o encontrada"),
+            @ApiResponse(responseCode = "500", description = "Erro ao gerar relatÃ³rio")
     })
     public ResponseEntity<byte[]> relatorioDetalhe(@PathVariable String sigla) {
         try {
@@ -77,3 +77,4 @@ public class UnidadeMedidaRelatorioController {
         }
     }
 }
+

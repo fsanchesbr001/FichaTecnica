@@ -9,7 +9,7 @@ import com.fabriciosanches.fichatecnica.core.domain.ItemProduto;
 import com.fabriciosanches.fichatecnica.core.domain.ItemProdutoId;
 import com.fabriciosanches.fichatecnica.core.domain.Produto;
 import com.fabriciosanches.fichatecnica.core.domain.UnidadeMedida;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
@@ -48,7 +48,7 @@ class DeletarItemUseCaseTest {
 
         FichaTecnicaException ex = assertThrows(FichaTecnicaException.class, () -> useCase.deletar(1L));
 
-        assertEquals("Item com ID 1 não encontrado", ex.getMessage());
+        assertEquals("Item com ID 1 nÃ£o encontrado", ex.getMessage());
     }
 
     @Test
@@ -74,4 +74,5 @@ class DeletarItemUseCaseTest {
         verify(itemRepositoryPort).deletarPorId(1L);
     }
 }
+
 

@@ -52,16 +52,16 @@ public class SecurityFilter extends OncePerRequestFilter {
         var tokenJWT = recuperarToken(request);
 
         if (tokenJWT == null) {
-            log.warn("[SecurityFilter] {} - Nenhum token encontrado no header Authorization. Requisição anônima.", uri);
+            log.warn("[SecurityFilter] {} - Nenhum token encontrado no header Authorization. RequisiÃ§Ã£o anÃ´nima.", uri);
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Validar se o token está expirado
+        // Validar se o token estÃ¡ expirado
         if (!validadorTokenPort.validarTokenExpirado(tokenJWT)) {
             log.warn("[SecurityFilter] {} - Token expirado.", uri);
             writeJsonError(response, HttpServletResponse.SC_UNAUTHORIZED,
-                    "Token expirado", "Seu token de autenticação expirou. Por favor, faça login novamente.");
+                    "Token expirado", "Seu token de autenticaÃ§Ã£o expirou. Por favor, faÃ§a login novamente.");
             return;
         }
 
@@ -69,7 +69,7 @@ public class SecurityFilter extends OncePerRequestFilter {
         if (gerenciadorBlacklistTokenPort.estaRevogado(tokenJWT)) {
             log.warn("[SecurityFilter] {} - Token revogado.", uri);
             writeJsonError(response, HttpServletResponse.SC_UNAUTHORIZED,
-                    "Token revogado", "Sua sessão foi encerrada. Por favor, faça login novamente.");
+                    "Token revogado", "Sua sessÃ£o foi encerrada. Por favor, faÃ§a login novamente.");
             return;
         }
 
@@ -77,12 +77,12 @@ public class SecurityFilter extends OncePerRequestFilter {
             var subject = validadorTokenPort.getSubject(tokenJWT);
             var role = validadorTokenPort.getRole(tokenJWT);
 
-            log.info("[SecurityFilter] {} - subject='{}' | role extraída do token='{}'", uri, subject, role);
+            log.info("[SecurityFilter] {} - subject='{}' | role extraÃ­da do token='{}'", uri, subject, role);
 
             if (role == null || role.isBlank()) {
-                log.error("[SecurityFilter] {} - Claim 'role' ausente ou vazia no token do usuário '{}'", uri, subject);
+                log.error("[SecurityFilter] {} - Claim 'role' ausente ou vazia no token do usuÃ¡rio '{}'", uri, subject);
                 writeJsonError(response, HttpServletResponse.SC_UNAUTHORIZED,
-                        "Token inválido", "O token não contém uma role válida. Faça login novamente.");
+                        "Token invÃ¡lido", "O token nÃ£o contÃ©m uma role vÃ¡lida. FaÃ§a login novamente.");
                 return;
             }
 
@@ -96,12 +96,12 @@ public class SecurityFilter extends OncePerRequestFilter {
                     Collections.singletonList(authority));
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            log.info("[SecurityFilter] {} - Autenticação definida | authority='{}'", uri, role);
+            log.info("[SecurityFilter] {} - AutenticaÃ§Ã£o definida | authority='{}'", uri, role);
 
         } catch (Exception e) {
             log.error("[SecurityFilter] {} - Erro ao processar token: {}", uri, e.getMessage(), e);
             writeJsonError(response, HttpServletResponse.SC_UNAUTHORIZED,
-                    "Token inválido", "Seu token de autenticação é inválido. Por favor, faça login novamente.");
+                    "Token invÃ¡lido", "Seu token de autenticaÃ§Ã£o Ã© invÃ¡lido. Por favor, faÃ§a login novamente.");
             return;
         }
 
@@ -130,4 +130,5 @@ public class SecurityFilter extends OncePerRequestFilter {
         return value.isBlank() ? null : value;
     }
 }
+
 

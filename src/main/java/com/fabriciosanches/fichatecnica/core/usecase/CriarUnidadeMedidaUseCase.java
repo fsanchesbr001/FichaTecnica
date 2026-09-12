@@ -10,17 +10,17 @@ public class CriarUnidadeMedidaUseCase implements CriarUnidadeMedidaPort {
     private final UnidadeMedidaRepositoryPort repositoryPort;
 
     public CriarUnidadeMedidaUseCase(UnidadeMedidaRepositoryPort repositoryPort) {
-        this.repositoryPort = Objects.requireNonNull(repositoryPort, "Repository port não pode ser nulo");
+        this.repositoryPort = Objects.requireNonNull(repositoryPort, "Repository port nÃ£o pode ser nulo");
     }
 
     @Override
     public UnidadeMedida criar(String nome, String sigla) {
-        String nomeNormalizado = normalizar(nome, "Nome não pode ser vazio");
-        String siglaNormalizada = normalizar(sigla, "Sigla não pode ser vazia").toUpperCase();
+        String nomeNormalizado = normalizar(nome, "Nome nÃ£o pode ser vazio");
+        String siglaNormalizada = normalizar(sigla, "Sigla nÃ£o pode ser vazia").toUpperCase();
 
         repositoryPort.buscarPorSigla(siglaNormalizada)
                 .ifPresent(unidadeExistente -> {
-                    throw new IllegalArgumentException("Já existe uma unidade de medida com a sigla '" + siglaNormalizada + "'.");
+                    throw new IllegalArgumentException("JÃ¡ existe uma unidade de medida com a sigla '" + siglaNormalizada + "'.");
                 });
 
         UnidadeMedida novaUnidade = new UnidadeMedida(nomeNormalizado, siglaNormalizada);
@@ -34,3 +34,4 @@ public class CriarUnidadeMedidaUseCase implements CriarUnidadeMedidaPort {
         return valor.trim();
     }
 }
+

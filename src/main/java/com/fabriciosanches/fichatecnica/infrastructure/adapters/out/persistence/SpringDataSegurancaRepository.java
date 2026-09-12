@@ -13,3 +13,4 @@ public interface SpringDataSegurancaRepository extends JpaRepository<SegurancaEn
     Optional<SegurancaEntity> findByEmail(String email);
 }
 
+

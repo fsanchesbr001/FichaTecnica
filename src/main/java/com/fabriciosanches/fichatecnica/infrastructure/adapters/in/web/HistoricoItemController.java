@@ -2,9 +2,9 @@ package com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web;
 
 import com.fabriciosanches.fichatecnica.core.domain.HistoricoItem;
 import com.fabriciosanches.fichatecnica.core.ports.in.ListarHistoricoItemPort;
-import com.fabriciosanches.fichatecnica.dtos.GraficoPrecoItemDTO;
-import com.fabriciosanches.fichatecnica.dtos.HistoricoItemDTO;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.GraficoPrecoItemDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.HistoricoItemDTO;
+import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -23,7 +23,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("ficha-tecnica")
-@Tag(name = "Histórico de Itens", description = "Consulta de histórico de preços e gráfico de evolução")
+@Tag(name = "HistÃ³rico de Itens", description = "Consulta de histÃ³rico de preÃ§os e grÃ¡fico de evoluÃ§Ã£o")
 @SecurityRequirement(name = "bearerAuth")
 public class HistoricoItemController {
 
@@ -36,10 +36,10 @@ public class HistoricoItemController {
     }
 
     @GetMapping("/historico-itens")
-    @Operation(summary = "Lista histórico de itens", description = "Retorna todos os registros de histórico de preços.")
+    @Operation(summary = "Lista histÃ³rico de itens", description = "Retorna todos os registros de histÃ³rico de preÃ§os.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Erro ao buscar histórico")
+            @ApiResponse(responseCode = "404", description = "Erro ao buscar histÃ³rico")
     })
     public ResponseEntity<List<HistoricoItemDTO>> buscarLista() {
         try {
@@ -51,10 +51,10 @@ public class HistoricoItemController {
     }
 
     @GetMapping("/historico-itens/{id}")
-    @Operation(summary = "Busca histórico por ID", description = "Retorna um registro específico do histórico de itens.")
+    @Operation(summary = "Busca histÃ³rico por ID", description = "Retorna um registro especÃ­fico do histÃ³rico de itens.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Registro encontrado"),
-            @ApiResponse(responseCode = "404", description = "Registro não encontrado")
+            @ApiResponse(responseCode = "404", description = "Registro nÃ£o encontrado")
     })
     public ResponseEntity<HistoricoItemDTO> buscarPorId(@PathVariable Long id) {
         try {
@@ -66,10 +66,10 @@ public class HistoricoItemController {
     }
 
     @GetMapping("/historico-itens/itens/{id}")
-    @Operation(summary = "Busca histórico por item", description = "Retorna todos os registros de histórico de um item específico.")
+    @Operation(summary = "Busca histÃ³rico por item", description = "Retorna todos os registros de histÃ³rico de um item especÃ­fico.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Registros retornados com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Erro ao buscar histórico do item")
+            @ApiResponse(responseCode = "404", description = "Erro ao buscar histÃ³rico do item")
     })
     public ResponseEntity<List<HistoricoItemDTO>> buscarPorItemId(@PathVariable Long id) {
         try {
@@ -84,23 +84,23 @@ public class HistoricoItemController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/historico-itens/grafico-precos/{codigoItem}")
-    @Operation(summary = "Gera gráfico de preços", description = "Retorna os dados do gráfico de evolução de preços de um item.")
+    @Operation(summary = "Gera grÃ¡fico de preÃ§os", description = "Retorna os dados do grÃ¡fico de evoluÃ§Ã£o de preÃ§os de um item.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Gráfico gerado com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Nenhum histórico encontrado para o item"),
-            @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o gráfico")
+            @ApiResponse(responseCode = "200", description = "GrÃ¡fico gerado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Nenhum histÃ³rico encontrado para o item"),
+            @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o grÃ¡fico")
     })
     public ResponseEntity<GraficoPrecoItemDTO> gerarGraficoPrecos(@PathVariable Long codigoItem) {
-        logger.info("Início do método gerarGraficoPrecos – codigoItem={}", codigoItem);
+        logger.info("InÃ­cio do mÃ©todo gerarGraficoPrecos â€“ codigoItem={}", codigoItem);
         try {
             GraficoPrecoItemDTO grafico = listarHistoricoItemPort.gerarGraficoPreco(codigoItem);
-            logger.info("Gráfico de preços gerado com sucesso para codigoItem={}", codigoItem);
+            logger.info("GrÃ¡fico de preÃ§os gerado com sucesso para codigoItem={}", codigoItem);
             return ResponseEntity.ok(grafico);
         } catch (FichaTecnicaException e) {
-            logger.warn("Nenhum histórico encontrado para codigoItem={}: {}", codigoItem, e.getMessage());
+            logger.warn("Nenhum histÃ³rico encontrado para codigoItem={}: {}", codigoItem, e.getMessage());
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
-            logger.error("Erro inesperado ao gerar gráfico de preços para codigoItem={}", codigoItem, e);
+            logger.error("Erro inesperado ao gerar grÃ¡fico de preÃ§os para codigoItem={}", codigoItem, e);
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -114,4 +114,5 @@ public class HistoricoItemController {
         );
     }
 }
+
 

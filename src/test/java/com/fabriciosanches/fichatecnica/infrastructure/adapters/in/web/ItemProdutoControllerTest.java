@@ -12,12 +12,12 @@ import com.fabriciosanches.fichatecnica.core.ports.in.GerarGraficoPizzaProdutoPo
 import com.fabriciosanches.fichatecnica.core.ports.in.ListarItensDoProdutoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.ListarProdutosPorItemPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.RemoverItemDoProdutoPort;
-import com.fabriciosanches.fichatecnica.dtos.GraficoPizzaDTO;
-import com.fabriciosanches.fichatecnica.dtos.GraficoPizzaFatiaDTO;
-import com.fabriciosanches.fichatecnica.dtos.ItemProdutoDTO;
-import com.fabriciosanches.fichatecnica.dtos.ProdutoCompletoDTO;
-import com.fabriciosanches.fichatecnica.dtos.ProdutosPorItemDTO;
-import com.fabriciosanches.fichatecnica.dtos.QuantidadeValorDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.GraficoPizzaDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.GraficoPizzaFatiaDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ItemProdutoDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ProdutoCompletoDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ProdutosPorItemDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.QuantidadeValorDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -143,4 +143,5 @@ class ItemProdutoControllerTest {
                 .andExpect(jsonPath("$.nomeProduto").value("Bolo"));
     }
 }
+
 

@@ -1,8 +1,8 @@
 package com.fabriciosanches.fichatecnica.core.usecase;
 
-import com.fabriciosanches.fichatecnica.dtos.RelatorioRequestDTO;
-import com.fabriciosanches.fichatecnica.enums.OrientacaoRelatorio;
-import com.fabriciosanches.fichatecnica.enums.TipoRelatorio;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.RelatorioRequestDTO;
+import com.fabriciosanches.fichatecnica.core.domain.enums.OrientacaoRelatorio;
+import com.fabriciosanches.fichatecnica.core.domain.enums.TipoRelatorio;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -49,7 +49,8 @@ class GerarRelatorioUseCaseTest {
                         TipoRelatorio.LISTA, OrientacaoRelatorio.RETRATO, false
                 )));
 
-        assertEquals("Nenhum registro encontrado para gerar o relatório.", ex.getMessage());
+        assertEquals("Nenhum registro encontrado para gerar o relatÃ³rio.", ex.getMessage());
     }
 }
+
 

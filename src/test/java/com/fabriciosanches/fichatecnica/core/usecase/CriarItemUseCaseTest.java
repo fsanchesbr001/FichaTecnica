@@ -4,7 +4,7 @@ import com.fabriciosanches.fichatecnica.core.domain.Item;
 import com.fabriciosanches.fichatecnica.core.domain.UnidadeMedida;
 import com.fabriciosanches.fichatecnica.core.ports.in.RegistrarHistoricoItemPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.ItemRepositoryPort;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -57,7 +57,8 @@ class CriarItemUseCaseTest {
                 () -> useCase.criar("Farinha", new UnidadeMedida(1L, "Quilo", "kg"), new BigDecimal("10.00"))
         );
 
-        assertEquals("Item já cadastrado", ex.getMessage());
+        assertEquals("Item jÃ¡ cadastrado", ex.getMessage());
     }
 }
+
 

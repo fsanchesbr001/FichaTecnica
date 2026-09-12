@@ -4,7 +4,7 @@ import com.fabriciosanches.fichatecnica.core.domain.Usuario;
 import com.fabriciosanches.fichatecnica.core.ports.in.AutenticarUsuarioPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.GerenciadorBlacklistTokenPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.ValidadorTokenPort;
-import com.fabriciosanches.fichatecnica.enums.UserRole;
+import com.fabriciosanches.fichatecnica.core.domain.enums.UserRole;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -93,4 +93,5 @@ class SecurityFilterTest {
         verify(filterChain).doFilter(request, response);
     }
 }
+
 
