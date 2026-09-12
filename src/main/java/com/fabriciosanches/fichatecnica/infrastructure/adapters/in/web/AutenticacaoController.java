@@ -4,12 +4,12 @@ import com.fabriciosanches.fichatecnica.constants.Constants;
 import com.fabriciosanches.fichatecnica.core.domain.Usuario;
 import com.fabriciosanches.fichatecnica.core.ports.in.ControleAcessoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarTokenPort;
+import com.fabriciosanches.fichatecnica.core.ports.out.GerenciadorBlacklistTokenPort;
+import com.fabriciosanches.fichatecnica.core.ports.out.ValidadorTokenPort;
 import com.fabriciosanches.fichatecnica.dtos.AutenticacaoDTO;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
-import com.fabriciosanches.fichatecnica.security.DadosTokenJWT;
-import com.fabriciosanches.fichatecnica.security.TokenBlacklistService;
-import com.fabriciosanches.fichatecnica.security.TokenService;
-import com.fabriciosanches.fichatecnica.security.UsuarioSecurityDetails;
+import com.fabriciosanches.fichatecnica.infrastructure.config.security.DadosTokenJWT;
+import com.fabriciosanches.fichatecnica.infrastructure.config.security.UsuarioSecurityDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -39,19 +39,19 @@ public class AutenticacaoController {
     private final AuthenticationManager manager;
     private final GerarTokenPort gerarTokenPort;
     private final ControleAcessoPort controleAcessoPort;
-    private final TokenBlacklistService tokenBlacklistService;
-    private final TokenService tokenService;
+    private final GerenciadorBlacklistTokenPort gerenciadorBlacklistTokenPort;
+    private final ValidadorTokenPort validadorTokenPort;
 
     public AutenticacaoController(AuthenticationManager manager,
                                   GerarTokenPort gerarTokenPort,
                                   ControleAcessoPort controleAcessoPort,
-                                  TokenBlacklistService tokenBlacklistService,
-                                  TokenService tokenService) {
+                                  GerenciadorBlacklistTokenPort gerenciadorBlacklistTokenPort,
+                                  ValidadorTokenPort validadorTokenPort) {
         this.manager = manager;
         this.gerarTokenPort = gerarTokenPort;
         this.controleAcessoPort = controleAcessoPort;
-        this.tokenBlacklistService = tokenBlacklistService;
-        this.tokenService = tokenService;
+        this.gerenciadorBlacklistTokenPort = gerenciadorBlacklistTokenPort;
+        this.validadorTokenPort = validadorTokenPort;
     }
 
     @PostMapping("/login")
@@ -101,13 +101,13 @@ public class AutenticacaoController {
         }
 
         String token = (String) auth.getCredentials();
-        Instant expiracao = tokenService.getExpiration(token);
+        Instant expiracao = validadorTokenPort.getExpiration(token);
         if (expiracao == null) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "Token inválido ou não foi possível determinar sua expiração"));
         }
 
-        tokenBlacklistService.revogar(token, expiracao);
+        gerenciadorBlacklistTokenPort.revogar(token, expiracao);
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok(Map.of("message", "Logout realizado com sucesso. Sessão encerrada."));
     }
