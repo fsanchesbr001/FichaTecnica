@@ -16,3 +16,4 @@ public interface SpringDataItemRepository extends JpaRepository<ItemEntity, Long
     void deleteItem(@Param("codigo") Long codigo);
 }
 
+

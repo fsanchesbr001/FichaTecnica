@@ -1,6 +1,6 @@
 package com.fabriciosanches.fichatecnica.apps;
 
-import com.fabriciosanches.fichatecnica.util.Utilidades;
+import com.fabriciosanches.fichatecnica.infrastructure.util.Utilidades;
 
 public class TesteBase64 {
     public static void main(String[] args) {
@@ -8,9 +8,10 @@ public class TesteBase64 {
         String decoded = Utilidades.decodeFromBase64(base64);
         System.out.println(decoded);
 
-        // Exemplo de uso do método encodeToBase64
+        // Exemplo de uso do mÃ©todo encodeToBase64
         String input = "Santander!037";
         String encoded = Utilidades.encodeToBase64(input);
         System.out.println("Encoded: " + encoded);
     }
 }
+

@@ -1,7 +1,7 @@
 package com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web;
 
 import com.fabriciosanches.fichatecnica.core.ports.in.TransferenciaArquivoPort;
-import com.fabriciosanches.fichatecnica.dtos.FileTransferRequestDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.FileTransferRequestDTO;
 import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -20,7 +20,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/files")
-@Tag(name = "Arquivos", description = "Transferência de arquivos e armazenamento no backend")
+@Tag(name = "Arquivos", description = "TransferÃªncia de arquivos e armazenamento no backend")
 public class FileTransferController {
     private final TransferenciaArquivoPort transferenciaArquivoPort;
 
@@ -32,12 +32,12 @@ public class FileTransferController {
     @Operation(summary = "Transfere arquivo", description = "Recebe metadados e um arquivo multipart e o armazena no destino informado.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Arquivo transferido com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos para transferência"),
+            @ApiResponse(responseCode = "400", description = "Dados invÃ¡lidos para transferÃªncia"),
             @ApiResponse(responseCode = "500", description = "Erro inesperado ao transferir o arquivo")
     })
     public ResponseEntity<Map<String, String>> transferFile(@Valid @RequestPart("metadata") FileTransferRequestDTO request,
                 @RequestPart("file") MultipartFile file) throws IOException {
-        // Armazena o arquivo e obtém o caminho relativo
+        // Armazena o arquivo e obtÃ©m o caminho relativo
         String fileAccessPath = transferenciaArquivoPort.transferir(file.getBytes(), request.getDestinationPath(),
                     request.getFileName());
 
@@ -49,4 +49,5 @@ public class FileTransferController {
         return ResponseEntity.ok(response);
     }
 }
+
 

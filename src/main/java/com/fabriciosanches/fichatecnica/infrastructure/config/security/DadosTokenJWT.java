@@ -11,9 +11,10 @@ public record DadosTokenJWT(
     String role
 ) {
 
-    // Construtor compatível com código antigo que passa apenas jwt
+    // Construtor compatÃ­vel com cÃ³digo antigo que passa apenas jwt
     public DadosTokenJWT(String jwt) {
         this(jwt, null, null, null, null, null);
     }
 }
+
 

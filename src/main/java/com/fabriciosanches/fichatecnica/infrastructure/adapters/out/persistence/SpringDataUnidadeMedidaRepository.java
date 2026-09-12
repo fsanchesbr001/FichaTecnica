@@ -18,3 +18,4 @@ public interface SpringDataUnidadeMedidaRepository extends JpaRepository<Unidade
 
     Optional<UnidadeMedidaEntity> findBySigla(String sigla);
 }
+

@@ -47,7 +47,7 @@ class GerarRelatorioDetalheUnidadeMedidaUseCaseTest {
     void executar_DeveLancarExcecaoQuandoSiglaForVazia() {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> useCase.executar(" "));
 
-        assertEquals("Sigla da unidade de medida não pode ser vazia", exception.getMessage());
+        assertEquals("Sigla da unidade de medida nÃ£o pode ser vazia", exception.getMessage());
     }
 
     @Test
@@ -56,6 +56,7 @@ class GerarRelatorioDetalheUnidadeMedidaUseCaseTest {
 
         NoSuchElementException exception = assertThrows(NoSuchElementException.class, () -> useCase.executar("kg"));
 
-        assertEquals("Unidade de medida não encontrada: KG", exception.getMessage());
+        assertEquals("Unidade de medida nÃ£o encontrada: KG", exception.getMessage());
     }
 }
+

@@ -3,9 +3,9 @@ package com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web;
 import com.fabriciosanches.fichatecnica.core.domain.Usuario;
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarTokenPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.RecuperacaoSenhaPort;
-import com.fabriciosanches.fichatecnica.dtos.EnviarEmailSegurancaResponseDTO;
-import com.fabriciosanches.fichatecnica.enums.UserRole;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.EnviarEmailSegurancaResponseDTO;
+import com.fabriciosanches.fichatecnica.core.domain.enums.UserRole;
+import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.infrastructure.config.FichaTecnicaProperty;
 import com.fabriciosanches.fichatecnica.infrastructure.config.security.DadosTokenJWT;
 import com.fabriciosanches.fichatecnica.infrastructure.config.security.UsuarioSecurityDetails;
@@ -61,7 +61,7 @@ class SegurancaControllerTest {
 
         mockMvc.perform(post("/ficha-tecnica/login-recuperacao-senha"))
                 .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.jwt").value("Credenciais do usuário de sistema não configuradas"));
+                .andExpect(jsonPath("$.jwt").value("Credenciais do usuÃ¡rio de sistema nÃ£o configuradas"));
     }
 
     @Test
@@ -76,7 +76,7 @@ class SegurancaControllerTest {
 
         mockMvc.perform(post("/ficha-tecnica/login-recuperacao-senha"))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.jwt").value("Usuário de sistema não possui ROLE_SYSTEM"));
+                .andExpect(jsonPath("$.jwt").value("UsuÃ¡rio de sistema nÃ£o possui ROLE_SYSTEM"));
     }
 
     @Test
@@ -112,7 +112,7 @@ class SegurancaControllerTest {
 
         mockMvc.perform(post("/ficha-tecnica/login-recuperacao-senha"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.jwt").value("Credenciais do usuário de sistema inválidas"));
+                .andExpect(jsonPath("$.jwt").value("Credenciais do usuÃ¡rio de sistema invÃ¡lidas"));
     }
 
     @Test
@@ -179,4 +179,5 @@ class SegurancaControllerTest {
                 .andExpect(jsonPath("$").value("erro"));
     }
 }
+
 

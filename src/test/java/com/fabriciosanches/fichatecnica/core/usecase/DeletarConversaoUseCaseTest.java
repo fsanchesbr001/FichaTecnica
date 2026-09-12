@@ -30,3 +30,4 @@ class DeletarConversaoUseCaseTest {
         assertThrows(IllegalArgumentException.class, () -> useCase.deletar(null));
     }
 }
+

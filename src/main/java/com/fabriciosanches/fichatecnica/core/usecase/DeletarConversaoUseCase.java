@@ -9,15 +9,16 @@ public class DeletarConversaoUseCase implements DeletarConversaoPort {
     private final ConversaoRepositoryPort repositoryPort;
 
     public DeletarConversaoUseCase(ConversaoRepositoryPort repositoryPort) {
-        this.repositoryPort = Objects.requireNonNull(repositoryPort, "Repository port não pode ser nulo");
+        this.repositoryPort = Objects.requireNonNull(repositoryPort, "Repository port nÃ£o pode ser nulo");
     }
 
     @Override
     public void deletar(Long id) {
         if (id == null) {
-            throw new IllegalArgumentException("Id não pode ser nulo");
+            throw new IllegalArgumentException("Id nÃ£o pode ser nulo");
         }
 
         repositoryPort.deletar(id);
     }
 }
+

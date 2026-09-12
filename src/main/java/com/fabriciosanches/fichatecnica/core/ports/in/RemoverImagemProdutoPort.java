@@ -4,3 +4,4 @@ public interface RemoverImagemProdutoPort {
     void remover(Long produtoId);
 }
 
+

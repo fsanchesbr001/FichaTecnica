@@ -6,3 +6,4 @@ public interface TransferenciaArquivoPort {
     String transferir(byte[] conteudo, String destinationPath, String fileName) throws IOException;
 }
 
+

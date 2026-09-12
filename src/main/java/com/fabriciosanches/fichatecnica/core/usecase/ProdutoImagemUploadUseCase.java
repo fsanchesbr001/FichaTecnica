@@ -8,9 +8,9 @@ import com.fabriciosanches.fichatecnica.core.ports.in.ListarJobsUploadImagemProd
 import com.fabriciosanches.fichatecnica.core.ports.in.RemoverImagemProdutoPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.ProdutoImagemStoragePort;
 import com.fabriciosanches.fichatecnica.core.ports.out.ProdutoRepositoryPort;
-import com.fabriciosanches.fichatecnica.dtos.UploadJobDTO;
-import com.fabriciosanches.fichatecnica.enums.UploadJobStatus;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.UploadJobDTO;
+import com.fabriciosanches.fichatecnica.core.domain.enums.UploadJobStatus;
+import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
 
 import java.util.List;
 import java.util.Map;
@@ -26,14 +26,14 @@ public class ProdutoImagemUploadUseCase implements IniciarUploadImagemProdutoPor
     private final Map<String, JobState> jobs = new ConcurrentHashMap<>();
 
     public ProdutoImagemUploadUseCase(ProdutoRepositoryPort produtoRepositoryPort, ProdutoImagemStoragePort produtoImagemStoragePort) {
-        this.produtoRepositoryPort = Objects.requireNonNull(produtoRepositoryPort, "ProdutoRepositoryPort não pode ser nulo");
-        this.produtoImagemStoragePort = Objects.requireNonNull(produtoImagemStoragePort, "ProdutoImagemStoragePort não pode ser nulo");
+        this.produtoRepositoryPort = Objects.requireNonNull(produtoRepositoryPort, "ProdutoRepositoryPort nÃ£o pode ser nulo");
+        this.produtoImagemStoragePort = Objects.requireNonNull(produtoImagemStoragePort, "ProdutoImagemStoragePort nÃ£o pode ser nulo");
     }
 
     @Override
     public UploadJobDTO iniciar(Long produtoId, ArquivoUpload arquivo) {
         Produto produto = produtoRepositoryPort.buscarPorId(produtoId)
-                .orElseThrow(() -> new FichaTecnicaException("Produto não encontrado id=" + produtoId));
+                .orElseThrow(() -> new FichaTecnicaException("Produto nÃ£o encontrado id=" + produtoId));
 
         validarArquivo(arquivo);
         String jobId = UUID.randomUUID().toString();
@@ -56,7 +56,7 @@ public class ProdutoImagemUploadUseCase implements IniciarUploadImagemProdutoPor
     public UploadJobDTO consultar(String jobId) {
         JobState state = jobs.get(jobId);
         if (state == null) {
-            throw new FichaTecnicaException("Job de upload não encontrado: " + jobId);
+            throw new FichaTecnicaException("Job de upload nÃ£o encontrado: " + jobId);
         }
         return toDTO(state);
     }
@@ -64,7 +64,7 @@ public class ProdutoImagemUploadUseCase implements IniciarUploadImagemProdutoPor
     @Override
     public void remover(Long produtoId) {
         Produto produto = produtoRepositoryPort.buscarPorId(produtoId)
-                .orElseThrow(() -> new FichaTecnicaException("Produto não encontrado id=" + produtoId));
+                .orElseThrow(() -> new FichaTecnicaException("Produto nÃ£o encontrado id=" + produtoId));
 
         String imagemAtual = produto.getImagem();
         if (imagemAtual == null || imagemAtual.isBlank()) {
@@ -83,19 +83,19 @@ public class ProdutoImagemUploadUseCase implements IniciarUploadImagemProdutoPor
 
     private void validarArquivo(ArquivoUpload arquivo) {
         if (arquivo == null || arquivo.isVazio()) {
-            throw new FichaTecnicaException("Arquivo de imagem não pode ser vazio.");
+            throw new FichaTecnicaException("Arquivo de imagem nÃ£o pode ser vazio.");
         }
         if (arquivo.getTamanho() > 10L * 1024 * 1024) {
-            throw new FichaTecnicaException("Arquivo excede o tamanho máximo permitido de 10 MB.");
+            throw new FichaTecnicaException("Arquivo excede o tamanho mÃ¡ximo permitido de 10 MB.");
         }
         String contentType = arquivo.getTipoConteudo();
         if (contentType == null || !(contentType.equalsIgnoreCase("image/jpeg") || contentType.equalsIgnoreCase("image/png") || contentType.equalsIgnoreCase("image/webp"))) {
-            throw new FichaTecnicaException("Tipo de arquivo não suportado: " + contentType + ". Permitidos: jpg, jpeg, png, webp.");
+            throw new FichaTecnicaException("Tipo de arquivo nÃ£o suportado: " + contentType + ". Permitidos: jpg, jpeg, png, webp.");
         }
         String original = arquivo.getNomeOriginal();
         String ext = original == null || !original.contains(".") ? "jpg" : original.substring(original.lastIndexOf('.') + 1);
         if (!(ext.equalsIgnoreCase("jpg") || ext.equalsIgnoreCase("jpeg") || ext.equalsIgnoreCase("png") || ext.equalsIgnoreCase("webp"))) {
-            throw new FichaTecnicaException("Extensão não permitida: " + ext + ". Permitidas: jpg, jpeg, png, webp.");
+            throw new FichaTecnicaException("ExtensÃ£o nÃ£o permitida: " + ext + ". Permitidas: jpg, jpeg, png, webp.");
         }
     }
 
@@ -109,4 +109,5 @@ public class ProdutoImagemUploadUseCase implements IniciarUploadImagemProdutoPor
 
     private record JobState(String jobId, UploadJobStatus status, Long produtoId, String imagemUrl, String message) {}
 }
+
 

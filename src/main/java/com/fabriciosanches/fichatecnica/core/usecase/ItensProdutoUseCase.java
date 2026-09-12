@@ -18,14 +18,14 @@ import com.fabriciosanches.fichatecnica.core.ports.out.ItemProdutoRepositoryPort
 import com.fabriciosanches.fichatecnica.core.ports.out.ItemRepositoryPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.ProdutoRepositoryPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.UnidadeMedidaRepositoryPort;
-import com.fabriciosanches.fichatecnica.dtos.GraficoPizzaDTO;
-import com.fabriciosanches.fichatecnica.dtos.GraficoPizzaFatiaDTO;
-import com.fabriciosanches.fichatecnica.dtos.ItemProdutoDTO;
-import com.fabriciosanches.fichatecnica.dtos.ProdutoCompletoDTO;
-import com.fabriciosanches.fichatecnica.dtos.ProdutosPorItemDTO;
-import com.fabriciosanches.fichatecnica.dtos.QuantidadeValorDTO;
-import com.fabriciosanches.fichatecnica.dtos.ConversaoValoresDTO;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.GraficoPizzaDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.GraficoPizzaFatiaDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ItemProdutoDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ProdutoCompletoDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ProdutosPorItemDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.QuantidadeValorDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ConversaoValoresDTO;
+import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -62,11 +62,11 @@ public class ItensProdutoUseCase implements AdicionarItemAoProdutoPort, ListarIt
             ItemRepositoryPort itemRepositoryPort,
             UnidadeMedidaRepositoryPort unidadeMedidaRepositoryPort,
             ObterValoresConversaoPort obterValoresConversaoPort) {
-        this.itemProdutoRepositoryPort = Objects.requireNonNull(itemProdutoRepositoryPort, "ItemProdutoRepositoryPort não pode ser nulo");
-        this.produtoRepositoryPort = Objects.requireNonNull(produtoRepositoryPort, "ProdutoRepositoryPort não pode ser nulo");
-        this.itemRepositoryPort = Objects.requireNonNull(itemRepositoryPort, "ItemRepositoryPort não pode ser nulo");
-        this.unidadeMedidaRepositoryPort = Objects.requireNonNull(unidadeMedidaRepositoryPort, "UnidadeMedidaRepositoryPort não pode ser nulo");
-        this.obterValoresConversaoPort = Objects.requireNonNull(obterValoresConversaoPort, "ObterValoresConversaoPort não pode ser nulo");
+        this.itemProdutoRepositoryPort = Objects.requireNonNull(itemProdutoRepositoryPort, "ItemProdutoRepositoryPort nÃ£o pode ser nulo");
+        this.produtoRepositoryPort = Objects.requireNonNull(produtoRepositoryPort, "ProdutoRepositoryPort nÃ£o pode ser nulo");
+        this.itemRepositoryPort = Objects.requireNonNull(itemRepositoryPort, "ItemRepositoryPort nÃ£o pode ser nulo");
+        this.unidadeMedidaRepositoryPort = Objects.requireNonNull(unidadeMedidaRepositoryPort, "UnidadeMedidaRepositoryPort nÃ£o pode ser nulo");
+        this.obterValoresConversaoPort = Objects.requireNonNull(obterValoresConversaoPort, "ObterValoresConversaoPort nÃ£o pode ser nulo");
     }
 
     @Override
@@ -74,7 +74,7 @@ public class ItensProdutoUseCase implements AdicionarItemAoProdutoPort, ListarIt
         Produto produto = getProduto(idProduto);
 
         if (!isValidItens(itemProduto)) {
-            throw new FichaTecnicaException("Item não encontrado");
+            throw new FichaTecnicaException("Item nÃ£o encontrado");
         }
 
         var salvoList = new ArrayList<ItemProduto>();
@@ -83,9 +83,9 @@ public class ItensProdutoUseCase implements AdicionarItemAoProdutoPort, ListarIt
             Long unidadeId = item.getUnidadePara().getCodigo();
 
             Item itemDomain = itemRepositoryPort.buscarPorId(itemId)
-                    .orElseThrow(() -> new FichaTecnicaException("Item não encontrado"));
+                    .orElseThrow(() -> new FichaTecnicaException("Item nÃ£o encontrado"));
             UnidadeMedida unidadeMedida = unidadeMedidaRepositoryPort.buscarPorId(unidadeId)
-                    .orElseThrow(() -> new FichaTecnicaException("Unidade de medida não encontrada"));
+                    .orElseThrow(() -> new FichaTecnicaException("Unidade de medida nÃ£o encontrada"));
 
             ConversaoValoresDTO conversaoValoresDTO = obterValoresConversaoPort.obterValoresConversao(itemDomain, item.getQuantidade(), unidadeId);
             ItemProduto itemProdutoSalvo = salvarItem(item, produto, itemDomain, unidadeMedida, conversaoValoresDTO);
@@ -132,7 +132,7 @@ public class ItensProdutoUseCase implements AdicionarItemAoProdutoPort, ListarIt
 
     @Override
     public QuantidadeValorDTO calcular(Long idProduto) {
-        logger().info("Inicio do método calcularQuantidadeEValorTotal");
+        logger().info("Inicio do mÃ©todo calcularQuantidadeEValorTotal");
         List<ItemProduto> listItensProduto = itemProdutoRepositoryPort.buscarPorProdutoId(idProduto);
         int quantidadeTotal = listItensProduto.size();
         BigDecimal valorTotal = listItensProduto.stream()
@@ -145,7 +145,7 @@ public class ItensProdutoUseCase implements AdicionarItemAoProdutoPort, ListarIt
     @Override
     public List<ProdutosPorItemDTO> listarPorItem(Long codigoItem) {
         itemRepositoryPort.buscarPorId(codigoItem)
-                .orElseThrow(() -> new FichaTecnicaException("Item não encontrado"));
+                .orElseThrow(() -> new FichaTecnicaException("Item nÃ£o encontrado"));
 
         return itemProdutoRepositoryPort.buscarPorItemId(codigoItem).stream()
                 .map(itemProduto -> new ProdutosPorItemDTO(
@@ -157,7 +157,7 @@ public class ItensProdutoUseCase implements AdicionarItemAoProdutoPort, ListarIt
     @Override
     public void remover(Long idProduto, Long idItem) {
         ItemProduto itemProduto = itemProdutoRepositoryPort.buscarPorProdutoIdEItemId(idProduto, idItem)
-                .orElseThrow(() -> new FichaTecnicaException("ItemProduto não encontrado para o produto e item especificados"));
+                .orElseThrow(() -> new FichaTecnicaException("ItemProduto nÃ£o encontrado para o produto e item especificados"));
         itemProdutoRepositoryPort.deletarPorProdutoIdEItemId(idProduto, idItem);
         atualizarValorItensProduto(getProduto(idProduto));
     }
@@ -165,10 +165,10 @@ public class ItensProdutoUseCase implements AdicionarItemAoProdutoPort, ListarIt
     @Override
     public void atualizarQuantidade(Long idProduto, Long idItem, Double novaQuantidade) {
         ItemProduto itemProduto = itemProdutoRepositoryPort.buscarPorProdutoIdEItemId(idProduto, idItem)
-                .orElseThrow(() -> new FichaTecnicaException("ItemProduto não encontrado para o produto e item especificados"));
+                .orElseThrow(() -> new FichaTecnicaException("ItemProduto nÃ£o encontrado para o produto e item especificados"));
 
         Item item = itemRepositoryPort.buscarPorId(idItem)
-                .orElseThrow(() -> new FichaTecnicaException("Item não encontrado"));
+                .orElseThrow(() -> new FichaTecnicaException("Item nÃ£o encontrado"));
 
         ConversaoValoresDTO conversaoValoresDTO = obterValoresConversaoPort.obterValoresConversao(
                 item,
@@ -262,11 +262,12 @@ public class ItensProdutoUseCase implements AdicionarItemAoProdutoPort, ListarIt
 
     private Produto getProduto(Long idProduto) {
         return produtoRepositoryPort.buscarPorId(idProduto)
-                .orElseThrow(() -> new FichaTecnicaException("Produto não encontrado"));
+                .orElseThrow(() -> new FichaTecnicaException("Produto nÃ£o encontrado"));
     }
 
     private org.apache.logging.log4j.Logger logger() {
         return org.apache.logging.log4j.LogManager.getLogger(ItensProdutoUseCase.class);
     }
 }
+
 

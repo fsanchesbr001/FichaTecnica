@@ -22,9 +22,10 @@ public class AutenticacaoUserDetailsServiceAdapter implements UserDetailsService
             Usuario usuario = autenticarUsuarioPort.buscarPorLogin(username);
             return new UsuarioSecurityDetails(usuario);
         } catch (Exception ex) {
-            throw new UsernameNotFoundException("Usuário não encontrado: " + username, ex);
+            throw new UsernameNotFoundException("UsuÃ¡rio nÃ£o encontrado: " + username, ex);
         }
     }
 }
+
 
 

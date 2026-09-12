@@ -1,6 +1,6 @@
 package com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence;
 
-import com.fabriciosanches.fichatecnica.dtos.UnidadeMedidaDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.UnidadeMedidaDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,3 +26,4 @@ public class UnidadeMedidaEntity {
         this.sigla = unidadeMedidaDTO.sigla();
     }
 }
+

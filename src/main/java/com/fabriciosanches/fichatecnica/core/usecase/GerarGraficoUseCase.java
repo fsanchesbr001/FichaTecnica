@@ -1,8 +1,8 @@
 package com.fabriciosanches.fichatecnica.core.usecase;
 
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarGraficoPort;
-import com.fabriciosanches.fichatecnica.dtos.GraficoPizzaDTO;
-import com.fabriciosanches.fichatecnica.dtos.GraficoPrecoItemDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.GraficoPizzaDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.GraficoPrecoItemDTO;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jfree.chart.ChartFactory;
@@ -30,43 +30,43 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Serviço responsável pela geração de gráficos como imagens PNG.
- * Utiliza JFreeChart para renderização.
+ * ServiÃ§o responsÃ¡vel pela geraÃ§Ã£o de grÃ¡ficos como imagens PNG.
+ * Utiliza JFreeChart para renderizaÃ§Ã£o.
  */
 public class GerarGraficoUseCase implements GerarGraficoPort {
 
     private static final Logger logger = LogManager.getLogger(GerarGraficoUseCase.class);
 
-    /** Largura padrão da imagem gerada (pixels). */
+    /** Largura padrÃ£o da imagem gerada (pixels). */
     private static final int CHART_WIDTH  = 900;
-    /** Altura padrão da imagem gerada (pixels). */
+    /** Altura padrÃ£o da imagem gerada (pixels). */
     private static final int CHART_HEIGHT = 400;
 
-    /** Cor da linha do gráfico – azul escuro. */
+    /** Cor da linha do grÃ¡fico â€“ azul escuro. */
     private static final Color COR_LINHA  = new Color(21, 101, 192);   // #1565C0
-    /** Cor dos pontos (círculos) – vermelho. */
+    /** Cor dos pontos (cÃ­rculos) â€“ vermelho. */
     private static final Color COR_PONTOS = new Color(211, 47, 47);    // #D32F2F
     private static final Pattern LABEL_EVENTO_PATTERN = Pattern.compile("^(.*?)(?:\\s*\\[#(\\d+)])?$");
 
     /**
-     * Gera um gráfico de linha de variação de preços a partir de um {@link GraficoPrecoItemDTO}
+     * Gera um grÃ¡fico de linha de variaÃ§Ã£o de preÃ§os a partir de um {@link GraficoPrecoItemDTO}
      * e retorna os bytes PNG da imagem resultante.
      *
      * <ul>
-     *   <li>Eixo X – datas formatadas (labels do DTO)</li>
-     *   <li>Eixo Y – valores numéricos brutos</li>
-     *   <li>Linha azul (#1565C0) contínua</li>
-     *   <li>Pontos de intersecção: círculos vermelhos (#D32F2F)</li>
+     *   <li>Eixo X â€“ datas formatadas (labels do DTO)</li>
+     *   <li>Eixo Y â€“ valores numÃ©ricos brutos</li>
+     *   <li>Linha azul (#1565C0) contÃ­nua</li>
+     *   <li>Pontos de intersecÃ§Ã£o: cÃ­rculos vermelhos (#D32F2F)</li>
      * </ul>
      *
-     * @param dto dados do gráfico gerados pelo fluxo de histórico de item (use case)
+     * @param dto dados do grÃ¡fico gerados pelo fluxo de histÃ³rico de item (use case)
      * @return array de bytes da imagem PNG
-     * @throws IOException se ocorrer erro ao serializar o gráfico
+     * @throws IOException se ocorrer erro ao serializar o grÃ¡fico
      */
     public byte[] gerarGraficoPNG(GraficoPrecoItemDTO dto) throws IOException {
-        logger.info("Gerando gráfico PNG para item '{}'", dto.nomeItem());
+        logger.info("Gerando grÃ¡fico PNG para item '{}'", dto.nomeItem());
 
-        // ── Dataset ──────────────────────────────────────────────────────────
+        // â”€â”€ Dataset â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
         List<String>     labels  = dto.labels();
         List<BigDecimal> valores = dto.valores();
@@ -79,9 +79,9 @@ public class GerarGraficoUseCase implements GerarGraficoPort {
             dataset.addValue(val, dto.nomeItem(), new EventoCategoria(evento.data(), evento.codigoEvento(), i));
         }
 
-        // ── Gráfico ───────────────────────────────────────────────────────────
+        // â”€â”€ GrÃ¡fico â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         JFreeChart chart = ChartFactory.createLineChart(
-                dto.titulo(),          // título
+                dto.titulo(),          // tÃ­tulo
                 "Data",                // label eixo X
                 "Valor (R$)",          // label eixo Y
                 dataset,
@@ -94,7 +94,7 @@ public class GerarGraficoUseCase implements GerarGraficoPort {
         chart.setBackgroundPaint(Color.WHITE);
         chart.getTitle().setFont(new Font("SansSerif", Font.BOLD, 14));
 
-        // ── Plot ─────────────────────────────────────────────────────────────
+        // â”€â”€ Plot â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         CategoryPlot plot = chart.getCategoryPlot();
         plot.setBackgroundPaint(Color.WHITE);
         plot.setRangeGridlinePaint(new Color(200, 200, 200));
@@ -102,20 +102,20 @@ public class GerarGraficoUseCase implements GerarGraficoPort {
         plot.setDomainGridlinesVisible(true);
         plot.setOutlineVisible(false);
 
-        // ── Eixo X ────────────────────────────────────────────────────────────
+        // â”€â”€ Eixo X â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         CategoryAxis domainAxis = plot.getDomainAxis();
         domainAxis.setCategoryLabelPositions(CategoryLabelPositions.UP_45);
         domainAxis.setTickLabelFont(new Font("SansSerif", Font.PLAIN, 10));
         domainAxis.setAxisLineVisible(true);
 
-        // ── Eixo Y ────────────────────────────────────────────────────────────
+        // â”€â”€ Eixo Y â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
         rangeAxis.setAutoRangeIncludesZero(false);
         rangeAxis.setTickLabelFont(new Font("SansSerif", Font.PLAIN, 10));
         rangeAxis.setNumberFormatOverride(
                 java.text.NumberFormat.getCurrencyInstance(new java.util.Locale("pt", "BR")));
 
-        // ── Renderer: linha azul + pontos vermelhos ───────────────────────────
+        // â”€â”€ Renderer: linha azul + pontos vermelhos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         LineAndShapeRenderer renderer = new LineAndShapeRenderer();
         renderer.setSeriesPaint(0, COR_LINHA);
         renderer.setSeriesStroke(0, new BasicStroke(2.0f));
@@ -134,32 +134,32 @@ public class GerarGraficoUseCase implements GerarGraficoPort {
                     String valorFmt   = dto.valoresFormatados().get(col);
                     String variacao   = dto.variacoes().get(col);
                     String varMon     = dto.variacoesMonetarias().get(col);
-                    return label + " – " + valorFmt + codigoInfo + " | " + variacao + " (" + varMon + ")";
+                    return label + " â€“ " + valorFmt + codigoInfo + " | " + variacao + " (" + varMon + ")";
                 }
         );
         plot.setRenderer(renderer);
 
-        // Subtítulo com nome do item
+        // SubtÃ­tulo com nome do item
         chart.addSubtitle(new TextTitle(
                 dto.nomeItem(),
                 new Font("SansSerif", Font.ITALIC, 11)
         ));
 
-        // ── Renderizar como PNG ───────────────────────────────────────────────
+        // â”€â”€ Renderizar como PNG â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ChartUtils.writeChartAsPNG(baos, chart, CHART_WIDTH, CHART_HEIGHT);
         byte[] pngBytes = baos.toByteArray();
 
-        logger.info("Gráfico PNG gerado com sucesso – {} bytes, {} pontos", pngBytes.length, labels.size());
+        logger.info("GrÃ¡fico PNG gerado com sucesso â€“ {} bytes, {} pontos", pngBytes.length, labels.size());
         return pngBytes;
     }
 
 
     /**
-     * Gera um gráfico de pizza (composição de custo de produto) e retorna os bytes PNG.
+     * Gera um grÃ¡fico de pizza (composiÃ§Ã£o de custo de produto) e retorna os bytes PNG.
      */
     public byte[] gerarGraficoPizzaPNG(GraficoPizzaDTO dto) throws IOException {
-        logger.info("Gerando gráfico de pizza PNG para produto '{}'", dto.nomeProduto());
+        logger.info("Gerando grÃ¡fico de pizza PNG para produto '{}'", dto.nomeProduto());
 
         DefaultPieDataset<String> dataset = new DefaultPieDataset<>();
         List<String> labels = dto.labels() != null ? dto.labels() : List.of();
@@ -171,7 +171,7 @@ public class GerarGraficoUseCase implements GerarGraficoPort {
         }
 
         JFreeChart chart = ChartFactory.createPieChart(
-                "Composição de Custo - " + dto.nomeProduto(),
+                "ComposiÃ§Ã£o de Custo - " + dto.nomeProduto(),
                 dataset,
                 true,
                 true,
@@ -200,7 +200,7 @@ public class GerarGraficoUseCase implements GerarGraficoPort {
         ChartUtils.writeChartAsPNG(baos, chart, CHART_WIDTH, CHART_HEIGHT);
         byte[] pngBytes = baos.toByteArray();
 
-        logger.info("Gráfico de pizza PNG gerado com sucesso – {} bytes, {} fatias", pngBytes.length, labels.size());
+        logger.info("GrÃ¡fico de pizza PNG gerado com sucesso â€“ {} bytes, {} fatias", pngBytes.length, labels.size());
         return pngBytes;
     }
 
@@ -239,5 +239,6 @@ public class GerarGraficoUseCase implements GerarGraficoPort {
         }
     }
 }
+
 
 

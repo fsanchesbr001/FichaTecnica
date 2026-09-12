@@ -5,8 +5,8 @@ import com.fabriciosanches.fichatecnica.core.ports.in.ControleAcessoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarTokenPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.GerenciadorBlacklistTokenPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.ValidadorTokenPort;
-import com.fabriciosanches.fichatecnica.dtos.AutenticacaoDTO;
-import com.fabriciosanches.fichatecnica.enums.UserRole;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.AutenticacaoDTO;
+import com.fabriciosanches.fichatecnica.core.domain.enums.UserRole;
 import com.fabriciosanches.fichatecnica.infrastructure.config.security.DadosTokenJWT;
 import com.fabriciosanches.fichatecnica.infrastructure.config.security.UsuarioSecurityDetails;
 import org.junit.jupiter.api.AfterEach;
@@ -86,4 +86,5 @@ class AutenticacaoControllerTest {
         verify(gerenciadorBlacklistTokenPort).revogar(token, expiration);
     }
 }
+
 

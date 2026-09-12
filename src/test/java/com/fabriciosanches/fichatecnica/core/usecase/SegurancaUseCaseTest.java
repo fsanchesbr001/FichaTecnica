@@ -1,15 +1,15 @@
 package com.fabriciosanches.fichatecnica.core.usecase;
 
-import com.fabriciosanches.fichatecnica.constants.Constants;
+import com.fabriciosanches.fichatecnica.infrastructure.constants.Constants;
 import com.fabriciosanches.fichatecnica.core.domain.Seguranca;
 import com.fabriciosanches.fichatecnica.core.domain.Usuario;
 import com.fabriciosanches.fichatecnica.core.ports.out.EnviarEmailPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.SegurancaRepositoryPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.UsuarioRepositoryPort;
-import com.fabriciosanches.fichatecnica.dtos.EnviarEmailSegurancaResponseDTO;
-import com.fabriciosanches.fichatecnica.enums.UserRole;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
-import com.fabriciosanches.fichatecnica.util.Utilidades;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.EnviarEmailSegurancaResponseDTO;
+import com.fabriciosanches.fichatecnica.core.domain.enums.UserRole;
+import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.infrastructure.util.Utilidades;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -97,4 +97,5 @@ class SegurancaUseCaseTest {
         assertTrue(usuario.getSenha() != null && !usuario.getSenha().equals("NovaSenha@123"));
     }
 }
+
 

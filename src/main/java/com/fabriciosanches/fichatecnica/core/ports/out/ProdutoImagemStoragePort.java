@@ -6,3 +6,4 @@ public interface ProdutoImagemStoragePort {
     void remover(String imagemUrl, Long produtoId);
 }
 
+

@@ -10,11 +10,11 @@ import com.fabriciosanches.fichatecnica.core.ports.out.ItemProdutoRepositoryPort
 import com.fabriciosanches.fichatecnica.core.ports.out.ItemRepositoryPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.ProdutoRepositoryPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.UnidadeMedidaRepositoryPort;
-import com.fabriciosanches.fichatecnica.dtos.ConversaoValoresDTO;
-import com.fabriciosanches.fichatecnica.dtos.GraficoPizzaDTO;
-import com.fabriciosanches.fichatecnica.dtos.ProdutosPorItemDTO;
-import com.fabriciosanches.fichatecnica.dtos.QuantidadeValorDTO;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ConversaoValoresDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.GraficoPizzaDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ProdutosPorItemDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.QuantidadeValorDTO;
+import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -77,7 +77,7 @@ class ItensProdutoUseCaseTest {
         FichaTecnicaException ex = org.junit.jupiter.api.Assertions.assertThrows(FichaTecnicaException.class,
                 () -> useCase.listarPorItem(99L));
 
-        assertEquals("Item não encontrado", ex.getMessage());
+        assertEquals("Item nÃ£o encontrado", ex.getMessage());
     }
 
     @Test
@@ -192,3 +192,4 @@ class ItensProdutoUseCaseTest {
         assertEquals(0, captor.getValue().getValor().compareTo(new BigDecimal("12.50")));
     }
 }
+

@@ -10,8 +10,8 @@ import com.fabriciosanches.fichatecnica.core.domain.ItemProduto;
 import com.fabriciosanches.fichatecnica.core.domain.ItemProdutoId;
 import com.fabriciosanches.fichatecnica.core.domain.Produto;
 import com.fabriciosanches.fichatecnica.core.domain.UnidadeMedida;
-import com.fabriciosanches.fichatecnica.dtos.ConversaoValoresDTO;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ConversaoValoresDTO;
+import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -59,7 +59,7 @@ class AtualizarItemUseCaseTest {
                 () -> useCase.atualizar(1L, "Farinha", unidade, new BigDecimal("10.00"))
         );
 
-        assertEquals("Item com ID 1 não encontrado", ex.getMessage());
+        assertEquals("Item com ID 1 nÃ£o encontrado", ex.getMessage());
     }
 
     @Test
@@ -103,4 +103,5 @@ class AtualizarItemUseCaseTest {
         verify(produtoRepositoryPort).salvar(any(Produto.class));
     }
 }
+
 

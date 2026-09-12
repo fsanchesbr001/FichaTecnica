@@ -9,3 +9,4 @@ public interface BuscarConversaoPort {
 
     Conversao buscarPorId(Long id);
 }
+

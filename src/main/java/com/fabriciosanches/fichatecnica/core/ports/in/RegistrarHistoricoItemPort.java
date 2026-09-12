@@ -9,3 +9,4 @@ public interface RegistrarHistoricoItemPort {
     HistoricoItem registrar(Long codigoItem, BigDecimal valor, LocalDate dataInicio);
 }
 
+

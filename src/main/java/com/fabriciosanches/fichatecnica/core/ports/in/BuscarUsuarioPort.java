@@ -1,6 +1,6 @@
 package com.fabriciosanches.fichatecnica.core.ports.in;
 
-import com.fabriciosanches.fichatecnica.dtos.UsuarioListagemDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.UsuarioListagemDTO;
 
 import java.util.List;
 
@@ -9,4 +9,5 @@ public interface BuscarUsuarioPort {
 
     List<UsuarioListagemDTO> listarTodosUsuarios();
 }
+
 

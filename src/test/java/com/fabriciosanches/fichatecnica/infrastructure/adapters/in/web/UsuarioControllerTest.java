@@ -7,9 +7,9 @@ import com.fabriciosanches.fichatecnica.core.ports.in.CriarUsuarioPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.ExcluirUsuarioPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.GerenciarBloqueioPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.PrimeiroAcessoPort;
-import com.fabriciosanches.fichatecnica.dtos.AtualizarUsuarioRequestDTO;
-import com.fabriciosanches.fichatecnica.dtos.UsuarioListagemDTO;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.AtualizarUsuarioRequestDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.UsuarioListagemDTO;
+import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -82,7 +82,7 @@ class UsuarioControllerTest {
         when(buscarUsuarioPort.listarTodosUsuarios()).thenReturn(List.of(
                 new UsuarioListagemDTO("user@email.com", "52998224725", null, 5,
                         false, false, false, false, null, null, null,
-                        "Usuário Teste", "ADMIN")
+                        "UsuÃ¡rio Teste", "ADMIN")
         ));
 
         mockMvc.perform(get("/ficha-tecnica/usuarios/listar-todos-usuarios"))
@@ -103,11 +103,11 @@ class UsuarioControllerTest {
         when(buscarUsuarioPort.buscarUsuarioPorEmail("user@email.com"))
                 .thenReturn(new UsuarioListagemDTO("user@email.com", "52998224725", null, 5,
                         false, false, false, false, null, null, null,
-                        "Usuário Teste", "ADMIN"));
+                        "UsuÃ¡rio Teste", "ADMIN"));
 
         mockMvc.perform(get("/ficha-tecnica/usuarios/buscar-usuario/{email}", "user@email.com"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nome").value("Usuário Teste"));
+                .andExpect(jsonPath("$.nome").value("UsuÃ¡rio Teste"));
     }
 
     @Test
@@ -149,4 +149,5 @@ class UsuarioControllerTest {
                 .andExpect(status().isBadRequest());
     }
 }
+
 

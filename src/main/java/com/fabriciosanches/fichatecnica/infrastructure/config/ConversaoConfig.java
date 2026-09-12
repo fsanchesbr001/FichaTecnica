@@ -49,3 +49,4 @@ public class ConversaoConfig {
         return new ObterValoresConversaoUseCase(conversaoRepositoryPort);
     }
 }
+

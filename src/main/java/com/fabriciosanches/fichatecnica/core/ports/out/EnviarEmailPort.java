@@ -4,3 +4,4 @@ public interface EnviarEmailPort {
     void enviar(String destinatario, String assunto, String corpoTexto);
 }
 
+

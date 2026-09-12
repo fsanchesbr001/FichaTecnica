@@ -14,3 +14,4 @@ public interface SpringDataItemProdutoRepository extends JpaRepository<ItemProdu
 
     void deleteByProdutoCodigoAndItemCodigo(Long produtoCodigo, Long itemCodigo);
 }
+

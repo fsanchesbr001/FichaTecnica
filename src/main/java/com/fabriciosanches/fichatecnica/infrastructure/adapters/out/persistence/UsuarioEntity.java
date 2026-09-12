@@ -1,6 +1,6 @@
 package com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence;
 
-import com.fabriciosanches.fichatecnica.enums.UserRole;
+import com.fabriciosanches.fichatecnica.core.domain.enums.UserRole;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -34,4 +34,5 @@ public class UsuarioEntity {
 
     private String nome;
 }
+
 

@@ -12,3 +12,4 @@ public interface SpringDataUsuarioRepository extends JpaRepository<UsuarioEntity
     Optional<UsuarioEntity> findByLoginUsuario(String login);
 }
 
+

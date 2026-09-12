@@ -1,7 +1,7 @@
 package com.fabriciosanches.fichatecnica.core.ports.in;
 
 import com.fabriciosanches.fichatecnica.core.domain.HistoricoItem;
-import com.fabriciosanches.fichatecnica.dtos.GraficoPrecoItemDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.GraficoPrecoItemDTO;
 
 import java.util.List;
 
@@ -16,4 +16,5 @@ public interface ListarHistoricoItemPort {
 
     GraficoPrecoItemDTO gerarGraficoPreco(Long codigoItem);
 }
+
 

@@ -10,9 +10,9 @@ import com.fabriciosanches.fichatecnica.core.ports.in.RegistrarHistoricoItemPort
 import com.fabriciosanches.fichatecnica.core.ports.out.ItemRepositoryPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.ItemProdutoRepositoryPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.ProdutoRepositoryPort;
-import com.fabriciosanches.fichatecnica.dtos.ConversaoValoresDTO;
-import com.fabriciosanches.fichatecnica.dtos.QuantidadeValorDTO;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ConversaoValoresDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.QuantidadeValorDTO;
+import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -32,24 +32,24 @@ public class AtualizarItemUseCase implements AtualizarItemPort {
             ItemProdutoRepositoryPort itemProdutoRepositoryPort,
             ObterValoresConversaoPort obterValoresConversaoPort,
             ProdutoRepositoryPort produtoRepositoryPort) {
-        this.itemRepositoryPort = Objects.requireNonNull(itemRepositoryPort, "Item repository port não pode ser nulo");
-        this.registrarHistoricoItemPort = Objects.requireNonNull(registrarHistoricoItemPort, "Port de histórico não pode ser nulo");
-        this.itemProdutoRepositoryPort = Objects.requireNonNull(itemProdutoRepositoryPort, "ItemProdutoRepositoryPort não pode ser nulo");
-        this.obterValoresConversaoPort = Objects.requireNonNull(obterValoresConversaoPort, "ObterValoresConversaoPort não pode ser nulo");
-        this.produtoRepositoryPort = Objects.requireNonNull(produtoRepositoryPort, "ProdutoRepositoryPort não pode ser nulo");
+        this.itemRepositoryPort = Objects.requireNonNull(itemRepositoryPort, "Item repository port nÃ£o pode ser nulo");
+        this.registrarHistoricoItemPort = Objects.requireNonNull(registrarHistoricoItemPort, "Port de histÃ³rico nÃ£o pode ser nulo");
+        this.itemProdutoRepositoryPort = Objects.requireNonNull(itemProdutoRepositoryPort, "ItemProdutoRepositoryPort nÃ£o pode ser nulo");
+        this.obterValoresConversaoPort = Objects.requireNonNull(obterValoresConversaoPort, "ObterValoresConversaoPort nÃ£o pode ser nulo");
+        this.produtoRepositoryPort = Objects.requireNonNull(produtoRepositoryPort, "ProdutoRepositoryPort nÃ£o pode ser nulo");
     }
 
     @Override
     public Item atualizar(Long id, String nome, UnidadeMedida unidadeMedida, BigDecimal valor) {
         if (id == null) {
-            throw new IllegalArgumentException("Id não pode ser nulo");
+            throw new IllegalArgumentException("Id nÃ£o pode ser nulo");
         }
-        Objects.requireNonNull(nome, "Nome do item não pode ser nulo");
-        Objects.requireNonNull(unidadeMedida, "Unidade de medida não pode ser nula");
-        Objects.requireNonNull(valor, "Valor do item não pode ser nulo");
+        Objects.requireNonNull(nome, "Nome do item nÃ£o pode ser nulo");
+        Objects.requireNonNull(unidadeMedida, "Unidade de medida nÃ£o pode ser nula");
+        Objects.requireNonNull(valor, "Valor do item nÃ£o pode ser nulo");
 
         Item item = itemRepositoryPort.buscarPorId(id)
-                .orElseThrow(() -> new FichaTecnicaException("Item com ID " + id + " não encontrado"));
+                .orElseThrow(() -> new FichaTecnicaException("Item com ID " + id + " nÃ£o encontrado"));
 
         item.setNome(nome);
         item.setUnidadeMedida(unidadeMedida);
@@ -71,7 +71,7 @@ public class AtualizarItemUseCase implements AtualizarItemPort {
             Produto produto = itemProduto.getProduto() != null
                     ? itemProduto.getProduto()
                     : produtoRepositoryPort.buscarPorId(itemProduto.getId().getProdutoId())
-                    .orElseThrow(() -> new FichaTecnicaException("Produto não encontrado"));
+                    .orElseThrow(() -> new FichaTecnicaException("Produto nÃ£o encontrado"));
             QuantidadeValorDTO quantidadeValorDTO = calcularQuantidadeEValorTotal(produto.getCodigo());
             produto.setValorItens(quantidadeValorDTO.valorTotal());
             produtoRepositoryPort.salvar(produto);
@@ -95,4 +95,5 @@ public class AtualizarItemUseCase implements AtualizarItemPort {
     }
 
 }
+
 

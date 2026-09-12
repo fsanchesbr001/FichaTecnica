@@ -4,9 +4,9 @@ import com.fabriciosanches.fichatecnica.core.domain.Conversao;
 import com.fabriciosanches.fichatecnica.core.ports.in.ObterValoresConversaoPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.ConversaoRepositoryPort;
 import com.fabriciosanches.fichatecnica.core.domain.Item;
-import com.fabriciosanches.fichatecnica.dtos.ConversaoValoresDTO;
-import com.fabriciosanches.fichatecnica.dtos.ItemDTO;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ConversaoValoresDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ItemDTO;
+import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
 
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -15,7 +15,7 @@ public class ObterValoresConversaoUseCase implements ObterValoresConversaoPort {
     private final ConversaoRepositoryPort repositoryPort;
 
     public ObterValoresConversaoUseCase(ConversaoRepositoryPort repositoryPort) {
-        this.repositoryPort = Objects.requireNonNull(repositoryPort, "Repository port nÃ£o pode ser nulo");
+        this.repositoryPort = Objects.requireNonNull(repositoryPort, "Repository port nÃƒÂ£o pode ser nulo");
     }
 
     @Override
@@ -27,14 +27,14 @@ public class ObterValoresConversaoUseCase implements ObterValoresConversaoPort {
         var valorCompra = itemDto.valor();
 
         Conversao conversao = repositoryPort.buscarPorUnidadeDeEUnidadePara(idUnidadeMedidaCompra, idUnidade)
-                .orElseThrow(() -> new FichaTecnicaException("ConversÃ£o nÃ£o encontrada"));
+                .orElseThrow(() -> new FichaTecnicaException("ConversÃƒÂ£o nÃƒÂ£o encontrada"));
 
         return converterValores(conversao, valorCompra, quantidade);
     }
 
     private void validaValoresConversao(Item item, Double quantidade, Long idUnidade) {
         if (item == null || item.getCodigo() == null || quantidade == null || idUnidade == null) {
-            throw new FichaTecnicaException("Valores de conversÃ£o invÃ¡lidos");
+            throw new FichaTecnicaException("Valores de conversÃƒÂ£o invÃƒÂ¡lidos");
         }
         if (quantidade <= 0) {
             throw new FichaTecnicaException("Quantidade deve ser maior que zero");
@@ -45,10 +45,11 @@ public class ObterValoresConversaoUseCase implements ObterValoresConversaoPort {
         var valorConvertido = switch (conversao.getOperacao()) {
             case "MULTIPLICA" -> valorCompra.multiply(conversao.getValor()).multiply(BigDecimal.valueOf(quantidade));
             case "DIVIDE" -> valorCompra.divide(conversao.getValor()).multiply(BigDecimal.valueOf(quantidade));
-            default -> throw new FichaTecnicaException("OperaÃ§Ã£o invÃ¡lida");
+            default -> throw new FichaTecnicaException("OperaÃƒÂ§ÃƒÂ£o invÃƒÂ¡lida");
         };
 
         return new ConversaoValoresDTO(quantidade, conversao.getUnidadePara(), valorConvertido);
     }
 }
+
 

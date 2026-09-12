@@ -8,3 +8,4 @@ public interface SpringDataProdutoRepository extends JpaRepository<ProdutoEntity
     @Query("SELECT COUNT(p) FROM Produto p WHERE p.nome = :nome")
     long countByName(@Param("nome") String nome);
 }
+

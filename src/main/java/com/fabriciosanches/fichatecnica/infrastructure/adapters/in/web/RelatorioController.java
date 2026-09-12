@@ -2,7 +2,7 @@ package com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web;
 
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarGraficoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarRelatorioPort;
-import com.fabriciosanches.fichatecnica.dtos.RelatorioRequestDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.RelatorioRequestDTO;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,13 +23,13 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Controller responsável pelos endpoints de geração de relatórios.
+ * Controller responsÃ¡vel pelos endpoints de geraÃ§Ã£o de relatÃ³rios.
  *
  * <p>Rota base: {@code /ficha-tecnica/relatorios}</p>
  */
 @RestController
 @RequestMapping("ficha-tecnica/relatorios")
-@Tag(name = "Relatórios", description = "Geração de relatórios em PDF a partir de dados JSON")
+@Tag(name = "RelatÃ³rios", description = "GeraÃ§Ã£o de relatÃ³rios em PDF a partir de dados JSON")
 @SecurityRequirement(name = "bearerAuth")
 public class RelatorioController {
 
@@ -45,17 +45,17 @@ public class RelatorioController {
     }
 
     /**
-     * Gera um relatório em PDF a partir de um JSON enviado no corpo da requisição
+     * Gera um relatÃ³rio em PDF a partir de um JSON enviado no corpo da requisiÃ§Ã£o
      * e retorna o arquivo pronto para download.
      *
-     * <p>Exemplo de corpo da requisição:</p>
+     * <p>Exemplo de corpo da requisiÃ§Ã£o:</p>
      * <pre>{@code
      * {
      *   "jsonData":  "[{\"nome\":\"Fabricio\",\"email\":\"a@b.com\",\"role\":\"ADMIN\"}]",
      *   "listPath":  "",
-     *   "titulo":    "Lista de Usuários",
+     *   "titulo":    "Lista de UsuÃ¡rios",
      *   "colunas": {
-     *     "nome":  "Nome do Usuário",
+     *     "nome":  "Nome do UsuÃ¡rio",
      *     "email": "E-mail",
      *     "role":  "Perfil"
          *   },
@@ -65,23 +65,23 @@ public class RelatorioController {
      * }
      * }</pre>
      *
-     * <p>O {@code listPath} pode ser vazio quando o JSON raiz já é um array.
-     * Para JSONs com estrutura aninhada, use notação de ponto: {@code "dados.lista"}.</p>
+     * <p>O {@code listPath} pode ser vazio quando o JSON raiz jÃ¡ Ã© um array.
+     * Para JSONs com estrutura aninhada, use notaÃ§Ã£o de ponto: {@code "dados.lista"}.</p>
      *
-     * @param request {@link RelatorioRequestDTO} com os parâmetros do relatório
+     * @param request {@link RelatorioRequestDTO} com os parÃ¢metros do relatÃ³rio
      * @return PDF como array de bytes com Content-Disposition para download
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/gerar-pdf")
-    @Operation(summary = "Gera relatório PDF", description = "Recebe os dados do relatório em JSON e devolve o arquivo PDF pronto para download.")
+    @Operation(summary = "Gera relatÃ³rio PDF", description = "Recebe os dados do relatÃ³rio em JSON e devolve o arquivo PDF pronto para download.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "PDF gerado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Parâmetros inválidos para geração do PDF"),
+            @ApiResponse(responseCode = "400", description = "ParÃ¢metros invÃ¡lidos para geraÃ§Ã£o do PDF"),
             @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o PDF")
     })
     public ResponseEntity<byte[]> gerarPDF(@RequestBody RelatorioRequestDTO request) {
-        logger.info("Início do método gerarPDF – RelatorioController");
-        logger.info("Título do relatório: '{}'", request.titulo());
+        logger.info("InÃ­cio do mÃ©todo gerarPDF â€“ RelatorioController");
+        logger.info("TÃ­tulo do relatÃ³rio: '{}'", request.titulo());
 
         try {
             byte[] pdfBytes = gerarRelatorioPort.gerarRelatorioPDF(request);
@@ -90,12 +90,12 @@ public class RelatorioController {
             String timestamp = LocalDateTime.now()
                     .format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss"));
             String baseFilename = request.titulo()
-                    .replaceAll("[^a-zA-Z0-9À-ÿ ]", "")   // remove caracteres especiais
+                    .replaceAll("[^\\p{L}\\p{N} ]", "")   // remove caracteres especiais mantendo letras/numeros Unicode
                     .trim()
-                    .replaceAll("\\s+", "-");               // espaços → hífen
+                    .replaceAll("\\s+", "-");               // espaÃ§os â†’ hÃ­fen
             String filename = baseFilename + "-" + timestamp + ".pdf";
 
-            logger.info("PDF gerado com sucesso – arquivo: '{}'", filename);
+            logger.info("PDF gerado com sucesso â€“ arquivo: '{}'", filename);
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION,
@@ -104,7 +104,7 @@ public class RelatorioController {
                     .body(pdfBytes);
 
         } catch (IllegalArgumentException e) {
-            logger.error("Parâmetros inválidos para geração do PDF: {}", e.getMessage());
+            logger.error("ParÃ¢metros invÃ¡lidos para geraÃ§Ã£o do PDF: {}", e.getMessage());
             return ResponseEntity.badRequest().build();
         } catch (Exception e) {
             logger.error("Erro inesperado ao gerar PDF", e);
@@ -112,5 +112,6 @@ public class RelatorioController {
         }
     }
 }
+
 
 

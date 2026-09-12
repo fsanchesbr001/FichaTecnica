@@ -4,8 +4,8 @@ import com.fabriciosanches.fichatecnica.core.domain.HistoricoItem;
 import com.fabriciosanches.fichatecnica.core.ports.in.ListarHistoricoItemPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.HistoricoItemRepositoryPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.ItemRepositoryPort;
-import com.fabriciosanches.fichatecnica.dtos.GraficoPrecoItemDTO;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.GraficoPrecoItemDTO;
+import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -23,8 +23,8 @@ public class ListarHistoricoItemUseCase implements ListarHistoricoItemPort {
     public ListarHistoricoItemUseCase(
             HistoricoItemRepositoryPort historicoItemRepositoryPort,
             ItemRepositoryPort itemRepositoryPort) {
-        this.historicoItemRepositoryPort = Objects.requireNonNull(historicoItemRepositoryPort, "HistoricoItem repository port não pode ser nulo");
-        this.itemRepositoryPort = Objects.requireNonNull(itemRepositoryPort, "Item repository port não pode ser nulo");
+        this.historicoItemRepositoryPort = Objects.requireNonNull(historicoItemRepositoryPort, "HistoricoItem repository port nÃ£o pode ser nulo");
+        this.itemRepositoryPort = Objects.requireNonNull(itemRepositoryPort, "Item repository port nÃ£o pode ser nulo");
     }
 
     @Override
@@ -35,11 +35,11 @@ public class ListarHistoricoItemUseCase implements ListarHistoricoItemPort {
     @Override
     public HistoricoItem buscarPorId(Long id) {
         if (id == null) {
-            throw new IllegalArgumentException("Id não pode ser nulo");
+            throw new IllegalArgumentException("Id nÃ£o pode ser nulo");
         }
 
         return historicoItemRepositoryPort.buscarPorId(id)
-                .orElseThrow(() -> new FichaTecnicaException("Historico de item não encontrado"));
+                .orElseThrow(() -> new FichaTecnicaException("Historico de item nÃ£o encontrado"));
     }
 
     @Override
@@ -51,7 +51,7 @@ public class ListarHistoricoItemUseCase implements ListarHistoricoItemPort {
     public List<HistoricoItem> listarPorCodigoItemOrdenadoPorDataInicio(Long codigoItem) {
         List<HistoricoItem> registros = historicoItemRepositoryPort.buscarPorCodigoItemOrdenadoPorDataInicio(codigoItem);
         if (registros.isEmpty()) {
-            throw new FichaTecnicaException("Nenhum histórico encontrado para o item codigo=" + codigoItem);
+            throw new FichaTecnicaException("Nenhum histÃ³rico encontrado para o item codigo=" + codigoItem);
         }
         return registros;
     }
@@ -80,11 +80,11 @@ public class ListarHistoricoItemUseCase implements ListarHistoricoItemPort {
             String labelEvento = h.getCodigo() != null ? dataLabel + " [#" + h.getCodigo() + "]" : dataLabel;
             labels.add(labelEvento);
             valores.add(h.getValor());
-            valoresFormatados.add(h.getValor() != null ? brl.format(h.getValor()) : "—");
+            valoresFormatados.add(h.getValor() != null ? brl.format(h.getValor()) : "â€”");
 
             if (anterior == null || h.getValor() == null || anterior.compareTo(BigDecimal.ZERO) == 0) {
-                variacoes.add("—");
-                variacoesMonetarias.add("—");
+                variacoes.add("â€”");
+                variacoesMonetarias.add("â€”");
             } else {
                 BigDecimal diff = h.getValor().subtract(anterior);
                 BigDecimal pct = diff.divide(anterior, 4, RoundingMode.HALF_UP)
@@ -99,8 +99,9 @@ public class ListarHistoricoItemUseCase implements ListarHistoricoItemPort {
             anterior = h.getValor();
         }
 
-        String titulo = "Variação de Preço – " + nomeItem;
+        String titulo = "VariaÃ§Ã£o de PreÃ§o â€“ " + nomeItem;
         return new GraficoPrecoItemDTO(titulo, nomeItem, labels, valores, valoresFormatados, variacoes, variacoesMonetarias);
     }
 }
+
 

@@ -12,7 +12,7 @@ public class BuscarConversaoUseCase implements BuscarConversaoPort {
     private final ConversaoRepositoryPort repositoryPort;
 
     public BuscarConversaoUseCase(ConversaoRepositoryPort repositoryPort) {
-        this.repositoryPort = Objects.requireNonNull(repositoryPort, "Repository port não pode ser nulo");
+        this.repositoryPort = Objects.requireNonNull(repositoryPort, "Repository port nÃ£o pode ser nulo");
     }
 
     @Override
@@ -25,10 +25,11 @@ public class BuscarConversaoUseCase implements BuscarConversaoPort {
     @Override
     public Conversao buscarPorId(Long id) {
         if (id == null) {
-            throw new IllegalArgumentException("Id não pode ser nulo");
+            throw new IllegalArgumentException("Id nÃ£o pode ser nulo");
         }
 
         return repositoryPort.buscarPorId(id)
-                .orElseThrow(() -> new java.util.NoSuchElementException("Conversão com ID " + id + " não encontrada"));
+                .orElseThrow(() -> new java.util.NoSuchElementException("ConversÃ£o com ID " + id + " nÃ£o encontrada"));
     }
 }
+

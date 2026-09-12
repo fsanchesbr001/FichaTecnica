@@ -3,9 +3,9 @@ package com.fabriciosanches.fichatecnica.infrastructure.adapters.out.report;
 import com.fabriciosanches.fichatecnica.core.domain.UnidadeMedida;
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarRelatorioPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.GeradorRelatorioUnidadeMedidaPort;
-import com.fabriciosanches.fichatecnica.dtos.RelatorioRequestDTO;
-import com.fabriciosanches.fichatecnica.enums.OrientacaoRelatorio;
-import com.fabriciosanches.fichatecnica.enums.TipoRelatorio;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.RelatorioRequestDTO;
+import com.fabriciosanches.fichatecnica.core.domain.enums.OrientacaoRelatorio;
+import com.fabriciosanches.fichatecnica.core.domain.enums.TipoRelatorio;
 import com.google.gson.Gson;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +22,7 @@ public class ITextUnidadeMedidaReportAdapter implements GeradorRelatorioUnidadeM
     private final Gson gson = new Gson();
 
     public ITextUnidadeMedidaReportAdapter(GerarRelatorioPort gerarRelatorioPort) {
-        this.gerarRelatorioPort = Objects.requireNonNull(gerarRelatorioPort, "GerarRelatorioPort não pode ser nulo");
+        this.gerarRelatorioPort = Objects.requireNonNull(gerarRelatorioPort, "GerarRelatorioPort nÃ£o pode ser nulo");
     }
 
     @Override
@@ -32,7 +32,7 @@ public class ITextUnidadeMedidaReportAdapter implements GeradorRelatorioUnidadeM
                 .toList();
 
         Map<String, String> colunas = new LinkedHashMap<>();
-        colunas.put("codigo", "Código");
+        colunas.put("codigo", "CÃ³digo");
         colunas.put("nome", "Nome");
         colunas.put("sigla", "Sigla");
 
@@ -52,7 +52,7 @@ public class ITextUnidadeMedidaReportAdapter implements GeradorRelatorioUnidadeM
     @Override
     public byte[] gerarRelatorioDetalhe(UnidadeMedida unidade) {
         Map<String, String> colunas = new LinkedHashMap<>();
-        colunas.put("codigo", "Código");
+        colunas.put("codigo", "CÃ³digo");
         colunas.put("nome", "Nome");
         colunas.put("sigla", "Sigla");
 
@@ -81,7 +81,8 @@ public class ITextUnidadeMedidaReportAdapter implements GeradorRelatorioUnidadeM
         try {
             return gerarRelatorioPort.gerarRelatorioPDF(request);
         } catch (IOException e) {
-            throw new IllegalStateException("Erro ao gerar relatório PDF de " + tipo + " de unidade de medida", e);
+            throw new IllegalStateException("Erro ao gerar relatÃ³rio PDF de " + tipo + " de unidade de medida", e);
         }
     }
 }
+

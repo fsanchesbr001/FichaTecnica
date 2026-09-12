@@ -44,7 +44,7 @@ public class UnidadeMedidaPersistenceAdapter implements UnidadeMedidaRepositoryP
             repository.deleteById(id);
             repository.flush();
         } catch (DataIntegrityViolationException e) {
-            throw new IllegalStateException("FKC-Registro não pode ser deletado. Existem Conversões vinculadas.");
+            throw new IllegalStateException("FKC-Registro nÃ£o pode ser deletado. Existem ConversÃµes vinculadas.");
         }
     }
 
@@ -56,3 +56,4 @@ public class UnidadeMedidaPersistenceAdapter implements UnidadeMedidaRepositoryP
         return new UnidadeMedidaEntity(domain.getCodigo(), domain.getNome(), domain.getSigla());
     }
 }
+

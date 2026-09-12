@@ -1,7 +1,7 @@
 package com.fabriciosanches.fichatecnica.infrastructure.adapters.out.security;
 
 import com.fabriciosanches.fichatecnica.core.domain.Usuario;
-import com.fabriciosanches.fichatecnica.enums.UserRole;
+import com.fabriciosanches.fichatecnica.core.domain.enums.UserRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -60,10 +60,11 @@ class TokenServiceTest {
         RuntimeException exSubject = assertThrows(RuntimeException.class, () -> service.getSubject(tokenInvalido));
         RuntimeException exRole = assertThrows(RuntimeException.class, () -> service.getRole(tokenInvalido));
 
-        assertTrue(exSubject.getMessage().contains("Verificação de Token falhou"));
-        assertTrue(exRole.getMessage().contains("Verificação de Token falhou"));
+        assertTrue(exSubject.getMessage().contains("VerificaÃ§Ã£o de Token falhou"));
+        assertTrue(exRole.getMessage().contains("VerificaÃ§Ã£o de Token falhou"));
         assertNull(service.getExpiration(tokenInvalido));
         assertFalse(service.validarTokenExpirado(tokenInvalido));
     }
 }
+
 

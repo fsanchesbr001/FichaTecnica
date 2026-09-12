@@ -54,3 +54,4 @@ public class UnidadeMedidaConfig {
         return new GerarRelatorioDetalheUnidadeMedidaUseCase(unidadeMedidaRepositoryPort, geradorRelatorioUnidadeMedidaPort);
     }
 }
+

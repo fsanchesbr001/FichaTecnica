@@ -1,6 +1,6 @@
 package com.fabriciosanches.fichatecnica.core.domain;
 
-import com.fabriciosanches.fichatecnica.enums.UserRole;
+import com.fabriciosanches.fichatecnica.core.domain.enums.UserRole;
 
 import java.util.List;
 
@@ -76,4 +76,5 @@ public class Usuario {
         this.nome = nome;
     }
 }
+
 

@@ -38,3 +38,4 @@ public class HistoricoItemEntity {
     private LocalDate dataInicio;
 }
 
+

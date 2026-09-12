@@ -8,7 +8,7 @@ import com.fabriciosanches.fichatecnica.core.ports.out.HistoricoItemRepositoryPo
 import com.fabriciosanches.fichatecnica.core.ports.out.ItemRepositoryPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.ItemProdutoRepositoryPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.ProdutoRepositoryPort;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -25,20 +25,20 @@ public class DeletarItemUseCase implements DeletarItemPort {
             HistoricoItemRepositoryPort historicoItemRepositoryPort,
             ItemProdutoRepositoryPort itemProdutoRepositoryPort,
             ProdutoRepositoryPort produtoRepositoryPort) {
-        this.itemRepositoryPort = Objects.requireNonNull(itemRepositoryPort, "Item repository port não pode ser nulo");
-        this.historicoItemRepositoryPort = Objects.requireNonNull(historicoItemRepositoryPort, "HistoricoItem repository port não pode ser nulo");
-        this.itemProdutoRepositoryPort = Objects.requireNonNull(itemProdutoRepositoryPort, "ItemProdutoRepositoryPort não pode ser nulo");
-        this.produtoRepositoryPort = Objects.requireNonNull(produtoRepositoryPort, "ProdutoRepositoryPort não pode ser nulo");
+        this.itemRepositoryPort = Objects.requireNonNull(itemRepositoryPort, "Item repository port nÃ£o pode ser nulo");
+        this.historicoItemRepositoryPort = Objects.requireNonNull(historicoItemRepositoryPort, "HistoricoItem repository port nÃ£o pode ser nulo");
+        this.itemProdutoRepositoryPort = Objects.requireNonNull(itemProdutoRepositoryPort, "ItemProdutoRepositoryPort nÃ£o pode ser nulo");
+        this.produtoRepositoryPort = Objects.requireNonNull(produtoRepositoryPort, "ProdutoRepositoryPort nÃ£o pode ser nulo");
     }
 
     @Override
     public void deletar(Long id) {
         if (id == null) {
-            throw new IllegalArgumentException("Id não pode ser nulo");
+            throw new IllegalArgumentException("Id nÃ£o pode ser nulo");
         }
 
         Item item = itemRepositoryPort.buscarPorId(id)
-                .orElseThrow(() -> new FichaTecnicaException("Item com ID " + id + " não encontrado"));
+                .orElseThrow(() -> new FichaTecnicaException("Item com ID " + id + " nÃ£o encontrado"));
 
         historicoItemRepositoryPort.deletarPorCodigoItem(id);
 
@@ -47,7 +47,7 @@ public class DeletarItemUseCase implements DeletarItemPort {
             Produto produto = itemProduto.getProduto() != null
                     ? itemProduto.getProduto()
                     : produtoRepositoryPort.buscarPorId(itemProduto.getId().getProdutoId())
-                    .orElseThrow(() -> new FichaTecnicaException("Produto não encontrado"));
+                    .orElseThrow(() -> new FichaTecnicaException("Produto nÃ£o encontrado"));
             BigDecimal valorAtual = produto.getValorItens() != null ? produto.getValorItens() : BigDecimal.ZERO;
             BigDecimal valorItem = itemProduto.getValor() != null ? itemProduto.getValor() : BigDecimal.ZERO;
             produto.setValorItens(valorAtual.subtract(valorItem));
@@ -58,4 +58,5 @@ public class DeletarItemUseCase implements DeletarItemPort {
         itemRepositoryPort.deletarPorId(item.getCodigo());
     }
 }
+
 

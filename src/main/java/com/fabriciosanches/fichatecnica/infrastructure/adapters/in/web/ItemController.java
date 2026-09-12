@@ -9,13 +9,13 @@ import com.fabriciosanches.fichatecnica.core.ports.in.DeletarItemPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarGraficoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarRelatorioPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.ListarHistoricoItemPort;
-import com.fabriciosanches.fichatecnica.dtos.GraficoPrecoItemDTO;
-import com.fabriciosanches.fichatecnica.dtos.ItemDTO;
-import com.fabriciosanches.fichatecnica.dtos.RelatorioRequestDTO;
-import com.fabriciosanches.fichatecnica.enums.ImagemPosicao;
-import com.fabriciosanches.fichatecnica.enums.OrientacaoRelatorio;
-import com.fabriciosanches.fichatecnica.enums.TipoRelatorio;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.GraficoPrecoItemDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ItemDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.RelatorioRequestDTO;
+import com.fabriciosanches.fichatecnica.core.domain.enums.ImagemPosicao;
+import com.fabriciosanches.fichatecnica.core.domain.enums.OrientacaoRelatorio;
+import com.fabriciosanches.fichatecnica.core.domain.enums.TipoRelatorio;
+import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.UnidadeMedidaEntity;
 import com.google.gson.Gson;
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,7 +47,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("ficha-tecnica")
-@Tag(name = "Itens", description = "Cadastro, consulta, atualização, exclusão e relatórios de itens")
+@Tag(name = "Itens", description = "Cadastro, consulta, atualizaÃ§Ã£o, exclusÃ£o e relatÃ³rios de itens")
 @SecurityRequirement(name = "bearerAuth")
 public class ItemController {
 
@@ -97,7 +97,7 @@ public class ItemController {
     }
 
     @GetMapping("/itens/{id}")
-    @Operation(summary = "Busca item por ID", description = "Retorna os dados de um item específico.")
+    @Operation(summary = "Busca item por ID", description = "Retorna os dados de um item especÃ­fico.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Item encontrado"),
             @ApiResponse(responseCode = "404", description = "Erro ao buscar item")
@@ -116,8 +116,8 @@ public class ItemController {
     @Operation(summary = "Remove item", description = "Exclui um item existente pelo ID.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Item removido com sucesso"),
-            @ApiResponse(responseCode = "422", description = "Existem históricos vinculados ao item"),
-            @ApiResponse(responseCode = "404", description = "Item não encontrado")
+            @ApiResponse(responseCode = "422", description = "Existem histÃ³ricos vinculados ao item"),
+            @ApiResponse(responseCode = "404", description = "Item nÃ£o encontrado")
     })
     public ResponseEntity<Void> apagar(@PathVariable Long id) {
         try {
@@ -135,7 +135,7 @@ public class ItemController {
     @Operation(summary = "Atualiza item", description = "Altera os dados de um item existente.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Item atualizado com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Item não encontrado")
+            @ApiResponse(responseCode = "404", description = "Item nÃ£o encontrado")
     })
     public ResponseEntity<ItemDTO> atualizarItem(@PathVariable Long id, @RequestBody ItemDTO itemDTO) {
         try {
@@ -151,7 +151,7 @@ public class ItemController {
     @Operation(summary = "Cadastra item", description = "Cria um novo item na base de dados.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Item cadastrado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos para cadastro")
+            @ApiResponse(responseCode = "400", description = "Dados invÃ¡lidos para cadastro")
     })
     public ResponseEntity<ItemDTO> cadastrarItem(@RequestBody ItemDTO itemDTO) {
         try {
@@ -166,7 +166,7 @@ public class ItemController {
     @GetMapping("/itens/gerar-pdf-lista")
     @Operation(summary = "Gera PDF da lista de itens", description = "Exporta a lista completa de itens em PDF.")
     public ResponseEntity<byte[]> gerarPdfLista() {
-        logger.info("Início do método gerarPdfLista – ItemController");
+        logger.info("InÃ­cio do mÃ©todo gerarPdfLista â€“ ItemController");
         try {
             List<ItemDTO> lista = buscarItemPort.listar().stream().map(this::toDto).toList();
             if (lista.isEmpty()) {
@@ -205,7 +205,7 @@ public class ItemController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/itens/gerar-pdf-detalhe/{id:[0-9]+}")
-    @Operation(summary = "Gera PDF detalhado do item", description = "Exporta a ficha detalhada de um item específico em PDF.")
+    @Operation(summary = "Gera PDF detalhado do item", description = "Exporta a ficha detalhada de um item especÃ­fico em PDF.")
     public ResponseEntity<byte[]> gerarPdfDetalhe(@PathVariable Long id) {
         try {
             Item item = buscarItemPort.buscarPorId(id);
@@ -223,7 +223,7 @@ public class ItemController {
                     graficoPng = gerarGraficoPort.gerarGraficoPNG(graficoDTO);
                 }
             } catch (FichaTecnicaException ex) {
-                logger.info("Sem histórico de preços para o item id={} – PDF será gerado sem gráfico", id);
+                logger.info("Sem histÃ³rico de preÃ§os para o item id={} â€“ PDF serÃ¡ gerado sem grÃ¡fico", id);
             }
 
             RelatorioRequestDTO request;
@@ -293,3 +293,4 @@ public class ItemController {
                 unidadeMedida.getSigla());
     }
 }
+

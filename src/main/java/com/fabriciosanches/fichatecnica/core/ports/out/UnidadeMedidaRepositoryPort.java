@@ -16,3 +16,4 @@ public interface UnidadeMedidaRepositoryPort {
 
     void deletar(Long id);
 }
+

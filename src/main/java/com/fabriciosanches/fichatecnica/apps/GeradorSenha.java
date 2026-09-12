@@ -13,3 +13,4 @@ public class GeradorSenha {
         System.out.println(senha);
     }
 }
+

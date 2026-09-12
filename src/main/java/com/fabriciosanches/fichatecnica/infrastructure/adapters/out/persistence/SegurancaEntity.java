@@ -62,3 +62,4 @@ public class SegurancaEntity {
     private LocalDateTime dataExpiracaoToken;
 }
 
+

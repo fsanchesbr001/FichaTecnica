@@ -9,7 +9,7 @@ import com.fabriciosanches.fichatecnica.core.ports.in.GerarGraficoPizzaProdutoPo
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarRelatorioPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.ListarItensDoProdutoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.ObterDescricoesUnidadePort;
-import com.fabriciosanches.fichatecnica.dtos.ProdutoDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ProdutoDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -78,3 +78,4 @@ class ProdutoControllerTest {
                 .andExpect(header().string("Content-Type", "application/pdf"));
     }
 }
+

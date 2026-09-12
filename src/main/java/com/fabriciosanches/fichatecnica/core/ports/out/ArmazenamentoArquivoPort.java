@@ -10,3 +10,4 @@ public interface ArmazenamentoArquivoPort {
     void deletar(String relativePath) throws IOException;
 }
 
+

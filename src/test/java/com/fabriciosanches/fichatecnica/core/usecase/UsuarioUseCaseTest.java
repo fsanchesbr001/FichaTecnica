@@ -4,10 +4,10 @@ import com.fabriciosanches.fichatecnica.core.domain.Seguranca;
 import com.fabriciosanches.fichatecnica.core.domain.Usuario;
 import com.fabriciosanches.fichatecnica.core.ports.out.SegurancaRepositoryPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.UsuarioRepositoryPort;
-import com.fabriciosanches.fichatecnica.dtos.AtualizarUsuarioRequestDTO;
-import com.fabriciosanches.fichatecnica.dtos.UsuarioListagemDTO;
-import com.fabriciosanches.fichatecnica.enums.UserRole;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.AtualizarUsuarioRequestDTO;
+import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.UsuarioListagemDTO;
+import com.fabriciosanches.fichatecnica.core.domain.enums.UserRole;
+import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,7 +54,7 @@ class UsuarioUseCaseTest {
         seguranca.setDataCriacao(LocalDateTime.now().minusDays(1));
         seguranca.setDataExpiracaoSenha(LocalDateTime.now().plusDays(30));
 
-        usuario = new Usuario(1L, "user@email.com", "senha", UserRole.ADMIN, "Usuário Teste");
+        usuario = new Usuario(1L, "user@email.com", "senha", UserRole.ADMIN, "UsuÃ¡rio Teste");
     }
 
     @Test
@@ -64,7 +64,7 @@ class UsuarioUseCaseTest {
 
         UsuarioListagemDTO dto = useCase.buscarUsuarioPorEmail("user@email.com");
 
-        assertEquals("Usuário Teste", dto.nome());
+        assertEquals("UsuÃ¡rio Teste", dto.nome());
         assertEquals("ADMIN", dto.role());
     }
 
@@ -94,4 +94,5 @@ class UsuarioUseCaseTest {
         assertThrows(FichaTecnicaException.class, () -> useCase.excluirUsuario("user@email.com"));
     }
 }
+
 
