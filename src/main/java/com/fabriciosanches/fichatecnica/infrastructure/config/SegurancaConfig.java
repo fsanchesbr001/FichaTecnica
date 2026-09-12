@@ -5,11 +5,11 @@ import com.fabriciosanches.fichatecnica.core.ports.in.ControleAcessoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarTokenPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.RecuperacaoSenhaPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.EnviarEmailPort;
+import com.fabriciosanches.fichatecnica.core.ports.out.GeradorTokenPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.SegurancaRepositoryPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.UsuarioRepositoryPort;
 import com.fabriciosanches.fichatecnica.core.usecase.AutenticacaoUseCase;
 import com.fabriciosanches.fichatecnica.core.usecase.SegurancaUseCase;
-import com.fabriciosanches.fichatecnica.security.TokenService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,8 +35,9 @@ public class SegurancaConfig {
     }
 
     @Bean
-    public AutenticacaoUseCase autenticacaoUseCase(UsuarioRepositoryPort usuarioRepositoryPort, TokenService tokenService) {
-        return new AutenticacaoUseCase(usuarioRepositoryPort, tokenService);
+    public AutenticacaoUseCase autenticacaoUseCase(UsuarioRepositoryPort usuarioRepositoryPort,
+                                                   GeradorTokenPort geradorTokenPort) {
+        return new AutenticacaoUseCase(usuarioRepositoryPort, geradorTokenPort);
     }
 
     @Bean

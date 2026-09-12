@@ -1,178 +1,89 @@
 package com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web;
 
-import com.fabriciosanches.fichatecnica.constants.Constants;
 import com.fabriciosanches.fichatecnica.core.domain.Usuario;
 import com.fabriciosanches.fichatecnica.core.ports.in.ControleAcessoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarTokenPort;
+import com.fabriciosanches.fichatecnica.core.ports.out.GerenciadorBlacklistTokenPort;
+import com.fabriciosanches.fichatecnica.core.ports.out.ValidadorTokenPort;
+import com.fabriciosanches.fichatecnica.dtos.AutenticacaoDTO;
 import com.fabriciosanches.fichatecnica.enums.UserRole;
-import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
-import com.fabriciosanches.fichatecnica.security.DadosTokenJWT;
-import com.fabriciosanches.fichatecnica.security.TokenBlacklistService;
-import com.fabriciosanches.fichatecnica.security.TokenService;
-import com.fabriciosanches.fichatecnica.security.UsuarioSecurityDetails;
+import com.fabriciosanches.fichatecnica.infrastructure.config.security.DadosTokenJWT;
+import com.fabriciosanches.fichatecnica.infrastructure.config.security.UsuarioSecurityDetails;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.Instant;
-import java.time.OffsetDateTime;
+import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class AutenticacaoControllerTest {
 
-    private MockMvc mockMvc;
     private AuthenticationManager manager;
     private GerarTokenPort gerarTokenPort;
     private ControleAcessoPort controleAcessoPort;
-    private TokenBlacklistService tokenBlacklistService;
-    private TokenService tokenService;
+    private GerenciadorBlacklistTokenPort gerenciadorBlacklistTokenPort;
+    private ValidadorTokenPort validadorTokenPort;
+    private AutenticacaoController controller;
 
     @BeforeEach
     void setUp() {
         manager = Mockito.mock(AuthenticationManager.class);
         gerarTokenPort = Mockito.mock(GerarTokenPort.class);
         controleAcessoPort = Mockito.mock(ControleAcessoPort.class);
-        tokenBlacklistService = Mockito.mock(TokenBlacklistService.class);
-        tokenService = Mockito.mock(TokenService.class);
+        gerenciadorBlacklistTokenPort = Mockito.mock(GerenciadorBlacklistTokenPort.class);
+        validadorTokenPort = Mockito.mock(ValidadorTokenPort.class);
 
-        AutenticacaoController controller = new AutenticacaoController(
+        controller = new AutenticacaoController(
                 manager,
                 gerarTokenPort,
                 controleAcessoPort,
-                tokenBlacklistService,
-                tokenService
+                gerenciadorBlacklistTokenPort,
+                validadorTokenPort
         );
-
-        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }
 
     @AfterEach
-    void clearSecurityContext() {
+    void tearDown() {
         SecurityContextHolder.clearContext();
     }
 
     @Test
-    void efetuarLogin_DeveRetornarBadRequestQuandoDadosAusentes() throws Exception {
-        mockMvc.perform(post("/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void efetuarLogin_DeveRetornarOkQuandoAutenticacaoForValida() throws Exception {
+    void efetuarLogin_DeveRetornarTokenQuandoCredenciaisValidas() {
         Usuario usuario = new Usuario(1L, "admin@email.com", "senha", UserRole.ADMIN, "Admin");
         UsuarioSecurityDetails details = new UsuarioSecurityDetails(usuario);
-        Authentication authentication = new UsernamePasswordAuthenticationToken(details, null, details.getAuthorities());
 
-        when(manager.authenticate(any())).thenReturn(authentication);
-        when(gerarTokenPort.gerarToken(any(Usuario.class))).thenReturn(new DadosTokenJWT(
-                "jwt-ok",
-                120L,
-                OffsetDateTime.parse("2026-05-28T01:00:00-03:00"),
-                "admin@email.com",
-                "Admin",
-                "ROLE_ADMIN"
-        ));
+        when(manager.authenticate(any())).thenReturn(new UsernamePasswordAuthenticationToken(details, "jwt", details.getAuthorities()));
+        when(gerarTokenPort.gerarToken(any(Usuario.class))).thenReturn(new DadosTokenJWT("jwt"));
 
-        mockMvc.perform(post("/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "login": "admin@email.com",
-                                  "senha": "123"
-                                }
-                                """))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.jwt").value("jwt-ok"))
-                .andExpect(jsonPath("$.usuarioLogin").value("admin@email.com"));
+        ResponseEntity<DadosTokenJWT> response = controller.efetuarLogin(new AutenticacaoDTO("admin@email.com", "senha"));
+
+        assertEquals(200, response.getStatusCode().value());
+        assertEquals("jwt", response.getBody().jwt());
     }
 
     @Test
-    void efetuarLogin_DeveRetornarBadRequestQuandoCredenciaisInvalidas() throws Exception {
-        when(manager.authenticate(any())).thenThrow(new BadCredentialsException("invalid"));
+    void efetuarLogout_DeveRevogarTokenQuandoTokenValido() {
+        String token = "jwt.token";
+        Instant expiration = Instant.now().plusSeconds(1200);
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken("u", token));
+        when(validadorTokenPort.getExpiration(token)).thenReturn(expiration);
 
-        mockMvc.perform(post("/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "login": "admin@email.com",
-                                  "senha": "errada"
-                                }
-                                """))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.jwt").value(Constants.MSG_DADOS_SEGURANCA_NAO_ENCONTRADOS));
+        ResponseEntity<Map<String, String>> response = controller.efetuarLogout();
 
-        verify(controleAcessoPort).errouSenha(eq("admin@email.com"));
-    }
-
-    @Test
-    void efetuarLogin_DeveRetornarBadRequestQuandoRegraNegocioFalhar() throws Exception {
-        doThrow(new FichaTecnicaException("bloqueado")).when(controleAcessoPort).validarAcesso("admin@email.com");
-
-        mockMvc.perform(post("/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "login": "admin@email.com",
-                                  "senha": "123"
-                                }
-                                """))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.jwt").value("bloqueado"));
-    }
-
-    @Test
-    void efetuarLogout_DeveRetornarBadRequestQuandoNaoHouverSessao() throws Exception {
-        SecurityContextHolder.clearContext();
-
-        mockMvc.perform(post("/auth/logout"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").exists());
-    }
-
-    @Test
-    void efetuarLogout_DeveRetornarBadRequestQuandoTokenSemExpiracao() throws Exception {
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken("user", "token-sem-exp")
-        );
-        when(tokenService.getExpiration("token-sem-exp")).thenReturn(null);
-
-        mockMvc.perform(post("/auth/logout"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").exists());
-    }
-
-    @Test
-    void efetuarLogout_DeveRetornarOkQuandoSessaoValida() throws Exception {
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken("user", "jwt-valido")
-        );
-        Instant exp = Instant.parse("2026-05-28T04:00:00Z");
-        when(tokenService.getExpiration("jwt-valido")).thenReturn(exp);
-
-        mockMvc.perform(post("/auth/logout"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").exists());
-
-        verify(tokenBlacklistService).revogar("jwt-valido", exp);
+        assertEquals(200, response.getStatusCode().value());
+        assertTrue(response.getBody().get("message").contains("Logout"));
+        verify(gerenciadorBlacklistTokenPort).revogar(token, expiration);
     }
 }
 

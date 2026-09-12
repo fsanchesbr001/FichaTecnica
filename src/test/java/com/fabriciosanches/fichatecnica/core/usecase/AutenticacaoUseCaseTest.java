@@ -1,14 +1,13 @@
 package com.fabriciosanches.fichatecnica.core.usecase;
 
 import com.fabriciosanches.fichatecnica.core.domain.Usuario;
+import com.fabriciosanches.fichatecnica.core.ports.out.GeradorTokenPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.UsuarioRepositoryPort;
 import com.fabriciosanches.fichatecnica.enums.UserRole;
 import com.fabriciosanches.fichatecnica.exceptions.FichaTecnicaException;
-import com.fabriciosanches.fichatecnica.security.DadosTokenJWT;
-import com.fabriciosanches.fichatecnica.security.TokenService;
+import com.fabriciosanches.fichatecnica.infrastructure.config.security.DadosTokenJWT;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -26,13 +25,11 @@ class AutenticacaoUseCaseTest {
     private UsuarioRepositoryPort usuarioRepositoryPort;
 
     @Mock
-    private TokenService tokenService;
-
-    @InjectMocks
-    private AutenticacaoUseCase useCase;
+    private GeradorTokenPort geradorTokenPort;
 
     @Test
     void buscarPorLogin_DeveRetornarUsuario() {
+        AutenticacaoUseCase useCase = new AutenticacaoUseCase(usuarioRepositoryPort, geradorTokenPort);
         Usuario usuario = new Usuario(1L, "admin@email.com", "senha", UserRole.ADMIN, "Admin");
         when(usuarioRepositoryPort.buscarPorLogin("admin@email.com")).thenReturn(Optional.of(usuario));
 
@@ -44,6 +41,7 @@ class AutenticacaoUseCaseTest {
 
     @Test
     void buscarPorLogin_DeveLancarExcecaoQuandoNaoEncontrar() {
+        AutenticacaoUseCase useCase = new AutenticacaoUseCase(usuarioRepositoryPort, geradorTokenPort);
         when(usuarioRepositoryPort.buscarPorLogin("inexistente@email.com")).thenReturn(Optional.empty());
 
         assertThrows(FichaTecnicaException.class, () -> useCase.buscarPorLogin("inexistente@email.com"));
@@ -51,16 +49,21 @@ class AutenticacaoUseCaseTest {
 
     @Test
     void gerarToken_DeveMontarDadosCompletos() {
+        AutenticacaoUseCase useCase = new AutenticacaoUseCase(usuarioRepositoryPort, geradorTokenPort);
         Usuario usuario = new Usuario(1L, "admin@email.com", "senha", UserRole.ADMIN, "Admin");
+        OffsetDateTime expiraEm = OffsetDateTime.parse("2026-05-28T01:00:00-03:00");
 
-        when(tokenService.gerarToken(usuario)).thenReturn("jwt");
-        when(tokenService.getExpirationMinutes()).thenReturn(120L);
-        when(tokenService.getTokenExpiresAt()).thenReturn(OffsetDateTime.parse("2026-05-28T01:00:00-03:00"));
+        when(geradorTokenPort.gerarToken(usuario)).thenReturn("jwt");
+        when(geradorTokenPort.getExpirationMinutes()).thenReturn(120L);
+        when(geradorTokenPort.getTokenExpiresAt()).thenReturn(expiraEm);
 
-        DadosTokenJWT dados = useCase.gerarToken(usuario);
+        DadosTokenJWT result = useCase.gerarToken(usuario);
 
-        assertEquals("jwt", dados.jwt());
-        assertEquals("admin@email.com", dados.usuarioLogin());
-        assertEquals("ROLE_ADMIN", dados.role());
+        assertEquals("jwt", result.jwt());
+        assertEquals(120L, result.expirationMinutes());
+        assertEquals(expiraEm, result.expiresAt());
+        assertEquals("admin@email.com", result.usuarioLogin());
+        assertEquals("Admin", result.usuarioNome());
+        assertEquals("ROLE_ADMIN", result.role());
     }
 }
