@@ -2,6 +2,7 @@ package com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web;
 
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarRelatorioDetalheUnidadeMedidaPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarRelatorioListaUnidadeMedidaPort;
+import com.fabriciosanches.fichatecnica.infrastructure.util.TextoEncodingUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -42,7 +43,7 @@ public class UnidadeMedidaRelatorioController {
             byte[] relatorio = gerarListaPort.executar();
 
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=lista_unidades_medida.pdf")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, TextoEncodingUtils.contentDispositionInline("lista_unidades_medida.pdf"))
                     .contentType(MediaType.APPLICATION_PDF)
                     .body(relatorio);
         } catch (java.util.NoSuchElementException e) {
@@ -65,7 +66,7 @@ public class UnidadeMedidaRelatorioController {
             byte[] relatorio = gerarDetalhePort.executar(sigla);
 
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=detalhe_unidade_" + sigla + ".pdf")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, TextoEncodingUtils.contentDispositionInline("detalhe_unidade_" + TextoEncodingUtils.normalizarMojibake(sigla) + ".pdf"))
                     .contentType(MediaType.APPLICATION_PDF)
                     .body(relatorio);
         } catch (IllegalArgumentException e) {

@@ -62,7 +62,7 @@ public class AutenticacaoController {
             @ApiResponse(responseCode = "500", description = "Erro inesperado ao autenticar")
     })
     public ResponseEntity<DadosTokenJWT> efetuarLogin(@RequestBody @Valid AutenticacaoDTO dados) {
-        LoggerFactory.getLogger(this.getClass()).info("Fluxo entrou no mÃ©todo efetuarLogin - UsuÃ¡rio: {}", dados.login());
+        LoggerFactory.getLogger(this.getClass()).info("Fluxo entrou no metodo efetuarLogin - Usuario: {}", dados.login());
 
         if (dados.login() == null || dados.senha() == null) {
             return ResponseEntity.badRequest().build();

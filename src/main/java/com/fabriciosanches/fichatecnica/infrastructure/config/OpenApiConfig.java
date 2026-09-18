@@ -19,10 +19,10 @@ public class OpenApiConfig {
     public OpenAPI fichaTecnicaOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Ficha TÃ©cnica API")
-                        .description("DocumentaÃ§Ã£o da API do backend Ficha TÃ©cnica")
+                        .title("Ficha T\u00e9cnica API")
+                        .description("Documenta\u00e7\u00e3o da API do backend Ficha T\u00e9cnica")
                         .version("1.9.8")
-                        .contact(new Contact().name("Suporte Ficha TÃ©cnica"))
+                        .contact(new Contact().name("Suporte Ficha T\u00e9cnica"))
                         .license(new License().name("Uso interno")))
                 .addSecurityItem(new SecurityRequirement().addList(SECURITY_SCHEME_NAME))
                 .components(new Components()
@@ -34,6 +34,3 @@ public class OpenApiConfig {
                                         .bearerFormat("JWT")));
     }
 }
-
-
-

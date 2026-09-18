@@ -36,10 +36,10 @@ public class TokenService implements GeradorTokenPort, ValidadorTokenPort {
 
     @Override
     public String gerarToken(Usuario usuario){
-        logger.info("Inicio do mÃ©todo gerarToken");
+        logger.info("Inicio do metodo gerarToken");
         try {
             var algoritimo = Algorithm.HMAC256(secret);
-            logger.info("Fim do mÃ©todo gerarToken");
+            logger.info("Fim do metodo gerarToken");
             return JWT.create()
                     .withIssuer("API Ficha Tecnica")
                     .withSubject(usuario.getLogin())
@@ -56,9 +56,9 @@ public class TokenService implements GeradorTokenPort, ValidadorTokenPort {
     @Override
     public String getSubject(String tokenJWT){
         try {
-            logger.info("Inicio do mÃ©todo getSubject");
+            logger.info("Inicio do metodo getSubject");
             var algoritimo = Algorithm.HMAC256(secret);
-            logger.info("Fim do mÃ©todo getSubject");
+            logger.info("Fim do metodo getSubject");
             return JWT.require(algoritimo)
                     .withIssuer("API Ficha Tecnica")
                     .build()
@@ -72,9 +72,9 @@ public class TokenService implements GeradorTokenPort, ValidadorTokenPort {
     @Override
     public String getRole(String tokenJWT){
         try {
-            logger.info("Inicio do mÃ©todo getRole");
+            logger.info("Inicio do metodo getRole");
             var algoritimo = Algorithm.HMAC256(secret);
-            logger.info("Fim do mÃ©todo getRole");
+            logger.info("Fim do metodo getRole");
             return JWT.require(algoritimo)
                     .withIssuer("API Ficha Tecnica")
                     .build()
@@ -116,7 +116,7 @@ public class TokenService implements GeradorTokenPort, ValidadorTokenPort {
                     .verify(tokenJWT);
             return decoded.getExpiresAtAsInstant();
         } catch (JWTVerificationException exception) {
-            logger.warn("NÃ£o foi possÃ­vel extrair expiraÃ§Ã£o do token: {}", exception.getMessage());
+            logger.warn("Nao foi possivel extrair expiracao do token: {}", exception.getMessage());
             return null;
         }
     }
@@ -124,13 +124,13 @@ public class TokenService implements GeradorTokenPort, ValidadorTokenPort {
     @Override
     public boolean validarTokenExpirado(String tokenJWT) {
         try {
-            logger.info("Validando expiraÃ§Ã£o do token");
+            logger.info("Validando expiracao do token");
             var algoritimo = Algorithm.HMAC256(secret);
             JWT.require(algoritimo)
                     .withIssuer("API Ficha Tecnica")
                     .build()
                     .verify(tokenJWT);
-            logger.info("Token vÃ¡lido e nÃ£o expirado");
+            logger.info("Token valido e nao expirado");
             return true;
         } catch (TokenExpiredException exception) {
             logger.warn("Token expirado: {}", exception.getMessage());

@@ -91,16 +91,16 @@ public class HistoricoItemController {
             @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o grÃ¡fico")
     })
     public ResponseEntity<GraficoPrecoItemDTO> gerarGraficoPrecos(@PathVariable Long codigoItem) {
-        logger.info("InÃ­cio do mÃ©todo gerarGraficoPrecos â€“ codigoItem={}", codigoItem);
+        logger.info("Inicio do metodo gerarGraficoPrecos - codigoItem={}", codigoItem);
         try {
             GraficoPrecoItemDTO grafico = listarHistoricoItemPort.gerarGraficoPreco(codigoItem);
-            logger.info("GrÃ¡fico de preÃ§os gerado com sucesso para codigoItem={}", codigoItem);
+            logger.info("Grafico de precos gerado com sucesso para codigoItem={}", codigoItem);
             return ResponseEntity.ok(grafico);
         } catch (FichaTecnicaException e) {
-            logger.warn("Nenhum histÃ³rico encontrado para codigoItem={}: {}", codigoItem, e.getMessage());
+            logger.warn("Nenhum historico encontrado para codigoItem={}: {}", codigoItem, e.getMessage());
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
-            logger.error("Erro inesperado ao gerar grÃ¡fico de preÃ§os para codigoItem={}", codigoItem, e);
+            logger.error("Erro inesperado ao gerar grafico de precos para codigoItem={}", codigoItem, e);
             return ResponseEntity.internalServerError().build();
         }
     }

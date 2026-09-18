@@ -2,6 +2,7 @@ package com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web;
 
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarRelatorioDetalheUnidadeMedidaPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarRelatorioListaUnidadeMedidaPort;
+import com.fabriciosanches.fichatecnica.infrastructure.util.TextoEncodingUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -36,7 +37,8 @@ class UnidadeMedidaRelatorioControllerTest {
         mockMvc.perform(get("/ficha-tecnica/unidades-medida/relatorios/lista"))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Type", "application/pdf"))
-                .andExpect(header().string("Content-Disposition", "inline; filename=lista_unidades_medida.pdf"));
+                .andExpect(header().string("Content-Disposition",
+                        TextoEncodingUtils.contentDispositionInline("lista_unidades_medida.pdf")));
     }
 
     @Test
@@ -54,7 +56,8 @@ class UnidadeMedidaRelatorioControllerTest {
         mockMvc.perform(get("/ficha-tecnica/unidades-medida/relatorios/{sigla}/detalhe", "kg"))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Type", "application/pdf"))
-                .andExpect(header().string("Content-Disposition", "inline; filename=detalhe_unidade_kg.pdf"));
+                .andExpect(header().string("Content-Disposition",
+                        TextoEncodingUtils.contentDispositionInline("detalhe_unidade_kg.pdf")));
     }
 
     @Test

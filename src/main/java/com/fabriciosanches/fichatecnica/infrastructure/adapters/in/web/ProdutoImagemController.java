@@ -105,7 +105,7 @@ public class ProdutoImagemController {
             }
             return ResponseEntity.ok(job);
         } catch (FichaTecnicaException e) {
-            logger.warn("[ProdutoImagemController] Job nÃ£o encontrado: {}", jobId);
+            logger.warn("[ProdutoImagemController] Job nao encontrado: {}", jobId);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             logger.error("[ProdutoImagemController] Erro ao consultar status do job {}", jobId, e);
@@ -130,7 +130,7 @@ public class ProdutoImagemController {
             logger.info("[ProdutoImagemController] Imagem removida com sucesso para produto id={}", id);
             return ResponseEntity.noContent().build();
         } catch (FichaTecnicaException e) {
-            logger.warn("[ProdutoImagemController] Produto nÃ£o encontrado ao remover imagem id={}: {}", id, e.getMessage());
+            logger.warn("[ProdutoImagemController] Produto nao encontrado ao remover imagem id={}: {}", id, e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             logger.error("[ProdutoImagemController] Erro inesperado ao remover imagem do produto id={}", id, e);

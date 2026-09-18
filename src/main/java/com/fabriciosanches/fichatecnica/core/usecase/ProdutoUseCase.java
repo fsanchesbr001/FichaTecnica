@@ -80,7 +80,9 @@ public class ProdutoUseCase implements CriarProdutoPort, BuscarProdutoPort, Atua
 
         produto.setNome(novosDados.nome());
         produto.setDescricao(novosDados.descricao());
-        produto.setImagem(novosDados.imagem());
+        if (novosDados.imagem() != null && !novosDados.imagem().isBlank()) {
+            produto.setImagem(novosDados.imagem());
+        }
         produto.setValorVenda(novosDados.valorVenda());
         produto.setValorItens(novosDados.valorItens());
 
