@@ -60,7 +60,7 @@ class ProdutoImagemUploadUseCaseTest {
         FichaTecnicaException exception = assertThrows(FichaTecnicaException.class,
                 () -> useCase.iniciar(4L, new ArquivoUpload("imagem.png", "image/png", new byte[]{})));
 
-        assertEquals("Arquivo de imagem nÃ£o pode ser vazio.", exception.getMessage());
+        assertEquals("Arquivo de imagem nao pode ser vazio.", exception.getMessage());
     }
 
     @Test
@@ -68,7 +68,7 @@ class ProdutoImagemUploadUseCaseTest {
         FichaTecnicaException exception = assertThrows(FichaTecnicaException.class,
                 () -> useCase.consultar("job-inexistente"));
 
-        assertEquals("Job de upload nÃ£o encontrado: job-inexistente", exception.getMessage());
+        assertEquals("Job de upload nao encontrado: job-inexistente", exception.getMessage());
     }
 
     @Test

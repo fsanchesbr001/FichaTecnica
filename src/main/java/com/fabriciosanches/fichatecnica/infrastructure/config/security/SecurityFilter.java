@@ -52,7 +52,7 @@ public class SecurityFilter extends OncePerRequestFilter {
         var tokenJWT = recuperarToken(request);
 
         if (tokenJWT == null) {
-            log.warn("[SecurityFilter] {} - Nenhum token encontrado no header Authorization. RequisiÃ§Ã£o anÃ´nima.", uri);
+            log.warn("[SecurityFilter] {} - Nenhum token encontrado no header Authorization. Requisicao anonima.", uri);
             filterChain.doFilter(request, response);
             return;
         }
@@ -77,10 +77,10 @@ public class SecurityFilter extends OncePerRequestFilter {
             var subject = validadorTokenPort.getSubject(tokenJWT);
             var role = validadorTokenPort.getRole(tokenJWT);
 
-            log.info("[SecurityFilter] {} - subject='{}' | role extraÃ­da do token='{}'", uri, subject, role);
+            log.info("[SecurityFilter] {} - subject='{}' | role extraida do token='{}'", uri, subject, role);
 
             if (role == null || role.isBlank()) {
-                log.error("[SecurityFilter] {} - Claim 'role' ausente ou vazia no token do usuÃ¡rio '{}'", uri, subject);
+                log.error("[SecurityFilter] {} - Claim 'role' ausente ou vazia no token do usuario '{}'", uri, subject);
                 writeJsonError(response, HttpServletResponse.SC_UNAUTHORIZED,
                         "Token invÃ¡lido", "O token nÃ£o contÃ©m uma role vÃ¡lida. FaÃ§a login novamente.");
                 return;
@@ -96,7 +96,7 @@ public class SecurityFilter extends OncePerRequestFilter {
                     Collections.singletonList(authority));
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            log.info("[SecurityFilter] {} - AutenticaÃ§Ã£o definida | authority='{}'", uri, role);
+            log.info("[SecurityFilter] {} - Autenticacao definida | authority='{}'", uri, role);
 
         } catch (Exception e) {
             log.error("[SecurityFilter] {} - Erro ao processar token: {}", uri, e.getMessage(), e);

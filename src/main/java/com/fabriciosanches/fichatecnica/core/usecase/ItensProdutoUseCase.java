@@ -20,8 +20,6 @@ import com.fabriciosanches.fichatecnica.core.ports.out.ProdutoRepositoryPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.UnidadeMedidaRepositoryPort;
 import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.GraficoPizzaDTO;
 import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.GraficoPizzaFatiaDTO;
-import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ItemProdutoDTO;
-import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ProdutoCompletoDTO;
 import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ProdutosPorItemDTO;
 import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.QuantidadeValorDTO;
 import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ConversaoValoresDTO;
@@ -132,7 +130,7 @@ public class ItensProdutoUseCase implements AdicionarItemAoProdutoPort, ListarIt
 
     @Override
     public QuantidadeValorDTO calcular(Long idProduto) {
-        logger().info("Inicio do mÃ©todo calcularQuantidadeEValorTotal");
+        logger().info("Inicio do metodo calcularQuantidadeEValorTotal");
         List<ItemProduto> listItensProduto = itemProdutoRepositoryPort.buscarPorProdutoId(idProduto);
         int quantidadeTotal = listItensProduto.size();
         BigDecimal valorTotal = listItensProduto.stream()

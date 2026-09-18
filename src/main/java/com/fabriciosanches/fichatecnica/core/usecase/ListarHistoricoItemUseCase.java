@@ -99,7 +99,7 @@ public class ListarHistoricoItemUseCase implements ListarHistoricoItemPort {
             anterior = h.getValor();
         }
 
-        String titulo = "VariaÃ§Ã£o de PreÃ§o â€“ " + nomeItem;
+        String titulo = "Variacao de Preco - " + nomeItem;
         return new GraficoPrecoItemDTO(titulo, nomeItem, labels, valores, valoresFormatados, variacoes, variacoesMonetarias);
     }
 }

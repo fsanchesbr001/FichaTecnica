@@ -1,12 +1,16 @@
 package com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web;
 
 import com.fabriciosanches.fichatecnica.core.domain.ItemProduto;
+import com.fabriciosanches.fichatecnica.core.domain.enums.ImagemPosicao;
+import com.fabriciosanches.fichatecnica.core.domain.enums.OrientacaoRelatorio;
+import com.fabriciosanches.fichatecnica.core.domain.enums.TipoRelatorio;
+import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
 import com.fabriciosanches.fichatecnica.core.ports.in.AtualizarProdutoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.BuscarProdutoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.CriarProdutoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.DeletarProdutoPort;
-import com.fabriciosanches.fichatecnica.core.ports.in.GerarGraficoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarGraficoPizzaProdutoPort;
+import com.fabriciosanches.fichatecnica.core.ports.in.GerarGraficoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.GerarRelatorioPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.ListarItensDoProdutoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.ObterDescricoesUnidadePort;
@@ -14,17 +18,14 @@ import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.Grafi
 import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ProdutoCompletoDTO;
 import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ProdutoDTO;
 import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.RelatorioRequestDTO;
-import com.fabriciosanches.fichatecnica.core.domain.enums.ImagemPosicao;
-import com.fabriciosanches.fichatecnica.core.domain.enums.OrientacaoRelatorio;
-import com.fabriciosanches.fichatecnica.core.domain.enums.TipoRelatorio;
-import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
+import com.fabriciosanches.fichatecnica.infrastructure.util.TextoEncodingUtils;
 import com.google.gson.Gson;
-import jakarta.transaction.Transactional;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,7 +56,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("ficha-tecnica")
-@Tag(name = "Produtos", description = "Cadastro, consulta, atualizaÃ§Ã£o, exclusÃ£o e relatÃ³rios de produtos")
+@Tag(name = "Produtos", description = "Cadastro, consulta, atualizacao, exclusao e relatorios de produtos")
 @SecurityRequirement(name = "bearerAuth")
 public class ProdutoController {
     private static final Logger logger = LogManager.getLogger(ProdutoController.class);
@@ -105,7 +106,7 @@ public class ProdutoController {
             @ApiResponse(responseCode = "404", description = "Erro ao consultar produtos")
     })
     public ResponseEntity<List<ProdutoDTO>> buscarLista() {
-        logger.info("Inicio do mÃ©todo buscarLista");
+        logger.info("Inicio do metodo buscarLista");
         try {
             List<ProdutoDTO> produtos = buscarProdutoPort.listar();
             if (produtos.isEmpty()) {
@@ -123,7 +124,7 @@ public class ProdutoController {
     @Operation(summary = "Cadastra produto", description = "Cria um novo produto na base de dados.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Produto cadastrado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados invÃ¡lidos para cadastro")
+            @ApiResponse(responseCode = "400", description = "Dados invalidos para cadastro")
     })
     public ResponseEntity<ProdutoDTO> cadastrarProduto(@RequestBody ProdutoDTO produto) {
         try {
@@ -139,12 +140,12 @@ public class ProdutoController {
     @Operation(summary = "Gera PDF da lista de produtos", description = "Exporta a lista completa de produtos em PDF.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "PDF gerado com sucesso"),
-            @ApiResponse(responseCode = "204", description = "Nenhum produto encontrado para o relatÃ³rio"),
-            @ApiResponse(responseCode = "400", description = "ParÃ¢metros invÃ¡lidos para geraÃ§Ã£o do PDF"),
-            @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o relatÃ³rio")
+            @ApiResponse(responseCode = "204", description = "Nenhum produto encontrado para o relatorio"),
+            @ApiResponse(responseCode = "400", description = "Parametros invalidos para geracao do PDF"),
+            @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o relatorio")
     })
     public ResponseEntity<byte[]> gerarPdfLista() {
-        logger.info("InÃ­cio do mÃ©todo gerarPdfLista â€“ ProdutoController");
+        logger.info("Inicio do metodo gerarPdfLista - ProdutoController");
         try {
             List<ProdutoDTO> lista = buscarProdutoPort.listar();
             if (lista.isEmpty()) {
@@ -154,7 +155,7 @@ public class ProdutoController {
             String jsonData = new Gson().toJson(lista);
             Map<String, String> colunas = new LinkedHashMap<>();
             colunas.put("nome", "Nome");
-            colunas.put("descricao", "DescriÃ§Ã£o");
+            colunas.put("descricao", "Descricao");
             colunas.put("valorVenda", "Valor de Venda");
             colunas.put("valorItens", "Valor dos Itens");
 
@@ -173,11 +174,11 @@ public class ProdutoController {
             String filename = "Lista-Produtos-" + timestamp + ".pdf";
 
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, TextoEncodingUtils.contentDispositionAttachment(filename))
                     .contentType(MediaType.APPLICATION_PDF)
                     .body(pdfBytes);
         } catch (IllegalArgumentException e) {
-            logger.error("ParÃ¢metros invÃ¡lidos para geraÃ§Ã£o do PDF de produtos: {}", e.getMessage());
+            logger.error("Parametros invalidos para geracao do PDF de produtos: {}", e.getMessage());
             return ResponseEntity.badRequest().build();
         } catch (Exception e) {
             logger.error("Erro inesperado ao gerar PDF de lista de produtos", e);
@@ -187,15 +188,15 @@ public class ProdutoController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/produtos/gerar-pdf-detalhe/{id:[0-9]+}")
-    @Operation(summary = "Gera PDF detalhado do produto", description = "Exporta a ficha detalhada de um produto especÃ­fico em PDF.")
+    @Operation(summary = "Gera PDF detalhado do produto", description = "Exporta a ficha detalhada de um produto especifico em PDF.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "PDF gerado com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Produto nÃ£o encontrado"),
-            @ApiResponse(responseCode = "400", description = "ParÃ¢metros invÃ¡lidos para geraÃ§Ã£o do PDF"),
-            @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o relatÃ³rio")
+            @ApiResponse(responseCode = "404", description = "Produto nao encontrado"),
+            @ApiResponse(responseCode = "400", description = "Parametros invalidos para geracao do PDF"),
+            @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o relatorio")
     })
     public ResponseEntity<byte[]> gerarPdfDetalhe(@PathVariable Long id) {
-        logger.info("InÃ­cio do mÃ©todo gerarPdfDetalhe â€“ ProdutoController â€“ id: {}", id);
+        logger.info("Inicio do metodo gerarPdfDetalhe - ProdutoController - id: {}", id);
         try {
             ProdutoDTO produto = buscarProdutoPort.buscarPorId(id);
             List<ItemProduto> itensProduto = listarItensDoProdutoPort.listar(id);
@@ -211,7 +212,7 @@ public class ProdutoController {
 
             Map<String, String> colunas = new LinkedHashMap<>();
             colunas.put("nome", "Nome");
-            colunas.put("descricao", "DescriÃ§Ã£o");
+            colunas.put("descricao", "Descricao");
             colunas.put("valorVenda", "Valor de Venda");
             colunas.put("valorItens", "Valor dos Itens");
 
@@ -222,12 +223,12 @@ public class ProdutoController {
                 GraficoPizzaDTO graficoDTO = gerarGraficoPizzaProdutoPort.gerar(id);
                 if (graficoDTO != null && graficoDTO.valores() != null && !graficoDTO.valores().isEmpty()) {
                     graficoPngBytes = gerarGraficoPort.gerarGraficoPizzaPNG(graficoDTO);
-                    logger.info("GrÃ¡fico de composiÃ§Ã£o de custo gerado para produto id={}", id);
+                    logger.info("Grafico de composicao de custo gerado para produto id={}", id);
                 }
             } catch (FichaTecnicaException ex) {
-                logger.info("Sem composiÃ§Ã£o suficiente para grÃ¡fico no produto id={} â€“ PDF seguirÃ¡ sem grÃ¡fico", id);
+                logger.info("Sem composicao suficiente para grafico no produto id={} - PDF seguira sem grafico", id);
             } catch (Exception ex) {
-                logger.warn("Falha ao gerar grÃ¡fico de composiÃ§Ã£o do produto id={}: {}", id, ex.getMessage());
+                logger.warn("Falha ao gerar grafico de composicao do produto id={}: {}", id, ex.getMessage());
             }
 
             RelatorioRequestDTO request;
@@ -289,14 +290,14 @@ public class ProdutoController {
             String filename = "Detalhe-Produto-" + id + "-" + timestamp + ".pdf";
 
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, TextoEncodingUtils.contentDispositionAttachment(filename))
                     .contentType(MediaType.APPLICATION_PDF)
                     .body(pdfBytes);
         } catch (FichaTecnicaException e) {
-            logger.error("Produto nÃ£o encontrado para id {}: {}", id, e.getMessage());
+            logger.error("Produto nao encontrado para id {}: {}", id, e.getMessage());
             return ResponseEntity.notFound().build();
         } catch (IllegalArgumentException e) {
-            logger.error("ParÃ¢metros invÃ¡lidos para geraÃ§Ã£o do PDF de detalhe de Produto: {}", e.getMessage());
+            logger.error("Parametros invalidos para geracao do PDF de detalhe de Produto: {}", e.getMessage());
             return ResponseEntity.badRequest().build();
         } catch (Exception e) {
             logger.error("Erro inesperado ao gerar PDF de detalhe de Produto", e);
@@ -305,10 +306,10 @@ public class ProdutoController {
     }
 
     @GetMapping("/produtos/{id:[0-9]+}")
-    @Operation(summary = "Busca produto por ID", description = "Retorna os dados de um produto especÃ­fico.")
+    @Operation(summary = "Busca produto por ID", description = "Retorna os dados de um produto especifico.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Produto encontrado"),
-            @ApiResponse(responseCode = "204", description = "Produto nÃ£o encontrado"),
+            @ApiResponse(responseCode = "204", description = "Produto nao encontrado"),
             @ApiResponse(responseCode = "404", description = "Erro ao buscar produto")
     })
     public ResponseEntity<ProdutoDTO> buscarPorId(@PathVariable Long id) {
@@ -329,7 +330,7 @@ public class ProdutoController {
     @Operation(summary = "Atualiza produto", description = "Altera os dados de um produto existente.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Produto atualizado com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Produto nÃ£o encontrado")
+            @ApiResponse(responseCode = "404", description = "Produto nao encontrado")
     })
     public ResponseEntity<ProdutoDTO> atualizarProduto(@PathVariable Long id, @RequestBody ProdutoDTO produto) {
         try {
@@ -345,7 +346,7 @@ public class ProdutoController {
     @Operation(summary = "Remove produto", description = "Exclui um produto existente pelo ID.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Produto removido com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Produto nÃ£o encontrado")
+            @ApiResponse(responseCode = "404", description = "Produto nao encontrado")
     })
     public ResponseEntity<Void> apagar(@PathVariable Long id) {
         try {
@@ -415,12 +416,10 @@ public class ProdutoController {
                 logger.info("Imagem do produto id={} carregada: {}", idProduto, imagePath);
                 return Files.readAllBytes(imagePath);
             }
-            logger.warn("Arquivo de imagem nÃ£o encontrado para produto id={}: {}", idProduto, imagePath);
+            logger.warn("Arquivo de imagem nao encontrado para produto id={}: {}", idProduto, imagePath);
         } catch (Exception e) {
-            logger.warn("NÃ£o foi possÃ­vel carregar a imagem do produto id={}: {}", idProduto, e.getMessage());
+            logger.warn("Nao foi possivel carregar a imagem do produto id={}: {}", idProduto, e.getMessage());
         }
         return null;
     }
 }
-
-

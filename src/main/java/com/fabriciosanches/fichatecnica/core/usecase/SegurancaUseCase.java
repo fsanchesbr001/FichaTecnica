@@ -160,7 +160,7 @@ public class SegurancaUseCase implements RecuperacaoSenhaPort, ControleAcessoPor
         if (seguranca.getDataExpiracaoSenha() != null && LocalDateTime.now().isAfter(seguranca.getDataExpiracaoSenha())) {
             expirarSenha(seguranca.getEmail());
         }
-        logger.info("Senha vÃ¡lida para o email: {}", email);
+        logger.info("Senha valida para o email: {}", email);
     }
 
     private Seguranca buscarSegurancaPorEmailOuFalhar(String email) {

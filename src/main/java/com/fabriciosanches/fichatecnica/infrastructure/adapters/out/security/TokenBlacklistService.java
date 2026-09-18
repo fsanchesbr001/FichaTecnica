@@ -36,7 +36,7 @@ public class TokenBlacklistService implements GerenciadorBlacklistTokenPort {
      */
     @Override
     public void revogar(String token, Instant expiresAt) {
-        logger.info("Token adicionado Ã  blacklist. Expira em: {}", expiresAt);
+        logger.info("Token adicionado a blacklist. Expira em: {}", expiresAt);
         blacklist.put(token, expiresAt);
     }
 

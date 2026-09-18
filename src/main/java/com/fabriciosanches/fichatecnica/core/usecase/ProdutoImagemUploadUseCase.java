@@ -56,7 +56,7 @@ public class ProdutoImagemUploadUseCase implements IniciarUploadImagemProdutoPor
     public UploadJobDTO consultar(String jobId) {
         JobState state = jobs.get(jobId);
         if (state == null) {
-            throw new FichaTecnicaException("Job de upload nÃ£o encontrado: " + jobId);
+            throw new FichaTecnicaException("Job de upload nao encontrado: " + jobId);
         }
         return toDTO(state);
     }
@@ -64,7 +64,7 @@ public class ProdutoImagemUploadUseCase implements IniciarUploadImagemProdutoPor
     @Override
     public void remover(Long produtoId) {
         Produto produto = produtoRepositoryPort.buscarPorId(produtoId)
-                .orElseThrow(() -> new FichaTecnicaException("Produto nÃ£o encontrado id=" + produtoId));
+                .orElseThrow(() -> new FichaTecnicaException("Produto nao encontrado id=" + produtoId));
 
         String imagemAtual = produto.getImagem();
         if (imagemAtual == null || imagemAtual.isBlank()) {
@@ -83,19 +83,19 @@ public class ProdutoImagemUploadUseCase implements IniciarUploadImagemProdutoPor
 
     private void validarArquivo(ArquivoUpload arquivo) {
         if (arquivo == null || arquivo.isVazio()) {
-            throw new FichaTecnicaException("Arquivo de imagem nÃ£o pode ser vazio.");
+            throw new FichaTecnicaException("Arquivo de imagem nao pode ser vazio.");
         }
         if (arquivo.getTamanho() > 10L * 1024 * 1024) {
-            throw new FichaTecnicaException("Arquivo excede o tamanho mÃ¡ximo permitido de 10 MB.");
+            throw new FichaTecnicaException("Arquivo excede o tamanho maximo permitido de 10 MB.");
         }
         String contentType = arquivo.getTipoConteudo();
         if (contentType == null || !(contentType.equalsIgnoreCase("image/jpeg") || contentType.equalsIgnoreCase("image/png") || contentType.equalsIgnoreCase("image/webp"))) {
-            throw new FichaTecnicaException("Tipo de arquivo nÃ£o suportado: " + contentType + ". Permitidos: jpg, jpeg, png, webp.");
+            throw new FichaTecnicaException("Tipo de arquivo nao suportado: " + contentType + ". Permitidos: jpg, jpeg, png, webp.");
         }
         String original = arquivo.getNomeOriginal();
         String ext = original == null || !original.contains(".") ? "jpg" : original.substring(original.lastIndexOf('.') + 1);
         if (!(ext.equalsIgnoreCase("jpg") || ext.equalsIgnoreCase("jpeg") || ext.equalsIgnoreCase("png") || ext.equalsIgnoreCase("webp"))) {
-            throw new FichaTecnicaException("ExtensÃ£o nÃ£o permitida: " + ext + ". Permitidas: jpg, jpeg, png, webp.");
+            throw new FichaTecnicaException("Extensao nao permitida: " + ext + ". Permitidas: jpg, jpeg, png, webp.");
         }
     }
 

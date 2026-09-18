@@ -47,11 +47,11 @@ public class UnidadeMedidaController {
             @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso")
     })
     public ResponseEntity<List<UnidadeMedidaDTO>> buscarLista() {
-        logger.info("Inicio do mÃ©todo buscarLista");
+        logger.info("Inicio do metodo buscarLista");
         List<UnidadeMedidaDTO> medidas = buscarUnidadeMedidaPort.buscarTodos().stream()
                 .map(this::toDto)
                 .toList();
-        logger.info("Fim do mÃ©todo buscarLista");
+        logger.info("Fim do metodo buscarLista");
         return ResponseEntity.ok(medidas);
     }
 
@@ -62,10 +62,10 @@ public class UnidadeMedidaController {
             @ApiResponse(responseCode = "404", description = "Unidade nÃ£o encontrada")
     })
     public ResponseEntity<?> buscarPorId(@PathVariable Long id) {
-        logger.info("Inicio do mÃ©todo buscarPorId");
+        logger.info("Inicio do metodo buscarPorId");
         try {
             UnidadeMedida medida = buscarUnidadeMedidaPort.buscarPorId(id);
-            logger.info("Fim do mÃ©todo buscarPorId");
+            logger.info("Fim do metodo buscarPorId");
             return ResponseEntity.ok(toDto(medida));
         } catch (java.util.NoSuchElementException e) {
             return ResponseEntity.notFound().build();
@@ -80,7 +80,7 @@ public class UnidadeMedidaController {
             @ApiResponse(responseCode = "400", description = "Dados invÃ¡lidos para cadastro")
     })
     public ResponseEntity<?> cadastrarUnidade(@RequestBody UnidadeMedidaDTO unidade) {
-        logger.info("Inicio do mÃ©todo cadastrarUnidade");
+        logger.info("Inicio do metodo cadastrarUnidade");
         logger.info("Cadastrando unidade de medida: {}", unidade);
         try {
             UnidadeMedida medidaCriada = criarUnidadeMedidaPort.criar(unidade.nome(), unidade.sigla());
@@ -90,7 +90,7 @@ public class UnidadeMedidaController {
                     medidaCriada.getSigla()
             );
             logger.info("Unidade de medida cadastrada com sucesso: {}", medida);
-            logger.info("Fim do mÃ©todo cadastrarUnidade");
+            logger.info("Fim do metodo cadastrarUnidade");
             return ResponseEntity.ok(medida);
         }
         catch (IllegalArgumentException e){
@@ -108,10 +108,10 @@ public class UnidadeMedidaController {
             @ApiResponse(responseCode = "404", description = "Unidade nÃ£o encontrada")
     })
     public ResponseEntity<?> atualizarUnidade(@PathVariable Long id, @RequestBody UnidadeMedidaDTO unidade) {
-        logger.info("Inicio do mÃ©todo atualizarUnidade");
+        logger.info("Inicio do metodo atualizarUnidade");
         try {
             UnidadeMedida medidaAtualizada = atualizarUnidadeMedidaPort.atualizar(id, unidade.nome(), unidade.sigla());
-            logger.info("Fim do mÃ©todo atualizarUnidade");
+            logger.info("Fim do metodo atualizarUnidade");
             return ResponseEntity.ok(toDto(medidaAtualizada));
         } catch (java.util.NoSuchElementException e) {
             return ResponseEntity.notFound().build();
@@ -129,10 +129,10 @@ public class UnidadeMedidaController {
             @ApiResponse(responseCode = "409", description = "Unidade vinculada a outros registros")
     })
     public ResponseEntity<?> apagar(@PathVariable Long id) {
-        logger.info("Inicio do mÃ©todo apagar");
+        logger.info("Inicio do metodo apagar");
         try {
             deletarUnidadeMedidaPort.deletar(id);
-            logger.info("Fim do mÃ©todo apagar");
+            logger.info("Fim do metodo apagar");
             return ResponseEntity.noContent().build();
         } catch (java.util.NoSuchElementException e) {
             return ResponseEntity.notFound().build();
