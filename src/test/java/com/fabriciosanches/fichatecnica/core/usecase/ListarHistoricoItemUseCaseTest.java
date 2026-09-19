@@ -43,7 +43,7 @@ class ListarHistoricoItemUseCaseTest {
                 () -> useCase.listarPorCodigoItemOrdenadoPorDataInicio(10L)
         );
 
-        assertEquals("Nenhum histÃ³rico encontrado para o item codigo=10", ex.getMessage());
+        assertEquals("Nenhum histórico encontrado para o item codigo=10", ex.getMessage());
     }
 
     @Test

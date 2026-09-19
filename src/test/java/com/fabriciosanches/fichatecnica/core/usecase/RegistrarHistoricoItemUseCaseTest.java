@@ -44,7 +44,7 @@ class RegistrarHistoricoItemUseCaseTest {
                 () -> useCase.registrar(null, new BigDecimal("10.00"), LocalDate.now())
         );
 
-        assertEquals("CÃ³digo do item nÃ£o pode ser nulo", ex.getMessage());
+        assertEquals("Código do item não pode ser nulo", ex.getMessage());
     }
 }
 

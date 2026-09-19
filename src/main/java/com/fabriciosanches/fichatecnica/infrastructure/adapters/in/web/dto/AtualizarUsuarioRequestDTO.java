@@ -3,16 +3,16 @@ package com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto;
 import com.fabriciosanches.fichatecnica.core.domain.enums.UserRole;
 
 /**
- * DTO de requisiÃ§Ã£o para atualizaÃ§Ã£o parcial de um usuÃ¡rio.
+ * DTO de requisição para atualização parcial de um usuário.
  * Atualiza campos de controle de acesso na tabela {@code seguranca}
  * e os campos {@code nome} e {@code role} na tabela {@code usuarios}.
  *
- * @param bloqueado_admin      indica se o usuÃ¡rio estÃ¡ bloqueado administrativamente
- * @param bloqueado_tentativas indica se o usuÃ¡rio estÃ¡ bloqueado por excesso de tentativas
- * @param bloqueado_expiracao  indica se o usuÃ¡rio estÃ¡ bloqueado por expiraÃ§Ã£o de senha
- * @param primeiro_acesso      indica se Ã© o primeiro acesso do usuÃ¡rio
- * @param nome                 nome completo do usuÃ¡rio
- * @param role                 perfil de acesso do usuÃ¡rio
+ * @param bloqueado_admin      indica se o usuário está bloqueado administrativamente
+ * @param bloqueado_tentativas indica se o usuário está bloqueado por excesso de tentativas
+ * @param bloqueado_expiracao  indica se o usuário está bloqueado por expiração de senha
+ * @param primeiro_acesso      indica se é o primeiro acesso do usuário
+ * @param nome                 nome completo do usuário
+ * @param role                 perfil de acesso do usuário
  */
 public record AtualizarUsuarioRequestDTO(
         Boolean bloqueado_admin,

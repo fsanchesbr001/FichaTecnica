@@ -55,18 +55,18 @@ class GerarRelatorioUseCaseTest {
                         TipoRelatorio.LISTA, OrientacaoRelatorio.RETRATO, false
                 )));
 
-        assertEquals("Nenhum registro encontrado para gerar o relatÃ³rio.", ex.getMessage());
+        assertEquals("Nenhum registro encontrado para gerar o relatório.", ex.getMessage());
     }
 
     @Test
     void gerarRelatorioPDF_DeveCorrigirTextoMojibakeNoConteudo() throws IOException {
-        String json = "[{\"nome\":\"Ficha TÃ©cnica\",\"valor\":\"10.00\"}]";
+        String json = "[{\"nome\":\"Ficha Técnica\",\"valor\":\"10.00\"}]";
         Map<String, String> colunas = new LinkedHashMap<>();
-        colunas.put("nome", "DescriÃ§Ã£o");
+        colunas.put("nome", "Descrição");
         colunas.put("valor", "Valor");
 
         byte[] pdf = useCase.gerarRelatorioPDF(new RelatorioRequestDTO(
-                json, "", "RelatÃ³rio TÃ©cnico", colunas,
+                json, "", "Relatório Técnico", colunas,
                 TipoRelatorio.LISTA, OrientacaoRelatorio.RETRATO, true
         ));
 

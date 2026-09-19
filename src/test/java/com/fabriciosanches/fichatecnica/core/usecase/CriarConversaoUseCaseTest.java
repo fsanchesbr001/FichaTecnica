@@ -49,7 +49,7 @@ class CriarConversaoUseCaseTest {
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> useCase.criar(conversao));
 
-        assertEquals("ConversÃ£o jÃ¡ cadastrada", exception.getMessage());
+        assertEquals("Conversão já cadastrada", exception.getMessage());
         verify(repositoryPort, never()).salvar(any(Conversao.class));
     }
 }

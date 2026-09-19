@@ -82,7 +82,7 @@ class UsuarioControllerTest {
         when(buscarUsuarioPort.listarTodosUsuarios()).thenReturn(List.of(
                 new UsuarioListagemDTO("user@email.com", "52998224725", null, 5,
                         false, false, false, false, null, null, null,
-                        "UsuÃ¡rio Teste", "ADMIN")
+                        "Usuário Teste", "ADMIN")
         ));
 
         mockMvc.perform(get("/ficha-tecnica/usuarios/listar-todos-usuarios"))
@@ -103,11 +103,11 @@ class UsuarioControllerTest {
         when(buscarUsuarioPort.buscarUsuarioPorEmail("user@email.com"))
                 .thenReturn(new UsuarioListagemDTO("user@email.com", "52998224725", null, 5,
                         false, false, false, false, null, null, null,
-                        "UsuÃ¡rio Teste", "ADMIN"));
+                        "Usuário Teste", "ADMIN"));
 
         mockMvc.perform(get("/ficha-tecnica/usuarios/buscar-usuario/{email}", "user@email.com"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nome").value("UsuÃ¡rio Teste"));
+                .andExpect(jsonPath("$.nome").value("Usuário Teste"));
     }
 
     @Test

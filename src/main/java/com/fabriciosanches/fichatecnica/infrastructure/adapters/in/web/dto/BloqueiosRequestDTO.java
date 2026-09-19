@@ -5,7 +5,7 @@ public record BloqueiosRequestDTO(String email)
 {
     public BloqueiosRequestDTO {
         if ( email == null || email.isBlank()) {
-            throw new IllegalArgumentException("O email nÃ£o pode ser nulo ou vazio");
+            throw new IllegalArgumentException("O email não pode ser nulo ou vazio");
         }
     }
 }

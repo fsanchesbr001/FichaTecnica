@@ -15,8 +15,8 @@ public class GerarRelatorioDetalheUnidadeMedidaUseCase implements GerarRelatorio
 
     public GerarRelatorioDetalheUnidadeMedidaUseCase(UnidadeMedidaRepositoryPort repositoryPort,
                                                       GeradorRelatorioUnidadeMedidaPort reportPort) {
-        this.repositoryPort = Objects.requireNonNull(repositoryPort, "Repository port nÃ£o pode ser nulo");
-        this.reportPort = Objects.requireNonNull(reportPort, "Report port nÃ£o pode ser nulo");
+        this.repositoryPort = Objects.requireNonNull(repositoryPort, "Repository port não pode ser nulo");
+        this.reportPort = Objects.requireNonNull(reportPort, "Report port não pode ser nulo");
     }
 
     @Override
@@ -25,14 +25,14 @@ public class GerarRelatorioDetalheUnidadeMedidaUseCase implements GerarRelatorio
 
         UnidadeMedida unidade = repositoryPort.buscarPorSigla(siglaNormalizada)
                 .orElseThrow(() -> new NoSuchElementException(
-                        "Unidade de medida nÃ£o encontrada: " + siglaNormalizada));
+                        "Unidade de medida não encontrada: " + siglaNormalizada));
 
         return reportPort.gerarRelatorioDetalhe(unidade);
     }
 
     private String normalizarSigla(String sigla) {
         if (sigla == null || sigla.isBlank()) {
-            throw new IllegalArgumentException("Sigla da unidade de medida nÃ£o pode ser vazia");
+            throw new IllegalArgumentException("Sigla da unidade de medida não pode ser vazia");
         }
         return sigla.trim().toUpperCase();
     }

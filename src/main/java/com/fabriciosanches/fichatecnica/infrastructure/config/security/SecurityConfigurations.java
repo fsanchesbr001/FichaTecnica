@@ -35,19 +35,19 @@ public class SecurityConfigurations {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(ex -> ex
-                        // 401 quando nÃ£o hÃ¡ autenticaÃ§Ã£o (token ausente / invÃ¡lido)
+                        // 401 quando não há autenticação (token ausente / inválido)
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(401);
                             response.setContentType("application/json;charset=UTF-8");
                             response.getWriter().write(
-                                    "{\"error\":\"NÃ£o autenticado\",\"message\":\"Token JWT ausente ou invÃ¡lido. FaÃ§a login.\"}");
+                                    "{\"error\":\"Não autenticado\",\"message\":\"Token JWT ausente ou inválido. Faça login.\"}");
                         })
-                        // 403 quando hÃ¡ autenticaÃ§Ã£o mas role insuficiente
+                        // 403 quando há autenticação mas role insuficiente
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
                             response.setStatus(403);
                             response.setContentType("application/json;charset=UTF-8");
                             response.getWriter().write(
-                                    "{\"error\":\"Acesso negado\",\"message\":\"Seu perfil nÃ£o tem permissÃ£o para este recurso.\"}");
+                                    "{\"error\":\"Acesso negado\",\"message\":\"Seu perfil não tem permissão para este recurso.\"}");
                         })
                 )
                 .authorizeHttpRequests(ar -> ar

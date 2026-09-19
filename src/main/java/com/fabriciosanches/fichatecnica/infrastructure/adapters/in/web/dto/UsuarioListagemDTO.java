@@ -7,7 +7,7 @@ import com.fabriciosanches.fichatecnica.core.domain.enums.UserRole;
 import java.time.LocalDateTime;
 
 /**
- * DTO de listagem de usuÃ¡rios que combina dados da tabela {@code seguranca}
+ * DTO de listagem de usuários que combina dados da tabela {@code seguranca}
  * (controle de acesso) com os campos {@code nome} e {@code role} da tabela
  * {@code usuarios}.
  */
@@ -28,10 +28,10 @@ public record UsuarioListagemDTO(
 ) {
 
     /**
-     * ConstrÃ³i o DTO combinando os dados de seguranÃ§a com os dados do usuÃ¡rio.
+     * Constrói o DTO combinando os dados de segurança com os dados do usuário.
      *
      * @param seguranca registro da tabela seguranca
-     * @param usuario   registro da tabela usuarios (pode ser {@code null} quando nÃ£o encontrado)
+     * @param usuario   registro da tabela usuarios (pode ser {@code null} quando não encontrado)
      */
     public UsuarioListagemDTO(Seguranca seguranca, Usuario usuario) {
         this(

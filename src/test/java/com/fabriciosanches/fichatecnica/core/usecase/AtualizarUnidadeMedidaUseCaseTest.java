@@ -47,19 +47,19 @@ class AtualizarUnidadeMedidaUseCaseTest {
         NoSuchElementException exception =
                 assertThrows(NoSuchElementException.class, () -> useCase.atualizar(1L, "Quilo", "kg"));
 
-        assertEquals("Unidade de medida nÃ£o encontrada", exception.getMessage());
+        assertEquals("Unidade de medida não encontrada", exception.getMessage());
         verify(repositoryPort, never()).salvar(any(UnidadeMedida.class));
     }
 
     @Test
     void atualizar_DeveLancarExcecaoQuandoSiglaJaExistirEmOutroRegistro() {
         when(repositoryPort.buscarPorId(1L)).thenReturn(Optional.of(new UnidadeMedida(1L, "Metro", "M")));
-        when(repositoryPort.buscarPorSigla("CM")).thenReturn(Optional.of(new UnidadeMedida(2L, "CentÃ­metro", "CM")));
+        when(repositoryPort.buscarPorSigla("CM")).thenReturn(Optional.of(new UnidadeMedida(2L, "Centímetro", "CM")));
 
         IllegalArgumentException exception =
                 assertThrows(IllegalArgumentException.class, () -> useCase.atualizar(1L, "Metro", "cm"));
 
-        assertEquals("JÃ¡ existe uma unidade de medida com a sigla 'CM'.", exception.getMessage());
+        assertEquals("Já existe uma unidade de medida com a sigla 'CM'.", exception.getMessage());
         verify(repositoryPort, never()).salvar(any(UnidadeMedida.class));
     }
 }

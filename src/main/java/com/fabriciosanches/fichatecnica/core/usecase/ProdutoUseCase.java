@@ -18,7 +18,7 @@ public class ProdutoUseCase implements CriarProdutoPort, BuscarProdutoPort, Atua
     private final ProdutoRepositoryPort produtoRepositoryPort;
 
     public ProdutoUseCase(ProdutoRepositoryPort produtoRepositoryPort) {
-        this.produtoRepositoryPort = Objects.requireNonNull(produtoRepositoryPort, "ProdutoRepositoryPort nÃ£o pode ser nulo");
+        this.produtoRepositoryPort = Objects.requireNonNull(produtoRepositoryPort, "ProdutoRepositoryPort não pode ser nulo");
     }
 
     @Override
@@ -32,11 +32,11 @@ public class ProdutoUseCase implements CriarProdutoPort, BuscarProdutoPort, Atua
     @Override
     public ProdutoDTO buscarPorId(Long id) {
         if (id == null) {
-            throw new IllegalArgumentException("Id nÃ£o pode ser nulo");
+            throw new IllegalArgumentException("Id não pode ser nulo");
         }
 
         Produto produto = produtoRepositoryPort.buscarPorId(id)
-                .orElseThrow(() -> new FichaTecnicaException("Produto nÃ£o encontrada"));
+                .orElseThrow(() -> new FichaTecnicaException("Produto não encontrada"));
         return toDto(produto);
     }
 
@@ -46,13 +46,13 @@ public class ProdutoUseCase implements CriarProdutoPort, BuscarProdutoPort, Atua
 
     @Override
     public ProdutoDTO cadastrarProduto(ProdutoDTO produtoDTO) {
-        Objects.requireNonNull(produtoDTO, "Produto nÃ£o pode ser nulo");
-        Objects.requireNonNull(produtoDTO.nome(), "Nome do produto nÃ£o pode ser nulo");
-        Objects.requireNonNull(produtoDTO.descricao(), "Descricao nÃ£o pode ser nula");
-        Objects.requireNonNull(produtoDTO.valorVenda(), "Valor de Venda nÃ£o pode ser nulo");
+        Objects.requireNonNull(produtoDTO, "Produto não pode ser nulo");
+        Objects.requireNonNull(produtoDTO.nome(), "Nome do produto não pode ser nulo");
+        Objects.requireNonNull(produtoDTO.descricao(), "Descricao não pode ser nula");
+        Objects.requireNonNull(produtoDTO.valorVenda(), "Valor de Venda não pode ser nulo");
 
         if (findByName(produtoDTO.nome()) > 0) {
-            throw new FichaTecnicaException("Produto jÃ¡ cadastrado");
+            throw new FichaTecnicaException("Produto já cadastrado");
         }
 
         Produto produto = new Produto(
@@ -71,12 +71,12 @@ public class ProdutoUseCase implements CriarProdutoPort, BuscarProdutoPort, Atua
     @Override
     public ProdutoDTO atualizarProduto(Long id, ProdutoDTO novosDados) {
         if (id == null) {
-            throw new IllegalArgumentException("Id nÃ£o pode ser nulo");
+            throw new IllegalArgumentException("Id não pode ser nulo");
         }
-        Objects.requireNonNull(novosDados, "Produto nÃ£o pode ser nulo");
+        Objects.requireNonNull(novosDados, "Produto não pode ser nulo");
 
         Produto produto = produtoRepositoryPort.buscarPorId(id)
-                .orElseThrow(() -> new FichaTecnicaException("Produto com ID " + id + " nÃ£o encontrada"));
+                .orElseThrow(() -> new FichaTecnicaException("Produto com ID " + id + " não encontrada"));
 
         produto.setNome(novosDados.nome());
         produto.setDescricao(novosDados.descricao());
@@ -92,7 +92,7 @@ public class ProdutoUseCase implements CriarProdutoPort, BuscarProdutoPort, Atua
     @Override
     public void deletar(Long id) {
         if (id == null) {
-            throw new IllegalArgumentException("Id nÃ£o pode ser nulo");
+            throw new IllegalArgumentException("Id não pode ser nulo");
         }
         produtoRepositoryPort.deletarPorId(id);
     }

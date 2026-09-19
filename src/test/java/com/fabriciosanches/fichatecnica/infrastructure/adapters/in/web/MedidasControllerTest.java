@@ -90,7 +90,7 @@ class MedidasControllerTest {
     @Test
     void atualizarUnidade_DeveRetornarBadRequestQuandoInvalida() throws Exception {
         when(atualizarUnidadeMedidaPort.atualizar(eq(1L), any(), any()))
-                .thenThrow(new IllegalArgumentException("Sigla nÃ£o pode ser vazia"));
+                .thenThrow(new IllegalArgumentException("Sigla não pode ser vazia"));
 
         mockMvc.perform(put("/ficha-tecnica/unidades-medida/{id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -101,7 +101,7 @@ class MedidasControllerTest {
                                 }
                                 """))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Sigla nÃ£o pode ser vazia"));
+                .andExpect(content().string("Sigla não pode ser vazia"));
     }
 
     @Test
@@ -116,7 +116,7 @@ class MedidasControllerTest {
     @Test
     void cadastrarUnidade_DeveRetornarBadRequestQuandoCasoDeUsoFalhar() throws Exception {
         when(criarUnidadeMedidaPort.criar(any(), any()))
-                .thenThrow(new IllegalArgumentException("Sigla nÃ£o pode ser vazia"));
+                .thenThrow(new IllegalArgumentException("Sigla não pode ser vazia"));
 
         mockMvc.perform(post("/ficha-tecnica/unidades-medida")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -127,7 +127,7 @@ class MedidasControllerTest {
                                 }
                                 """))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string("Sigla nÃ£o pode ser vazia"));
+                .andExpect(content().string("Sigla não pode ser vazia"));
     }
 }
 

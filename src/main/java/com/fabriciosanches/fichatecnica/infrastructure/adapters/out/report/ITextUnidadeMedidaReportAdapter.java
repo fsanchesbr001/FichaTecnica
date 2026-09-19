@@ -22,7 +22,7 @@ public class ITextUnidadeMedidaReportAdapter implements GeradorRelatorioUnidadeM
     private final Gson gson = new Gson();
 
     public ITextUnidadeMedidaReportAdapter(GerarRelatorioPort gerarRelatorioPort) {
-        this.gerarRelatorioPort = Objects.requireNonNull(gerarRelatorioPort, "GerarRelatorioPort nÃ£o pode ser nulo");
+        this.gerarRelatorioPort = Objects.requireNonNull(gerarRelatorioPort, "GerarRelatorioPort não pode ser nulo");
     }
 
     @Override
@@ -32,7 +32,7 @@ public class ITextUnidadeMedidaReportAdapter implements GeradorRelatorioUnidadeM
                 .toList();
 
         Map<String, String> colunas = new LinkedHashMap<>();
-        colunas.put("codigo", "CÃ³digo");
+        colunas.put("codigo", "Código");
         colunas.put("nome", "Nome");
         colunas.put("sigla", "Sigla");
 
@@ -52,7 +52,7 @@ public class ITextUnidadeMedidaReportAdapter implements GeradorRelatorioUnidadeM
     @Override
     public byte[] gerarRelatorioDetalhe(UnidadeMedida unidade) {
         Map<String, String> colunas = new LinkedHashMap<>();
-        colunas.put("codigo", "CÃ³digo");
+        colunas.put("codigo", "Código");
         colunas.put("nome", "Nome");
         colunas.put("sigla", "Sigla");
 
@@ -81,7 +81,7 @@ public class ITextUnidadeMedidaReportAdapter implements GeradorRelatorioUnidadeM
         try {
             return gerarRelatorioPort.gerarRelatorioPDF(request);
         } catch (IOException e) {
-            throw new IllegalStateException("Erro ao gerar relatÃ³rio PDF de " + tipo + " de unidade de medida", e);
+            throw new IllegalStateException("Erro ao gerar relatório PDF de " + tipo + " de unidade de medida", e);
         }
     }
 }

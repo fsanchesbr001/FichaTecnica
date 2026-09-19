@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("ficha-tecnica")
-@Tag(name = "SeguranÃ§a", description = "Fluxos de recuperaÃ§Ã£o de senha, envio de e-mail e troca de credenciais")
+@Tag(name = "Segurança", description = "Fluxos de recuperação de senha, envio de e-mail e troca de credenciais")
 public class SegurancaController {
 
     private static final Logger logger = LogManager.getLogger(SegurancaController.class);
@@ -55,11 +55,11 @@ public class SegurancaController {
     }
 
     @PostMapping("/login-recuperacao-senha")
-    @Operation(summary = "Login tÃ©cnico para recuperaÃ§Ã£o de senha", description = "Emite um JWT tÃ©cnico de curta duraÃ§Ã£o para os fluxos de recuperaÃ§Ã£o e primeiro acesso.")
+    @Operation(summary = "Login técnico para recuperação de senha", description = "Emite um JWT técnico de curta duração para os fluxos de recuperação e primeiro acesso.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Token tÃ©cnico emitido com sucesso"),
-            @ApiResponse(responseCode = "401", description = "Credenciais invÃ¡lidas"),
-            @ApiResponse(responseCode = "403", description = "UsuÃ¡rio de sistema sem ROLE_SYSTEM"),
+            @ApiResponse(responseCode = "200", description = "Token técnico emitido com sucesso"),
+            @ApiResponse(responseCode = "401", description = "Credenciais inválidas"),
+            @ApiResponse(responseCode = "403", description = "Usuário de sistema sem ROLE_SYSTEM"),
             @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o token")
     })
     public ResponseEntity<DadosTokenJWT> loginRecuperacaoSenha() {
@@ -68,7 +68,7 @@ public class SegurancaController {
 
         if (systemUsername == null || systemUsername.isBlank() || systemPassword == null || systemPassword.isBlank()) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new DadosTokenJWT("Credenciais do usuÃ¡rio de sistema nÃ£o configuradas"));
+                    .body(new DadosTokenJWT("Credenciais do usuário de sistema não configuradas"));
         }
 
         try {
@@ -80,14 +80,14 @@ public class SegurancaController {
                     .anyMatch(a -> "ROLE_SYSTEM".equalsIgnoreCase(a.getAuthority()));
             if (!hasSystemRole) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(new DadosTokenJWT("UsuÃ¡rio de sistema nÃ£o possui ROLE_SYSTEM"));
+                        .body(new DadosTokenJWT("Usuário de sistema não possui ROLE_SYSTEM"));
             }
 
             Usuario usuario = toUsuario(principal);
             return ResponseEntity.ok(gerarTokenPort.gerarToken(usuario));
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new DadosTokenJWT("Credenciais do usuÃ¡rio de sistema invÃ¡lidas"));
+                    .body(new DadosTokenJWT("Credenciais do usuário de sistema inválidas"));
         } catch (FichaTecnicaException e) {
             return ResponseEntity.badRequest().body(new DadosTokenJWT(e.getMessage()));
         } catch (Exception e) {
@@ -98,10 +98,10 @@ public class SegurancaController {
     @PreAuthorize("hasAnyRole('SYSTEM', 'ADMIN')")
     @PostMapping("/enviar-email-seguranca")
     @Transactional
-    @Operation(summary = "Envia e-mail de seguranÃ§a", description = "Dispara um e-mail para validaÃ§Ã£o do fluxo de recuperaÃ§Ã£o de senha.")
+    @Operation(summary = "Envia e-mail de segurança", description = "Dispara um e-mail para validação do fluxo de recuperação de senha.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "E-mail enviado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados invÃ¡lidos para envio"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos para envio"),
             @ApiResponse(responseCode = "500", description = "Erro inesperado ao enviar o e-mail")
     })
     @SecurityRequirement(name = "bearerAuth")
@@ -118,10 +118,10 @@ public class SegurancaController {
     @PreAuthorize("hasAnyRole('SYSTEM', 'ADMIN')")
     @PostMapping("/enviar-email-primeiro-acesso")
     @Transactional
-    @Operation(summary = "Envia e-mail de primeiro acesso", description = "Envia um e-mail com instruÃ§Ãµes para o primeiro acesso do usuÃ¡rio.")
+    @Operation(summary = "Envia e-mail de primeiro acesso", description = "Envia um e-mail com instruções para o primeiro acesso do usuário.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "E-mail enviado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados invÃ¡lidos para envio"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos para envio"),
             @ApiResponse(responseCode = "500", description = "Erro inesperado ao enviar o e-mail")
     })
     @SecurityRequirement(name = "bearerAuth")
@@ -139,10 +139,10 @@ public class SegurancaController {
     @PreAuthorize("hasAnyRole('SYSTEM', 'ADMIN')")
     @PostMapping("/trocar-senha")
     @Transactional
-    @Operation(summary = "Troca senha", description = "Valida os dados de seguranÃ§a e altera a senha do usuÃ¡rio.")
+    @Operation(summary = "Troca senha", description = "Valida os dados de segurança e altera a senha do usuário.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Senha trocada com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados invÃ¡lidos para troca de senha"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos para troca de senha"),
             @ApiResponse(responseCode = "500", description = "Erro inesperado ao trocar a senha")
     })
     @SecurityRequirement(name = "bearerAuth")

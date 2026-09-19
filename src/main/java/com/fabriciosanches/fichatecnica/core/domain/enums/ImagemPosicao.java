@@ -1,16 +1,16 @@
 package com.fabriciosanches.fichatecnica.core.domain.enums;
 
 /**
- * Define a posiÃ§Ã£o da imagem opcional em um relatÃ³rio PDF.
+ * Define a posição da imagem opcional em um relatório PDF.
  *
  * <ul>
- *   <li>{@link #INICIO} â€“ a imagem Ã© exibida antes do conteÃºdo do relatÃ³rio,
- *       imediatamente apÃ³s o cabeÃ§alho da primeira pÃ¡gina.</li>
- *   <li>{@link #FIM}    â€“ a imagem Ã© exibida apÃ³s todo o conteÃºdo do relatÃ³rio
- *       e antes do rodapÃ©.</li>
+ *   <li>{@link #INICIO} - a imagem é exibida antes do conteúdo do relatório,
+ *       imediatamente após o cabeçalho da primeira página.</li>
+ *   <li>{@link #FIM}    - a imagem é exibida após todo o conteúdo do relatório
+ *       e antes do rodapé.</li>
  * </ul>
  *
- * SÃ³ Ã© relevante quando {@code usarImagem = true} no {@code RelatorioRequestDTO}.
+ * Só é relevante quando {@code usarImagem = true} no {@code RelatorioRequestDTO}.
  */
 public enum ImagemPosicao {
     INICIO,

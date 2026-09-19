@@ -57,7 +57,7 @@ class CriarItemUseCaseTest {
                 () -> useCase.criar("Farinha", new UnidadeMedida(1L, "Quilo", "kg"), new BigDecimal("10.00"))
         );
 
-        assertEquals("Item jÃ¡ cadastrado", ex.getMessage());
+        assertEquals("Item já cadastrado", ex.getMessage());
     }
 }
 

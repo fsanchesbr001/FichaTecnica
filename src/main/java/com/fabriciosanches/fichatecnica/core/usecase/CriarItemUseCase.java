@@ -16,8 +16,8 @@ public class CriarItemUseCase implements CriarItemPort {
     private final RegistrarHistoricoItemPort registrarHistoricoItemPort;
 
     public CriarItemUseCase(ItemRepositoryPort itemRepositoryPort, RegistrarHistoricoItemPort registrarHistoricoItemPort) {
-        this.itemRepositoryPort = Objects.requireNonNull(itemRepositoryPort, "Item repository port nÃ£o pode ser nulo");
-        this.registrarHistoricoItemPort = Objects.requireNonNull(registrarHistoricoItemPort, "Port de histÃ³rico nÃ£o pode ser nulo");
+        this.itemRepositoryPort = Objects.requireNonNull(itemRepositoryPort, "Item repository port não pode ser nulo");
+        this.registrarHistoricoItemPort = Objects.requireNonNull(registrarHistoricoItemPort, "Port de histórico não pode ser nulo");
     }
 
     @Override
@@ -25,7 +25,7 @@ public class CriarItemUseCase implements CriarItemPort {
         validar(nome, unidadeMedida, valor);
 
         if (itemRepositoryPort.contarPorNome(nome) > 0) {
-            throw new FichaTecnicaException("Item jÃ¡ cadastrado");
+            throw new FichaTecnicaException("Item já cadastrado");
         }
 
         Item novoItem = new Item(null, nome, unidadeMedida, valor);
@@ -36,9 +36,9 @@ public class CriarItemUseCase implements CriarItemPort {
     }
 
     private void validar(String nome, UnidadeMedida unidadeMedida, BigDecimal valor) {
-        Objects.requireNonNull(nome, "Nome do item nÃ£o pode ser nulo");
-        Objects.requireNonNull(unidadeMedida, "Unidade de medida nÃ£o pode ser nula");
-        Objects.requireNonNull(valor, "Valor do item nÃ£o pode ser nulo");
+        Objects.requireNonNull(nome, "Nome do item não pode ser nulo");
+        Objects.requireNonNull(unidadeMedida, "Unidade de medida não pode ser nula");
+        Objects.requireNonNull(valor, "Valor do item não pode ser nulo");
     }
 }
 

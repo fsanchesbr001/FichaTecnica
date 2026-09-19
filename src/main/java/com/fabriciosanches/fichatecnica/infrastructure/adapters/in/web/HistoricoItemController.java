@@ -23,7 +23,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("ficha-tecnica")
-@Tag(name = "HistÃ³rico de Itens", description = "Consulta de histÃ³rico de preÃ§os e grÃ¡fico de evoluÃ§Ã£o")
+@Tag(name = "Histórico de Itens", description = "Consulta de histórico de preços e gráfico de evolução")
 @SecurityRequirement(name = "bearerAuth")
 public class HistoricoItemController {
 
@@ -36,10 +36,10 @@ public class HistoricoItemController {
     }
 
     @GetMapping("/historico-itens")
-    @Operation(summary = "Lista histÃ³rico de itens", description = "Retorna todos os registros de histÃ³rico de preÃ§os.")
+    @Operation(summary = "Lista histórico de itens", description = "Retorna todos os registros de histórico de preços.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Erro ao buscar histÃ³rico")
+            @ApiResponse(responseCode = "404", description = "Erro ao buscar histórico")
     })
     public ResponseEntity<List<HistoricoItemDTO>> buscarLista() {
         try {
@@ -51,10 +51,10 @@ public class HistoricoItemController {
     }
 
     @GetMapping("/historico-itens/{id}")
-    @Operation(summary = "Busca histÃ³rico por ID", description = "Retorna um registro especÃ­fico do histÃ³rico de itens.")
+    @Operation(summary = "Busca histórico por ID", description = "Retorna um registro específico do histórico de itens.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Registro encontrado"),
-            @ApiResponse(responseCode = "404", description = "Registro nÃ£o encontrado")
+            @ApiResponse(responseCode = "404", description = "Registro não encontrado")
     })
     public ResponseEntity<HistoricoItemDTO> buscarPorId(@PathVariable Long id) {
         try {
@@ -66,10 +66,10 @@ public class HistoricoItemController {
     }
 
     @GetMapping("/historico-itens/itens/{id}")
-    @Operation(summary = "Busca histÃ³rico por item", description = "Retorna todos os registros de histÃ³rico de um item especÃ­fico.")
+    @Operation(summary = "Busca histórico por item", description = "Retorna todos os registros de histórico de um item específico.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Registros retornados com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Erro ao buscar histÃ³rico do item")
+            @ApiResponse(responseCode = "404", description = "Erro ao buscar histórico do item")
     })
     public ResponseEntity<List<HistoricoItemDTO>> buscarPorItemId(@PathVariable Long id) {
         try {
@@ -84,11 +84,11 @@ public class HistoricoItemController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/historico-itens/grafico-precos/{codigoItem}")
-    @Operation(summary = "Gera grÃ¡fico de preÃ§os", description = "Retorna os dados do grÃ¡fico de evoluÃ§Ã£o de preÃ§os de um item.")
+    @Operation(summary = "Gera gráfico de preços", description = "Retorna os dados do gráfico de evolução de preços de um item.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "GrÃ¡fico gerado com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Nenhum histÃ³rico encontrado para o item"),
-            @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o grÃ¡fico")
+            @ApiResponse(responseCode = "200", description = "Gráfico gerado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Nenhum histórico encontrado para o item"),
+            @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o gráfico")
     })
     public ResponseEntity<GraficoPrecoItemDTO> gerarGraficoPrecos(@PathVariable Long codigoItem) {
         logger.info("Inicio do metodo gerarGraficoPrecos - codigoItem={}", codigoItem);

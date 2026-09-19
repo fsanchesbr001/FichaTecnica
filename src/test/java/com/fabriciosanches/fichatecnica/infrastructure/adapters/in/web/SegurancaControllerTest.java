@@ -61,7 +61,7 @@ class SegurancaControllerTest {
 
         mockMvc.perform(post("/ficha-tecnica/login-recuperacao-senha"))
                 .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.jwt").value("Credenciais do usuÃ¡rio de sistema nÃ£o configuradas"));
+                .andExpect(jsonPath("$.jwt").value("Credenciais do usuário de sistema não configuradas"));
     }
 
     @Test
@@ -76,7 +76,7 @@ class SegurancaControllerTest {
 
         mockMvc.perform(post("/ficha-tecnica/login-recuperacao-senha"))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.jwt").value("UsuÃ¡rio de sistema nÃ£o possui ROLE_SYSTEM"));
+                .andExpect(jsonPath("$.jwt").value("Usuário de sistema não possui ROLE_SYSTEM"));
     }
 
     @Test
@@ -112,7 +112,7 @@ class SegurancaControllerTest {
 
         mockMvc.perform(post("/ficha-tecnica/login-recuperacao-senha"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.jwt").value("Credenciais do usuÃ¡rio de sistema invÃ¡lidas"));
+                .andExpect(jsonPath("$.jwt").value("Credenciais do usuário de sistema inválidas"));
     }
 
     @Test
