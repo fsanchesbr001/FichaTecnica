@@ -43,7 +43,7 @@ import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("ficha-tecnica/usuarios")
-@Tag(name = "UsuÃ¡rios", description = "AdministraÃ§Ã£o de usuÃ¡rios, permissÃµes e bloqueios")
+@Tag(name = "Usuários", description = "Administração de usuários, permissões e bloqueios")
 @SecurityRequirement(name = "bearerAuth")
 public class UsuarioController {
 
@@ -75,7 +75,7 @@ public class UsuarioController {
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/roles")
-    @Operation(summary = "Lista roles disponÃ­veis", description = "Retorna as roles do sistema para uso em cadastros e filtros.")
+    @Operation(summary = "Lista roles disponíveis", description = "Retorna as roles do sistema para uso em cadastros e filtros.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Roles retornadas com sucesso"),
             @ApiResponse(responseCode = "400", description = "Erro ao listar roles")
@@ -84,7 +84,7 @@ public class UsuarioController {
         try {
             Map<UserRole, String> defaultLabels = Map.of(
                     UserRole.ADMIN, "Administrador",
-                    UserRole.USER, "UsuÃ¡rio",
+                    UserRole.USER, "Usuário",
                     UserRole.SYSTEM, "Sistema"
             );
 
@@ -103,10 +103,10 @@ public class UsuarioController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/registrar-usuario")
     @Transactional
-    @Operation(summary = "Registra usuÃ¡rio", description = "Cria um novo usuÃ¡rio no sistema.")
+    @Operation(summary = "Registra usuário", description = "Cria um novo usuário no sistema.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "UsuÃ¡rio registrado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados invÃ¡lidos para registro")
+            @ApiResponse(responseCode = "200", description = "Usuário registrado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos para registro")
     })
     public ResponseEntity<?> registrarUsuario(@RequestBody RegisterDTO dados) {
         try {
@@ -122,7 +122,7 @@ public class UsuarioController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/excluir-usuario")
     @Transactional
-    @Operation(summary = "Exclui usuÃ¡rio", description = "Remove um usuÃ¡rio do sistema pelo e-mail informado.")
+    @Operation(summary = "Exclui usuário", description = "Remove um usuário do sistema pelo e-mail informado.")
     public ResponseEntity<?> excluirUsuario(@RequestBody BloqueiosRequestDTO dados) {
         try {
             excluirUsuarioPort.excluirUsuario(dados.email());
@@ -150,7 +150,7 @@ public class UsuarioController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/resetar-senha")
     @Transactional
-    @Operation(summary = "Reseta senha", description = "Expira a senha do usuÃ¡rio para forÃ§ar a redefiniÃ§Ã£o no prÃ³ximo login.")
+    @Operation(summary = "Reseta senha", description = "Expira a senha do usuário para forçar a redefinição no próximo login.")
     public ResponseEntity<?> resetarSenhaUsuario(@RequestBody BloqueiosRequestDTO dados) {
         try {
             controleAcessoPort.expirarSenha(dados.email());
@@ -163,7 +163,7 @@ public class UsuarioController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/bloqueio-administrativo")
     @Transactional
-    @Operation(summary = "Bloqueia usuÃ¡rio", description = "Executa o bloqueio administrativo de um usuÃ¡rio.")
+    @Operation(summary = "Bloqueia usuário", description = "Executa o bloqueio administrativo de um usuário.")
     public ResponseEntity<BloqueiosResponseDTO> bloqueioAdministrativo(@RequestBody BloqueiosRequestDTO bloqueiosRequestDTO) {
         try {
             return ResponseEntity.ok(gerenciarBloqueioPort.bloquear(bloqueiosRequestDTO));
@@ -175,7 +175,7 @@ public class UsuarioController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/desbloqueio-administrativo")
     @Transactional
-    @Operation(summary = "Desbloqueia usuÃ¡rio", description = "Remove o bloqueio administrativo de um usuÃ¡rio.")
+    @Operation(summary = "Desbloqueia usuário", description = "Remove o bloqueio administrativo de um usuário.")
     public ResponseEntity<BloqueiosResponseDTO> desbloqueioAdministrativo(@RequestBody BloqueiosRequestDTO bloqueiosRequestDTO) {
         try {
             return ResponseEntity.ok(gerenciarBloqueioPort.desbloquear(bloqueiosRequestDTO));
@@ -187,7 +187,7 @@ public class UsuarioController {
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/atualizar-usuario/{email}")
     @Transactional
-    @Operation(summary = "Atualiza usuÃ¡rio", description = "Altera os dados de um usuÃ¡rio identificado pelo e-mail.")
+    @Operation(summary = "Atualiza usuário", description = "Altera os dados de um usuário identificado pelo e-mail.")
     public ResponseEntity<UsuarioListagemDTO> atualizarUsuario(@PathVariable String email,
                                                                @RequestBody AtualizarUsuarioRequestDTO dados) {
         try {
@@ -199,7 +199,7 @@ public class UsuarioController {
 
     @GetMapping("/listar-todos-usuarios")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Lista usuÃ¡rios", description = "Retorna todos os usuÃ¡rios cadastrados no sistema.")
+    @Operation(summary = "Lista usuários", description = "Retorna todos os usuários cadastrados no sistema.")
     public ResponseEntity<List<UsuarioListagemDTO>> listarTodosUsuarios() {
         try {
             List<UsuarioListagemDTO> response = buscarUsuarioPort.listarTodosUsuarios();
@@ -214,7 +214,7 @@ public class UsuarioController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'SYSTEM')")
     @GetMapping("/buscar-usuario/{email}")
-    @Operation(summary = "Busca usuÃ¡rio por e-mail", description = "Retorna os dados de um usuÃ¡rio especÃ­fico a partir do e-mail.")
+    @Operation(summary = "Busca usuário por e-mail", description = "Retorna os dados de um usuário específico a partir do e-mail.")
     public ResponseEntity<UsuarioListagemDTO> buscarUsuarioPorEmail(@PathVariable String email) {
         try {
             UsuarioListagemDTO usuarioListagemDTO = buscarUsuarioPort.buscarUsuarioPorEmail(email);

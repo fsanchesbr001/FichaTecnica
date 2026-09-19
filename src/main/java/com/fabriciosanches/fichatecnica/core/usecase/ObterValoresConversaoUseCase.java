@@ -15,7 +15,7 @@ public class ObterValoresConversaoUseCase implements ObterValoresConversaoPort {
     private final ConversaoRepositoryPort repositoryPort;
 
     public ObterValoresConversaoUseCase(ConversaoRepositoryPort repositoryPort) {
-        this.repositoryPort = Objects.requireNonNull(repositoryPort, "Repository port nÃƒÂ£o pode ser nulo");
+        this.repositoryPort = Objects.requireNonNull(repositoryPort, "Repository port não pode ser nulo");
     }
 
     @Override
@@ -27,14 +27,14 @@ public class ObterValoresConversaoUseCase implements ObterValoresConversaoPort {
         var valorCompra = itemDto.valor();
 
         Conversao conversao = repositoryPort.buscarPorUnidadeDeEUnidadePara(idUnidadeMedidaCompra, idUnidade)
-                .orElseThrow(() -> new FichaTecnicaException("ConversÃƒÂ£o nÃƒÂ£o encontrada"));
+                .orElseThrow(() -> new FichaTecnicaException("Conversão não encontrada"));
 
         return converterValores(conversao, valorCompra, quantidade);
     }
 
     private void validaValoresConversao(Item item, Double quantidade, Long idUnidade) {
         if (item == null || item.getCodigo() == null || quantidade == null || idUnidade == null) {
-            throw new FichaTecnicaException("Valores de conversÃƒÂ£o invÃƒÂ¡lidos");
+            throw new FichaTecnicaException("Valores de conversão inválidos");
         }
         if (quantidade <= 0) {
             throw new FichaTecnicaException("Quantidade deve ser maior que zero");
@@ -45,7 +45,7 @@ public class ObterValoresConversaoUseCase implements ObterValoresConversaoPort {
         var valorConvertido = switch (conversao.getOperacao()) {
             case "MULTIPLICA" -> valorCompra.multiply(conversao.getValor()).multiply(BigDecimal.valueOf(quantidade));
             case "DIVIDE" -> valorCompra.divide(conversao.getValor()).multiply(BigDecimal.valueOf(quantidade));
-            default -> throw new FichaTecnicaException("OperaÃƒÂ§ÃƒÂ£o invÃƒÂ¡lida");
+            default -> throw new FichaTecnicaException("Operação inválida");
         };
 
         return new ConversaoValoresDTO(quantidade, conversao.getUnidadePara(), valorConvertido);

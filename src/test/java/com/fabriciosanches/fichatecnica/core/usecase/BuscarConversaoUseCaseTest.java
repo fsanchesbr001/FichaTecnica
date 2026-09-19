@@ -44,7 +44,7 @@ class BuscarConversaoUseCaseTest {
         java.util.NoSuchElementException exception =
                 assertThrows(java.util.NoSuchElementException.class, () -> useCase.buscarPorId(10L));
 
-        assertEquals("ConversÃ£o com ID 10 nÃ£o encontrada", exception.getMessage());
+        assertEquals("Conversão com ID 10 não encontrada", exception.getMessage());
     }
 }
 

@@ -11,8 +11,8 @@ public class UnidadeMedida {
 
     public UnidadeMedida(Long codigo, String nome, String sigla) {
         this.codigo = codigo;
-        this.nome = validarCampo(nome, "Nome nÃ£o pode ser vazio");
-        this.sigla = validarCampo(sigla, "Sigla nÃ£o pode ser vazia");
+        this.nome = validarCampo(nome, "Nome não pode ser vazio");
+        this.sigla = validarCampo(sigla, "Sigla não pode ser vazia");
     }
 
     private String validarCampo(String valor, String mensagem) {

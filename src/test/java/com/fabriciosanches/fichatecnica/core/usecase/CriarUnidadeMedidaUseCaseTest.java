@@ -53,7 +53,7 @@ class CriarUnidadeMedidaUseCaseTest {
         IllegalArgumentException exception =
                 assertThrows(IllegalArgumentException.class, () -> useCase.criar("Mililitro", "m"));
 
-        assertEquals("JÃ¡ existe uma unidade de medida com a sigla 'M'.", exception.getMessage());
+        assertEquals("Já existe uma unidade de medida com a sigla 'M'.", exception.getMessage());
         verify(repositoryPort, never()).salvar(any(UnidadeMedida.class));
     }
 
@@ -62,7 +62,7 @@ class CriarUnidadeMedidaUseCaseTest {
         IllegalArgumentException exception =
                 assertThrows(IllegalArgumentException.class, () -> useCase.criar("  ", "m"));
 
-        assertEquals("Nome nÃ£o pode ser vazio", exception.getMessage());
+        assertEquals("Nome não pode ser vazio", exception.getMessage());
                         verify(repositoryPort, never()).buscarPorSigla(anyString());
                         verify(repositoryPort, never()).salvar(any(UnidadeMedida.class));
     }
@@ -72,7 +72,7 @@ class CriarUnidadeMedidaUseCaseTest {
         IllegalArgumentException exception =
                 assertThrows(IllegalArgumentException.class, () -> useCase.criar("Metro", null));
 
-        assertEquals("Sigla nÃ£o pode ser vazia", exception.getMessage());
+        assertEquals("Sigla não pode ser vazia", exception.getMessage());
                         verify(repositoryPort, never()).buscarPorSigla(anyString());
                         verify(repositoryPort, never()).salvar(any(UnidadeMedida.class));
     }

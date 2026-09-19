@@ -40,7 +40,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("ficha-tecnica")
-@Tag(name = "Itens de Produto", description = "AssociaÃ§Ã£o entre itens e produtos, valores totais e grÃ¡fico de composiÃ§Ã£o")
+@Tag(name = "Itens de Produto", description = "Associação entre itens e produtos, valores totais e gráfico de composição")
 @SecurityRequirement(name = "bearerAuth")
 public class ItemProdutoController {
 
@@ -94,9 +94,9 @@ public class ItemProdutoController {
     }
 
     @GetMapping("/produtos/{idProduto}/itens")
-    @Operation(summary = "Lista itens de um produto", description = "Retorna a composiÃ§Ã£o completa de um produto.")
+    @Operation(summary = "Lista itens de um produto", description = "Retorna a composição completa de um produto.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "ComposiÃ§Ã£o retornada com sucesso"),
+            @ApiResponse(responseCode = "200", description = "Composição retornada com sucesso"),
             @ApiResponse(responseCode = "400", description = "Erro ao buscar itens do produto")
     })
     public ResponseEntity<List<ProdutoCompletoDTO>> buscarItensProduto(@PathVariable("idProduto") Long idProduto) {
@@ -147,9 +147,9 @@ public class ItemProdutoController {
     }
 
     @DeleteMapping("/produtos/{idProduto}/itens/{idItem}")
-    @Operation(summary = "Remove item do produto", description = "Desfaz a associaÃ§Ã£o entre um item e um produto.")
+    @Operation(summary = "Remove item do produto", description = "Desfaz a associação entre um item e um produto.")
     @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "AssociaÃ§Ã£o removida com sucesso"),
+            @ApiResponse(responseCode = "204", description = "Associação removida com sucesso"),
             @ApiResponse(responseCode = "400", description = "Erro ao deletar item do produto")
     })
     public ResponseEntity<Void> deletarItemProduto(@PathVariable("idProduto") Long idProduto,
@@ -165,7 +165,7 @@ public class ItemProdutoController {
     }
 
     @PutMapping("/{idProduto}/{idItem}/quantidade")
-    @Operation(summary = "Atualiza quantidade do item no produto", description = "Altera a quantidade de um item em um produto especÃ­fico.")
+    @Operation(summary = "Atualiza quantidade do item no produto", description = "Altera a quantidade de um item em um produto específico.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Quantidade atualizada com sucesso")
     })
@@ -178,11 +178,11 @@ public class ItemProdutoController {
     }
 
     @GetMapping("/produtos/{idProduto}/grafico-pizza")
-    @Operation(summary = "Gera grÃ¡fico de pizza", description = "Retorna os dados da composiÃ§Ã£o percentual de custo do produto.")
+    @Operation(summary = "Gera gráfico de pizza", description = "Retorna os dados da composição percentual de custo do produto.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "GrÃ¡fico gerado com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Dados insuficientes para gerar o grÃ¡fico"),
-            @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o grÃ¡fico")
+            @ApiResponse(responseCode = "200", description = "Gráfico gerado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Dados insuficientes para gerar o gráfico"),
+            @ApiResponse(responseCode = "500", description = "Erro inesperado ao gerar o gráfico")
     })
     public ResponseEntity<GraficoPizzaDTO> gerarGraficoPizza(@PathVariable Long idProduto) {
         logger.info("Inicio do metodo gerarGraficoPizza - idProduto={}", idProduto);

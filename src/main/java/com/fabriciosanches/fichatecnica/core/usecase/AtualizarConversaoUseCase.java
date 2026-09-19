@@ -10,22 +10,22 @@ public class AtualizarConversaoUseCase implements AtualizarConversaoPort {
     private final ConversaoRepositoryPort repositoryPort;
 
     public AtualizarConversaoUseCase(ConversaoRepositoryPort repositoryPort) {
-        this.repositoryPort = Objects.requireNonNull(repositoryPort, "Repository port nÃ£o pode ser nulo");
+        this.repositoryPort = Objects.requireNonNull(repositoryPort, "Repository port não pode ser nulo");
     }
 
     @Override
     public Conversao atualizar(Long id, Conversao conversao) {
         if (id == null) {
-            throw new IllegalArgumentException("Id nÃ£o pode ser nulo");
+            throw new IllegalArgumentException("Id não pode ser nulo");
         }
-        Objects.requireNonNull(conversao, "ConversÃ£o nÃ£o pode ser nula");
-        Objects.requireNonNull(conversao.getUnidadeDe(), "UnidadeDe nÃ£o pode ser nulo");
-        Objects.requireNonNull(conversao.getUnidadePara(), "UnidadePara nÃ£o pode ser nulo");
-        Objects.requireNonNull(conversao.getOperacao(), "OperaÃ§Ã£o nÃ£o pode ser nula");
-        Objects.requireNonNull(conversao.getValor(), "Valor nÃ£o pode ser nulo");
+        Objects.requireNonNull(conversao, "Conversão não pode ser nula");
+        Objects.requireNonNull(conversao.getUnidadeDe(), "UnidadeDe não pode ser nulo");
+        Objects.requireNonNull(conversao.getUnidadePara(), "UnidadePara não pode ser nulo");
+        Objects.requireNonNull(conversao.getOperacao(), "Operação não pode ser nula");
+        Objects.requireNonNull(conversao.getValor(), "Valor não pode ser nulo");
 
         repositoryPort.buscarPorId(id)
-                .orElseThrow(() -> new java.util.NoSuchElementException("ConversÃ£o com ID " + id + " nÃ£o encontrada"));
+                .orElseThrow(() -> new java.util.NoSuchElementException("Conversão com ID " + id + " não encontrada"));
 
         Conversao conversaoAtualizada = new Conversao(
                 id,

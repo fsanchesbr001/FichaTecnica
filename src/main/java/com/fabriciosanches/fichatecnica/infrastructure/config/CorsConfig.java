@@ -25,9 +25,9 @@ public class CorsConfig implements WebMvcConfigurer {
 
     /**
      * Bean usado pelo Spring Security (via Customizer.withDefaults()) para resolver
-     * a configuraÃ§Ã£o CORS antes que o SecurityFilterChain processe a requisiÃ§Ã£o.
-     * Sem este bean, o cors(Customizer.withDefaults()) nÃ£o encontra a configuraÃ§Ã£o
-     * e o header Access-Control-Allow-Origin nunca Ã© adicionado.
+     * a configuração CORS antes que o SecurityFilterChain processe a requisição.
+     * Sem este bean, o cors(Customizer.withDefaults()) não encontra a configuração
+     * e o header Access-Control-Allow-Origin nunca é adicionado.
      */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -53,7 +53,7 @@ public class CorsConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         String[] origins = ALLOWED_ORIGINS.split(",");
 
-        // Trimmar espaÃ§os em branco de cada origem
+        // Trimmar espaços em branco de cada origem
         for (int i = 0; i < origins.length; i++) {
             origins[i] = origins[i].trim();
         }

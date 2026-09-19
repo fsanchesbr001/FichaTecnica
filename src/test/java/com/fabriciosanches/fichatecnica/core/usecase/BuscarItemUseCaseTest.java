@@ -46,7 +46,7 @@ class BuscarItemUseCaseTest {
 
         FichaTecnicaException ex = assertThrows(FichaTecnicaException.class, () -> useCase.buscarPorId(99L));
 
-        assertEquals("Item com ID 99 nÃ£o encontrado", ex.getMessage());
+        assertEquals("Item com ID 99 não encontrado", ex.getMessage());
     }
 }
 

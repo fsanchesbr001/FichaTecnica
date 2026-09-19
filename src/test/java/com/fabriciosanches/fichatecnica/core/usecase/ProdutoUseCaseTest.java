@@ -67,7 +67,7 @@ class ProdutoUseCaseTest {
 
         FichaTecnicaException exception = assertThrows(FichaTecnicaException.class, () -> useCase.buscarPorId(99L));
 
-        assertEquals("Produto nÃ£o encontrada", exception.getMessage());
+        assertEquals("Produto não encontrada", exception.getMessage());
     }
 
     @Test
@@ -89,7 +89,7 @@ class ProdutoUseCaseTest {
 
         FichaTecnicaException exception = assertThrows(FichaTecnicaException.class, () -> useCase.cadastrarProduto(produtoDTO));
 
-        assertEquals("Produto jÃ¡ cadastrado", exception.getMessage());
+        assertEquals("Produto já cadastrado", exception.getMessage());
         verify(produtoRepositoryPort, never()).salvar(any());
     }
 

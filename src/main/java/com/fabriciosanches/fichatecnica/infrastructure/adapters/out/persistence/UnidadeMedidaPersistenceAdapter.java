@@ -44,7 +44,7 @@ public class UnidadeMedidaPersistenceAdapter implements UnidadeMedidaRepositoryP
             repository.deleteById(id);
             repository.flush();
         } catch (DataIntegrityViolationException e) {
-            throw new IllegalStateException("FKC-Registro nÃ£o pode ser deletado. Existem ConversÃµes vinculadas.");
+            throw new IllegalStateException("FKC-Registro não pode ser deletado. Existem Conversões vinculadas.");
         }
     }
 

@@ -21,7 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("ficha-tecnica")
-@Tag(name = "Unidades de Medida", description = "Cadastro, consulta, atualizaÃ§Ã£o, exclusÃ£o e relatÃ³rios de unidades de medida")
+@Tag(name = "Unidades de Medida", description = "Cadastro, consulta, atualização, exclusão e relatórios de unidades de medida")
 @SecurityRequirement(name = "bearerAuth")
 public class UnidadeMedidaController {
     private static final Logger logger = LogManager.getLogger(UnidadeMedidaController.class);
@@ -56,10 +56,10 @@ public class UnidadeMedidaController {
     }
 
     @GetMapping("/unidades-medida/{id:[0-9]+}")
-    @Operation(summary = "Busca unidade de medida por ID", description = "Retorna os dados de uma unidade de medida especÃ­fica.")
+    @Operation(summary = "Busca unidade de medida por ID", description = "Retorna os dados de uma unidade de medida específica.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Unidade encontrada"),
-            @ApiResponse(responseCode = "404", description = "Unidade nÃ£o encontrada")
+            @ApiResponse(responseCode = "404", description = "Unidade não encontrada")
     })
     public ResponseEntity<?> buscarPorId(@PathVariable Long id) {
         logger.info("Inicio do metodo buscarPorId");
@@ -77,7 +77,7 @@ public class UnidadeMedidaController {
     @Operation(summary = "Cadastra unidade de medida", description = "Cria uma nova unidade de medida.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Unidade cadastrada com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados invÃ¡lidos para cadastro")
+            @ApiResponse(responseCode = "400", description = "Dados inválidos para cadastro")
     })
     public ResponseEntity<?> cadastrarUnidade(@RequestBody UnidadeMedidaDTO unidade) {
         logger.info("Inicio do metodo cadastrarUnidade");
@@ -104,8 +104,8 @@ public class UnidadeMedidaController {
     @Operation(summary = "Atualiza unidade de medida", description = "Altera os dados de uma unidade de medida existente.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Unidade atualizada com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados invÃ¡lidos"),
-            @ApiResponse(responseCode = "404", description = "Unidade nÃ£o encontrada")
+            @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+            @ApiResponse(responseCode = "404", description = "Unidade não encontrada")
     })
     public ResponseEntity<?> atualizarUnidade(@PathVariable Long id, @RequestBody UnidadeMedidaDTO unidade) {
         logger.info("Inicio do metodo atualizarUnidade");
@@ -125,7 +125,7 @@ public class UnidadeMedidaController {
     @Operation(summary = "Remove unidade de medida", description = "Exclui uma unidade de medida existente pelo ID.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Unidade removida com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Unidade nÃ£o encontrada"),
+            @ApiResponse(responseCode = "404", description = "Unidade não encontrada"),
             @ApiResponse(responseCode = "409", description = "Unidade vinculada a outros registros")
     })
     public ResponseEntity<?> apagar(@PathVariable Long id) {

@@ -48,7 +48,7 @@ class DeletarItemUseCaseTest {
 
         FichaTecnicaException ex = assertThrows(FichaTecnicaException.class, () -> useCase.deletar(1L));
 
-        assertEquals("Item com ID 1 nÃ£o encontrado", ex.getMessage());
+        assertEquals("Item com ID 1 não encontrado", ex.getMessage());
     }
 
     @Test

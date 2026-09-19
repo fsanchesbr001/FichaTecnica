@@ -35,15 +35,15 @@ public class UsuarioUseCase implements CriarUsuarioPort, BuscarUsuarioPort, Atua
     public UsuarioUseCase(UsuarioRepositoryPort usuarioRepositoryPort,
                           SegurancaRepositoryPort segurancaRepositoryPort,
                           SegurancaUseCase segurancaUseCase) {
-        this.usuarioRepositoryPort = Objects.requireNonNull(usuarioRepositoryPort, "UsuarioRepositoryPort nÃ£o pode ser nulo");
-        this.segurancaRepositoryPort = Objects.requireNonNull(segurancaRepositoryPort, "SegurancaRepositoryPort nÃ£o pode ser nulo");
-        this.segurancaUseCase = Objects.requireNonNull(segurancaUseCase, "SegurancaUseCase nÃ£o pode ser nulo");
+        this.usuarioRepositoryPort = Objects.requireNonNull(usuarioRepositoryPort, "UsuarioRepositoryPort não pode ser nulo");
+        this.segurancaRepositoryPort = Objects.requireNonNull(segurancaRepositoryPort, "SegurancaRepositoryPort não pode ser nulo");
+        this.segurancaUseCase = Objects.requireNonNull(segurancaUseCase, "SegurancaUseCase não pode ser nulo");
     }
 
     @Override
     public void registrarUsuario(RegisterDTO registerDTO) throws MessagingException {
         if (usuarioRepositoryPort.buscarPorLogin(registerDTO.login()).isPresent()) {
-            throw new FichaTecnicaException("UsuÃ¡rio jÃ¡ existe com o login: " + registerDTO.login());
+            throw new FichaTecnicaException("Usuário já existe com o login: " + registerDTO.login());
         }
 
         String senhaAleatoria = Utilidades.gerarSenhaAleatoria();
@@ -77,7 +77,7 @@ public class UsuarioUseCase implements CriarUsuarioPort, BuscarUsuarioPort, Atua
         segurancaRepositoryPort.deletar(seguranca);
 
         Usuario usuario = usuarioRepositoryPort.buscarPorLogin(email)
-                .orElseThrow(() -> new FichaTecnicaException("UsuÃ¡rio nÃ£o encontrado"));
+                .orElseThrow(() -> new FichaTecnicaException("Usuário não encontrado"));
         usuarioRepositoryPort.deletar(usuario);
     }
 
@@ -85,13 +85,13 @@ public class UsuarioUseCase implements CriarUsuarioPort, BuscarUsuarioPort, Atua
     public void primeiroAcesso(String email) throws MessagingException {
         Seguranca seguranca = buscarSegurancaOuFalhar(email);
         Usuario usuario = usuarioRepositoryPort.buscarPorLogin(email)
-                .orElseThrow(() -> new FichaTecnicaException("UsuÃ¡rio nÃ£o encontrado"));
+                .orElseThrow(() -> new FichaTecnicaException("Usuário não encontrado"));
 
         String nome = usuario.getNome();
         String cpfSemPontuacao = seguranca.getCpf() != null ? seguranca.getCpf().replaceAll("\\D", "") : null;
 
         if (cpfSemPontuacao == null || cpfSemPontuacao.isBlank()) {
-            throw new FichaTecnicaException("CPF invÃ¡lido para o usuÃ¡rio: " + email);
+            throw new FichaTecnicaException("CPF inválido para o usuário: " + email);
         }
 
         RegisterDTO registerDTO = new RegisterDTO(email, null, usuario.getRole(), nome, cpfSemPontuacao);
@@ -102,10 +102,10 @@ public class UsuarioUseCase implements CriarUsuarioPort, BuscarUsuarioPort, Atua
     @Override
     public UsuarioListagemDTO atualizarUsuario(String email, AtualizarUsuarioRequestDTO dados) {
         Seguranca seguranca = segurancaRepositoryPort.buscarPorEmail(email)
-                .orElseThrow(() -> new FichaTecnicaException("UsuÃ¡rio nÃ£o encontrado: " + email));
+                .orElseThrow(() -> new FichaTecnicaException("Usuário não encontrado: " + email));
 
         Usuario usuario = usuarioRepositoryPort.buscarPorLogin(email)
-                .orElseThrow(() -> new FichaTecnicaException("UsuÃ¡rio nÃ£o encontrado na tabela usuarios: " + email));
+                .orElseThrow(() -> new FichaTecnicaException("Usuário não encontrado na tabela usuarios: " + email));
 
         if (dados.bloqueado_admin() != null) {
             seguranca.setBloqueado_admin(dados.bloqueado_admin());

@@ -44,7 +44,7 @@ class GerarRelatorioConversaoUseCaseTest {
         java.util.NoSuchElementException exception =
                 assertThrows(java.util.NoSuchElementException.class, () -> useCase.buscarPorIdComNomes(1L));
 
-        assertEquals("ConversÃ£o com ID 1 nÃ£o encontrada", exception.getMessage());
+        assertEquals("Conversão com ID 1 não encontrada", exception.getMessage());
     }
 }
 

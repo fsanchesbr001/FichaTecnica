@@ -57,11 +57,11 @@ public class SecurityFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Validar se o token estÃ¡ expirado
+        // Validar se o token está expirado
         if (!validadorTokenPort.validarTokenExpirado(tokenJWT)) {
             log.warn("[SecurityFilter] {} - Token expirado.", uri);
             writeJsonError(response, HttpServletResponse.SC_UNAUTHORIZED,
-                    "Token expirado", "Seu token de autenticaÃ§Ã£o expirou. Por favor, faÃ§a login novamente.");
+                    "Token expirado", "Seu token de autenticação expirou. Por favor, faça login novamente.");
             return;
         }
 
@@ -69,7 +69,7 @@ public class SecurityFilter extends OncePerRequestFilter {
         if (gerenciadorBlacklistTokenPort.estaRevogado(tokenJWT)) {
             log.warn("[SecurityFilter] {} - Token revogado.", uri);
             writeJsonError(response, HttpServletResponse.SC_UNAUTHORIZED,
-                    "Token revogado", "Sua sessÃ£o foi encerrada. Por favor, faÃ§a login novamente.");
+                    "Token revogado", "Sua sessão foi encerrada. Por favor, faça login novamente.");
             return;
         }
 
@@ -82,7 +82,7 @@ public class SecurityFilter extends OncePerRequestFilter {
             if (role == null || role.isBlank()) {
                 log.error("[SecurityFilter] {} - Claim 'role' ausente ou vazia no token do usuario '{}'", uri, subject);
                 writeJsonError(response, HttpServletResponse.SC_UNAUTHORIZED,
-                        "Token invÃ¡lido", "O token nÃ£o contÃ©m uma role vÃ¡lida. FaÃ§a login novamente.");
+                        "Token inválido", "O token não contém uma role válida. Faça login novamente.");
                 return;
             }
 
@@ -101,7 +101,7 @@ public class SecurityFilter extends OncePerRequestFilter {
         } catch (Exception e) {
             log.error("[SecurityFilter] {} - Erro ao processar token: {}", uri, e.getMessage(), e);
             writeJsonError(response, HttpServletResponse.SC_UNAUTHORIZED,
-                    "Token invÃ¡lido", "Seu token de autenticaÃ§Ã£o Ã© invÃ¡lido. Por favor, faÃ§a login novamente.");
+                    "Token inválido", "Seu token de autenticação é inválido. Por favor, faça login novamente.");
             return;
         }
 

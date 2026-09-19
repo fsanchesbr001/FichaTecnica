@@ -11,10 +11,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * ServiÃ§o responsÃ¡vel por manter a blacklist de tokens JWT invalidados via logout.
+ * Serviço responsável por manter a blacklist de tokens JWT invalidados via logout.
  * <p>
- * Como JWT Ã© stateless, o logout Ã© implementado adicionando o token a uma lista negra
- * em memÃ³ria. O token permanece na lista atÃ© atingir sua expiraÃ§Ã£o original, quando Ã©
+ * Como JWT é stateless, o logout é implementado adicionando o token a uma lista negra
+ * em memória. O token permanece na lista até atingir sua expiração original, quando é
  * removido automaticamente por uma tarefa agendada.
  * </p>
  */
@@ -24,15 +24,15 @@ public class TokenBlacklistService implements GerenciadorBlacklistTokenPort {
     private static final Logger logger = LogManager.getLogger(TokenBlacklistService.class);
 
     /**
-     * Mapa de tokens invalidados: chave = token JWT, valor = instante de expiraÃ§Ã£o original.
+     * Mapa de tokens invalidados: chave = token JWT, valor = instante de expiração original.
      */
     private final Map<String, Instant> blacklist = new ConcurrentHashMap<>();
 
     /**
-     * Adiciona um token Ã  blacklist atÃ© que expire.
+     * Adiciona um token à blacklist até que expire.
      *
      * @param token     token JWT a ser invalidado
-     * @param expiresAt instante de expiraÃ§Ã£o original do token
+     * @param expiresAt instante de expiração original do token
      */
     @Override
     public void revogar(String token, Instant expiresAt) {
@@ -41,7 +41,7 @@ public class TokenBlacklistService implements GerenciadorBlacklistTokenPort {
     }
 
     /**
-     * Verifica se um token estÃ¡ revogado (presente na blacklist).
+     * Verifica se um token está revogado (presente na blacklist).
      *
      * @param token token JWT a verificar
      * @return {@code true} se o token foi revogado via logout
@@ -52,8 +52,8 @@ public class TokenBlacklistService implements GerenciadorBlacklistTokenPort {
     }
 
     /**
-     * Tarefa agendada que limpa da blacklist os tokens que jÃ¡ expiraram naturalmente,
-     * evitando crescimento ilimitado da estrutura em memÃ³ria.
+     * Tarefa agendada que limpa da blacklist os tokens que já expiraram naturalmente,
+     * evitando crescimento ilimitado da estrutura em memória.
      * Executada a cada 10 minutos.
      */
     @Override

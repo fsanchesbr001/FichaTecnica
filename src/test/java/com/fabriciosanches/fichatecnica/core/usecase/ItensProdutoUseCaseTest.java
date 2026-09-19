@@ -77,7 +77,7 @@ class ItensProdutoUseCaseTest {
         FichaTecnicaException ex = org.junit.jupiter.api.Assertions.assertThrows(FichaTecnicaException.class,
                 () -> useCase.listarPorItem(99L));
 
-        assertEquals("Item nÃ£o encontrado", ex.getMessage());
+        assertEquals("Item não encontrado", ex.getMessage());
     }
 
     @Test

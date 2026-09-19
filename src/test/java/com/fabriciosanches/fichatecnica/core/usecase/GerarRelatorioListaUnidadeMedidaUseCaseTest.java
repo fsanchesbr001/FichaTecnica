@@ -36,7 +36,7 @@ class GerarRelatorioListaUnidadeMedidaUseCaseTest {
     void executar_DeveGerarRelatorioComListaOrdenadaPorNome() {
         when(repositoryPort.buscarTodos()).thenReturn(List.of(
                 new UnidadeMedida(2L, "Metro", "M"),
-                new UnidadeMedida(1L, "CentÃ­metro", "CM")
+                new UnidadeMedida(1L, "Centímetro", "CM")
         ));
         when(reportPort.gerarRelatorioLista(anyList())).thenReturn(new byte[]{1, 2, 3});
 
@@ -45,7 +45,7 @@ class GerarRelatorioListaUnidadeMedidaUseCaseTest {
         assertArrayEquals(new byte[]{1, 2, 3}, resultado);
         ArgumentCaptor<List<UnidadeMedida>> captor = ArgumentCaptor.forClass(List.class);
         verify(reportPort).gerarRelatorioLista(captor.capture());
-        assertEquals(List.of("CentÃ­metro", "Metro"), captor.getValue().stream().map(UnidadeMedida::getNome).toList());
+        assertEquals(List.of("Centímetro", "Metro"), captor.getValue().stream().map(UnidadeMedida::getNome).toList());
     }
 
     @Test
@@ -54,7 +54,7 @@ class GerarRelatorioListaUnidadeMedidaUseCaseTest {
 
         NoSuchElementException exception = assertThrows(NoSuchElementException.class, useCase::executar);
 
-        assertEquals("Nenhuma unidade de medida encontrada para gerar relatÃ³rio", exception.getMessage());
+        assertEquals("Nenhuma unidade de medida encontrada para gerar relatório", exception.getMessage());
     }
 }
 

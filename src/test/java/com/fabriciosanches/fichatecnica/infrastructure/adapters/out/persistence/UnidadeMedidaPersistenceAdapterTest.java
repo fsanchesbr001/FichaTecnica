@@ -69,7 +69,7 @@ class UnidadeMedidaPersistenceAdapterTest {
 
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> adapter.deletar(1L));
 
-        assertEquals("FKC-Registro nÃ£o pode ser deletado. Existem ConversÃµes vinculadas.", exception.getMessage());
+        assertEquals("FKC-Registro não pode ser deletado. Existem Conversões vinculadas.", exception.getMessage());
     }
 }
 

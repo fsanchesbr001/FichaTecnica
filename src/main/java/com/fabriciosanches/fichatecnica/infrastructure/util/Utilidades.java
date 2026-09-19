@@ -13,7 +13,7 @@ public class Utilidades {
             return false;
         }
 
-        // Verifica se todos os dÃ­gitos sÃ£o iguais
+        // Verifica se todos os dígitos são iguais
         boolean allEqual = true;
         for (int i = 1; i < cpf.length(); i++) {
             if (cpf.charAt(i) != cpf.charAt(0)) {
@@ -25,7 +25,7 @@ public class Utilidades {
             return false;
         }
 
-        // ValidaÃ§Ã£o do CPF
+        // Validação do CPF
         int soma = 0;
         int peso = 10;
 
@@ -59,27 +59,27 @@ public class Utilidades {
         return encoder.encode(senha);
     }
 
-    // MÃ©todo para converter uma string normal em base64
+    // Método para converter uma string normal em base64
     public static String encodeToBase64(String input) {
         return Base64.getEncoder().encodeToString(input.getBytes());
     }
 
-    // MÃ©todo para converter uma string em base64 para uma string normal
+    // Método para converter uma string em base64 para uma string normal
     public static String decodeFromBase64(String base64Input) {
         return new String(Base64.getDecoder().decode(base64Input));
     }
 
     /**
-     * Gera uma senha aleatÃ³ria de 10 caracteres que respeita as seguintes regras:
-     * 01 - Pode conter caracteres alfanumÃ©ricos e caracteres especiais.
+     * Gera uma senha aleatória de 10 caracteres que respeita as seguintes regras:
+     * 01 - Pode conter caracteres alfanuméricos e caracteres especiais.
      * 02 - Pelo menos um caractere especial.
-     * 03 - Pelo menos uma letra maiÃºscula.
-     * 04 - Pelo menos uma letra minÃºscula.
-     * 05 - NÃ£o pode conter espaÃ§o.
-     * 06 - Pelo menos um nÃºmero.
-     * 07 - Tem que comeÃ§ar por letra ou nÃºmero.
+     * 03 - Pelo menos uma letra maiúscula.
+     * 04 - Pelo menos uma letra minúscula.
+     * 05 - Não pode conter espaço.
+     * 06 - Pelo menos um número.
+     * 07 - Tem que começar por letra ou número.
      *
-     * ObservaÃ§Ãµes: O mÃ©todo sempre retorna uma senha com exatamente 10 caracteres e usa SecureRandom
+     * Observações: O método sempre retorna uma senha com exatamente 10 caracteres e usa SecureRandom
      * para garantir maior entropia.
      */
     public static String gerarSenhaAleatoria() {
@@ -87,21 +87,21 @@ public class Utilidades {
         final String UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         final String LOWER = "abcdefghijklmnopqrstuvwxyz";
         final String DIGITS = "0123456789";
-        final String SPECIAL = "!@#$%^&*()-_+=[]{};:,.<>?/"; // sem espaÃ§os
+        final String SPECIAL = "!@#$%^&*()-_+=[]{};:,.<>?/"; // sem espaços
         final String ALPHANUM = UPPER + LOWER + DIGITS;
         final String ALL_ALLOWED = ALPHANUM + SPECIAL;
 
         SecureRandom random = new SecureRandom();
         char[] password = new char[LENGTH];
 
-        // 1) Garantir que o primeiro caractere seja letra ou nÃºmero
+        // 1) Garantir que o primeiro caractere seja letra ou número
         password[0] = ALPHANUM.charAt(random.nextInt(ALPHANUM.length()));
         boolean hasUpper = Character.isUpperCase(password[0]);
         boolean hasLower = Character.isLowerCase(password[0]);
         boolean hasDigit = Character.isDigit(password[0]);
-        boolean hasSpecial = false; // nÃ£o pode ser special no primeiro
+        boolean hasSpecial = false; // não pode ser special no primeiro
 
-        // 2) Preparar lista de caracteres obrigatÃ³rios que faltam
+        // 2) Preparar lista de caracteres obrigatórios que faltam
         List<Character> requiredChars = new ArrayList<>();
         if (!hasUpper) requiredChars.add(UPPER.charAt(random.nextInt(UPPER.length())));
         if (!hasLower) requiredChars.add(LOWER.charAt(random.nextInt(LOWER.length())));
@@ -112,14 +112,14 @@ public class Utilidades {
         int requiredCount = requiredChars.size();
 
         List<Character> pool = new ArrayList<>();
-        // 3) Preencher com caracteres aleatÃ³rios (exceto os que jÃ¡ garantimos) atÃ© sobrar espaÃ§o para os obrigatÃ³rios
+        // 3) Preencher com caracteres aleatórios (exceto os que já garantimos) até sobrar espaço para os obrigatórios
         for (int i = 0; i < remainingPositions - requiredCount; i++) {
             pool.add(ALL_ALLOWED.charAt(random.nextInt(ALL_ALLOWED.length())));
         }
-        // 4) Adicionar os caracteres obrigatÃ³rios
+        // 4) Adicionar os caracteres obrigatórios
         pool.addAll(requiredChars);
 
-        // 5) Embaralhar os caracteres que irÃ£o para as posiÃ§Ãµes 1..9
+        // 5) Embaralhar os caracteres que irão para as posições 1..9
         Collections.shuffle(pool, random);
 
         for (int i = 0; i < pool.size(); i++) {

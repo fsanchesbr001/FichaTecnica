@@ -211,4 +211,5 @@ sum(rate(http_server_requests_seconds_count{uri=~"/ficha-tecnica/unidades-medida
 - 09/09/2026 - Versão 2.0.8 - Migração para Clean Architecture (Arquitetura Hexagonal) - CRUD Usuario e Segurança Completo.
 - 10/09/2026 - Versão 2.0.9 - Migração para Clean Architecture (Arquitetura Hexagonal) - Organizando Estrutura.
 - 11/09/2026 - Versão 2.1.0 - Migração para Clean Architecture (Arquitetura Hexagonal) - Finalizando a migração hexagonal.
-- 18/09/2026 - Versão 2.1.1 - Migração para Clean Architecture (Arquitetura Hexagonal) - Ajustes finais e melhorias.
+- 18/09/2026 - Versão 2.1.1 - Migração para Clean Architecture (Arquitetura Hexagonal) - Ajustes finais e melhorias de layout.
+- 19/09/2026 - Versão 2.1.2 - Migração para Clean Architecture (Arquitetura Hexagonal) - Testes de Usuario e correção de rotas.

@@ -62,7 +62,7 @@ class UnidadeMedidaRelatorioControllerTest {
 
     @Test
     void relatorioDetalhe_DeveRetornarBadRequestQuandoSiglaInvalida() throws Exception {
-        when(gerarDetalhePort.executar(anyString())).thenThrow(new IllegalArgumentException("invÃ¡lida"));
+        when(gerarDetalhePort.executar(anyString())).thenThrow(new IllegalArgumentException("inválida"));
 
         mockMvc.perform(get("/ficha-tecnica/unidades-medida/relatorios/{sigla}/detalhe", " "))
                 .andExpect(status().isBadRequest());

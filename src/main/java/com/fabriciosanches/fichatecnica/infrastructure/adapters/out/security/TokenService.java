@@ -65,7 +65,7 @@ public class TokenService implements GeradorTokenPort, ValidadorTokenPort {
                     .verify(tokenJWT)
                     .getSubject();
         } catch (JWTVerificationException exception){
-            throw new RuntimeException("VerificaÃ§Ã£o de Token falhou!!!",exception);
+            throw new RuntimeException("Verificação de Token falhou!!!",exception);
         }
     }
 
@@ -81,7 +81,7 @@ public class TokenService implements GeradorTokenPort, ValidadorTokenPort {
                     .verify(tokenJWT)
                     .getClaim("role").asString();
         } catch (JWTVerificationException exception){
-            throw new RuntimeException("VerificaÃ§Ã£o de Token falhou!!!",exception);
+            throw new RuntimeException("Verificação de Token falhou!!!",exception);
         }
     }
 
@@ -101,10 +101,10 @@ public class TokenService implements GeradorTokenPort, ValidadorTokenPort {
     }
 
     /**
-     * Extrai o instante de expiraÃ§Ã£o de um token JWT jÃ¡ emitido.
+     * Extrai o instante de expiração de um token JWT já emitido.
      *
      * @param tokenJWT token JWT
-     * @return instante de expiraÃ§Ã£o ou {@code null} se nÃ£o for possÃ­vel extrair
+     * @return instante de expiração ou {@code null} se não for possível extrair
      */
     @Override
     public Instant getExpiration(String tokenJWT) {

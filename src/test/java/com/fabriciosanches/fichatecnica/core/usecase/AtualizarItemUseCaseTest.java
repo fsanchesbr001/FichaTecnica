@@ -59,7 +59,7 @@ class AtualizarItemUseCaseTest {
                 () -> useCase.atualizar(1L, "Farinha", unidade, new BigDecimal("10.00"))
         );
 
-        assertEquals("Item com ID 1 nÃ£o encontrado", ex.getMessage());
+        assertEquals("Item com ID 1 não encontrado", ex.getMessage());
     }
 
     @Test

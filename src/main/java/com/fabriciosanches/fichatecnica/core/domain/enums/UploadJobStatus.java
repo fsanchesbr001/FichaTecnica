@@ -1,13 +1,13 @@
 package com.fabriciosanches.fichatecnica.core.domain.enums;
 
 /**
- * Status do job assÃ­ncrono de upload de imagem de produto.
+ * Status do job assíncrono de upload de imagem de produto.
  *
  * <ul>
- *   <li>{@code PENDING}    â€“ job registrado, aguardando processamento</li>
- *   <li>{@code PROCESSING} â€“ upload em andamento</li>
- *   <li>{@code DONE}       â€“ upload concluÃ­do com sucesso; {@code imagemUrl} disponÃ­vel</li>
- *   <li>{@code ERROR}      â€“ falha no upload; detalhes em {@code message}</li>
+ *   <li>{@code PENDING}    - job registrado, aguardando processamento</li>
+ *   <li>{@code PROCESSING} - upload em andamento</li>
+ *   <li>{@code DONE}       - upload concluído com sucesso; {@code imagemUrl} disponível</li>
+ *   <li>{@code ERROR}      - falha no upload; detalhes em {@code message}</li>
  * </ul>
  */
 public enum UploadJobStatus {

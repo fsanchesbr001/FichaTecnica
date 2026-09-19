@@ -54,7 +54,7 @@ class UsuarioUseCaseTest {
         seguranca.setDataCriacao(LocalDateTime.now().minusDays(1));
         seguranca.setDataExpiracaoSenha(LocalDateTime.now().plusDays(30));
 
-        usuario = new Usuario(1L, "user@email.com", "senha", UserRole.ADMIN, "UsuÃ¡rio Teste");
+        usuario = new Usuario(1L, "user@email.com", "senha", UserRole.ADMIN, "Usuário Teste");
     }
 
     @Test
@@ -64,7 +64,7 @@ class UsuarioUseCaseTest {
 
         UsuarioListagemDTO dto = useCase.buscarUsuarioPorEmail("user@email.com");
 
-        assertEquals("UsuÃ¡rio Teste", dto.nome());
+        assertEquals("Usuário Teste", dto.nome());
         assertEquals("ADMIN", dto.role());
     }
 

@@ -26,14 +26,14 @@ public class ProdutoImagemUploadUseCase implements IniciarUploadImagemProdutoPor
     private final Map<String, JobState> jobs = new ConcurrentHashMap<>();
 
     public ProdutoImagemUploadUseCase(ProdutoRepositoryPort produtoRepositoryPort, ProdutoImagemStoragePort produtoImagemStoragePort) {
-        this.produtoRepositoryPort = Objects.requireNonNull(produtoRepositoryPort, "ProdutoRepositoryPort nÃ£o pode ser nulo");
-        this.produtoImagemStoragePort = Objects.requireNonNull(produtoImagemStoragePort, "ProdutoImagemStoragePort nÃ£o pode ser nulo");
+        this.produtoRepositoryPort = Objects.requireNonNull(produtoRepositoryPort, "ProdutoRepositoryPort não pode ser nulo");
+        this.produtoImagemStoragePort = Objects.requireNonNull(produtoImagemStoragePort, "ProdutoImagemStoragePort não pode ser nulo");
     }
 
     @Override
     public UploadJobDTO iniciar(Long produtoId, ArquivoUpload arquivo) {
         Produto produto = produtoRepositoryPort.buscarPorId(produtoId)
-                .orElseThrow(() -> new FichaTecnicaException("Produto nÃ£o encontrado id=" + produtoId));
+                .orElseThrow(() -> new FichaTecnicaException("Produto não encontrado id=" + produtoId));
 
         validarArquivo(arquivo);
         String jobId = UUID.randomUUID().toString();

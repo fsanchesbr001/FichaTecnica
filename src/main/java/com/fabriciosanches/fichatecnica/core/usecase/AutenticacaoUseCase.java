@@ -17,14 +17,14 @@ public class AutenticacaoUseCase implements AutenticarUsuarioPort, GerarTokenPor
     private final GeradorTokenPort geradorTokenPort;
 
     public AutenticacaoUseCase(UsuarioRepositoryPort usuarioRepositoryPort, GeradorTokenPort geradorTokenPort) {
-        this.usuarioRepositoryPort = Objects.requireNonNull(usuarioRepositoryPort, "UsuarioRepositoryPort nÃ£o pode ser nulo");
-        this.geradorTokenPort = Objects.requireNonNull(geradorTokenPort, "GeradorTokenPort nÃ£o pode ser nulo");
+        this.usuarioRepositoryPort = Objects.requireNonNull(usuarioRepositoryPort, "UsuarioRepositoryPort não pode ser nulo");
+        this.geradorTokenPort = Objects.requireNonNull(geradorTokenPort, "GeradorTokenPort não pode ser nulo");
     }
 
     @Override
     public Usuario buscarPorLogin(String username) {
         return usuarioRepositoryPort.buscarPorLogin(username)
-                .orElseThrow(() -> new FichaTecnicaException("UsuÃ¡rio nÃ£o encontrado: " + username));
+                .orElseThrow(() -> new FichaTecnicaException("Usuário não encontrado: " + username));
     }
 
     @Override

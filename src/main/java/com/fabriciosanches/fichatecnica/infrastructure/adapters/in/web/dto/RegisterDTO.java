@@ -6,16 +6,16 @@ public record RegisterDTO(String login, String senha, UserRole role, String nome
 
     public RegisterDTO {
         if (login == null || login.isBlank()) {
-            throw new IllegalArgumentException("Login nÃ£o pode ser nulo ou vazio.");
+            throw new IllegalArgumentException("Login não pode ser nulo ou vazio.");
         }
         if (role == null) {
-            throw new IllegalArgumentException("Role nÃ£o pode ser nula.");
+            throw new IllegalArgumentException("Role não pode ser nula.");
         }
         if (nome == null || nome.isBlank()) {
-            throw new IllegalArgumentException("Nome nÃ£o pode ser nulo ou vazio.");
+            throw new IllegalArgumentException("Nome não pode ser nulo ou vazio.");
         }
         if (cpf == null || cpf.isBlank()) {
-            throw new IllegalArgumentException("CPF nÃ£o pode ser nulo ou vazio.");
+            throw new IllegalArgumentException("CPF não pode ser nulo ou vazio.");
         }
     }
 }

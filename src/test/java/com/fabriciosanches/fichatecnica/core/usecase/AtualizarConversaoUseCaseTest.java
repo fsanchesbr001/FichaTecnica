@@ -53,7 +53,7 @@ class AtualizarConversaoUseCaseTest {
                 () -> useCase.atualizar(1L, new Conversao(2L, 3L, "MULTIPLICA", BigDecimal.ONE))
         );
 
-        assertEquals("ConversÃ£o com ID 1 nÃ£o encontrada", exception.getMessage());
+        assertEquals("Conversão com ID 1 não encontrada", exception.getMessage());
         verify(repositoryPort, never()).salvar(any(Conversao.class));
     }
 }
