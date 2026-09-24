@@ -3,6 +3,7 @@ package com.fabriciosanches.fichatecnica.core.usecase;
 import com.fabriciosanches.fichatecnica.infrastructure.constants.Constants;
 import com.fabriciosanches.fichatecnica.core.domain.Seguranca;
 import com.fabriciosanches.fichatecnica.core.domain.Usuario;
+import com.fabriciosanches.fichatecnica.core.domain.enums.UserRole;
 import com.fabriciosanches.fichatecnica.core.ports.in.AtualizarUsuarioPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.BuscarUsuarioPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.CriarUsuarioPort;
@@ -73,11 +74,12 @@ public class UsuarioUseCase implements CriarUsuarioPort, BuscarUsuarioPort, Atua
 
     @Override
     public void excluirUsuario(String email) {
-        Seguranca seguranca = buscarSegurancaOuFalhar(email);
-        segurancaRepositoryPort.deletar(seguranca);
-
         Usuario usuario = usuarioRepositoryPort.buscarPorLogin(email)
                 .orElseThrow(() -> new FichaTecnicaException("Usuário não encontrado"));
+        validarUsuarioAdministravel(usuario);
+
+        Seguranca seguranca = buscarSegurancaOuFalhar(email);
+        segurancaRepositoryPort.deletar(seguranca);
         usuarioRepositoryPort.deletar(usuario);
     }
 
@@ -86,6 +88,7 @@ public class UsuarioUseCase implements CriarUsuarioPort, BuscarUsuarioPort, Atua
         Seguranca seguranca = buscarSegurancaOuFalhar(email);
         Usuario usuario = usuarioRepositoryPort.buscarPorLogin(email)
                 .orElseThrow(() -> new FichaTecnicaException("Usuário não encontrado"));
+        validarUsuarioAdministravel(usuario);
 
         String nome = usuario.getNome();
         String cpfSemPontuacao = seguranca.getCpf() != null ? seguranca.getCpf().replaceAll("\\D", "") : null;
@@ -106,6 +109,7 @@ public class UsuarioUseCase implements CriarUsuarioPort, BuscarUsuarioPort, Atua
 
         Usuario usuario = usuarioRepositoryPort.buscarPorLogin(email)
                 .orElseThrow(() -> new FichaTecnicaException("Usuário não encontrado na tabela usuarios: " + email));
+        validarUsuarioAdministravel(usuario);
 
         if (dados.bloqueado_admin() != null) {
             seguranca.setBloqueado_admin(dados.bloqueado_admin());
@@ -153,11 +157,13 @@ public class UsuarioUseCase implements CriarUsuarioPort, BuscarUsuarioPort, Atua
         return dadosSeguranca.stream()
                 .map(seguranca -> new UsuarioListagemDTO(seguranca,
                         usuarioRepositoryPort.buscarPorLogin(seguranca.getEmail()).orElse(null)))
+                .filter(usuario -> !UserRole.SYSTEM.name().equals(usuario.role()))
                 .toList();
     }
 
     @Override
     public BloqueiosResponseDTO bloquear(BloqueiosRequestDTO bloqueiosRequestDTO) {
+        validarUsuarioAdministravelPorEmail(bloqueiosRequestDTO.email());
         Seguranca seguranca = segurancaRepositoryPort.buscarPorEmail(bloqueiosRequestDTO.email()).orElse(null);
         if (seguranca == null) {
             return new BloqueiosResponseDTO(Constants.MSG_DADOS_SEGURANCA_NAO_ENCONTRADOS);
@@ -174,6 +180,7 @@ public class UsuarioUseCase implements CriarUsuarioPort, BuscarUsuarioPort, Atua
 
     @Override
     public BloqueiosResponseDTO desbloquear(BloqueiosRequestDTO bloqueiosRequestDTO) {
+        validarUsuarioAdministravelPorEmail(bloqueiosRequestDTO.email());
         Seguranca seguranca = segurancaRepositoryPort.buscarPorEmail(bloqueiosRequestDTO.email()).orElse(null);
         if (seguranca == null) {
             return new BloqueiosResponseDTO(Constants.MSG_DADOS_SEGURANCA_NAO_ENCONTRADOS);
@@ -189,6 +196,7 @@ public class UsuarioUseCase implements CriarUsuarioPort, BuscarUsuarioPort, Atua
     }
 
     public void expirarSenha(String email) {
+        validarUsuarioAdministravelPorEmail(email);
         Seguranca seguranca = buscarSegurancaOuFalhar(email);
         seguranca.setDataExpiracaoSenha(LocalDateTime.now().minusDays(1));
         seguranca.setBloqueado_expiracao(Boolean.TRUE);
@@ -199,6 +207,15 @@ public class UsuarioUseCase implements CriarUsuarioPort, BuscarUsuarioPort, Atua
         return segurancaRepositoryPort.buscarPorEmail(email)
                 .orElseThrow(() -> new FichaTecnicaException(Constants.MSG_DADOS_SEGURANCA_NAO_ENCONTRADOS));
     }
-}
 
+    private void validarUsuarioAdministravelPorEmail(String email) {
+        usuarioRepositoryPort.buscarPorLogin(email).ifPresent(this::validarUsuarioAdministravel);
+    }
+
+    private void validarUsuarioAdministravel(Usuario usuario) {
+        if (UserRole.SYSTEM == usuario.getRole()) {
+            throw new FichaTecnicaException("Usuário ROLE_SYSTEM não pode ser alterado.");
+        }
+    }
+}
 

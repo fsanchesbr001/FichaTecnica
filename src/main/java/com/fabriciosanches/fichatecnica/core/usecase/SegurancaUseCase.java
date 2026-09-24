@@ -3,6 +3,7 @@ package com.fabriciosanches.fichatecnica.core.usecase;
 import com.fabriciosanches.fichatecnica.infrastructure.constants.Constants;
 import com.fabriciosanches.fichatecnica.core.domain.Seguranca;
 import com.fabriciosanches.fichatecnica.core.domain.Usuario;
+import com.fabriciosanches.fichatecnica.core.domain.enums.UserRole;
 import com.fabriciosanches.fichatecnica.core.ports.in.ControleAcessoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.RecuperacaoSenhaPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.EnviarEmailPort;
@@ -39,6 +40,7 @@ public class SegurancaUseCase implements RecuperacaoSenhaPort, ControleAcessoPor
 
     @Override
     public EnviarEmailSegurancaResponseDTO enviarEmailSeguranca(String email) throws MessagingException {
+        validarUsuarioNaoSistema(email);
         String cpf = segurancaRepositoryPort.buscarCpfPorEmail(email);
         if (cpf == null) {
             throw new FichaTecnicaException("Email não encontrado");
@@ -83,6 +85,7 @@ public class SegurancaUseCase implements RecuperacaoSenhaPort, ControleAcessoPor
 
     @Override
     public void trocarSenhaSeguranca(String email, String cpf, String tokenSeguranca, String senha, String confirmacaoSenha) {
+        validarUsuarioNaoSistema(email);
         Seguranca seguranca = buscarSegurancaPorEmailOuFalhar(email);
 
         if (!seguranca.getCpf().equals(cpf)) {
@@ -132,6 +135,7 @@ public class SegurancaUseCase implements RecuperacaoSenhaPort, ControleAcessoPor
 
     @Override
     public void errouSenha(String email) {
+        validarUsuarioNaoSistema(email);
         Seguranca seguranca = buscarSegurancaPorEmailOuFalhar(email);
         seguranca.setTentativas(seguranca.getTentativas() - 1);
 
@@ -149,6 +153,7 @@ public class SegurancaUseCase implements RecuperacaoSenhaPort, ControleAcessoPor
 
     @Override
     public void resetarTentativas(String email) {
+        validarUsuarioNaoSistema(email);
         Seguranca seguranca = buscarSegurancaPorEmailOuFalhar(email);
         seguranca.setTentativas(5);
         segurancaRepositoryPort.salvar(seguranca);
@@ -156,6 +161,7 @@ public class SegurancaUseCase implements RecuperacaoSenhaPort, ControleAcessoPor
 
     @Override
     public void expirarSenha(String email) {
+        validarUsuarioNaoSistema(email);
         Seguranca seguranca = buscarSegurancaPorEmailOuFalhar(email);
         seguranca.setDataExpiracaoSenha(LocalDateTime.now().minusDays(1));
         seguranca.setBloqueado_expiracao(Boolean.TRUE);
@@ -164,10 +170,24 @@ public class SegurancaUseCase implements RecuperacaoSenhaPort, ControleAcessoPor
 
     private void validarSenhaExpirada(String email) {
         Seguranca seguranca = buscarSegurancaPorEmailOuFalhar(email);
-        if (seguranca.getDataExpiracaoSenha() != null && LocalDateTime.now().isAfter(seguranca.getDataExpiracaoSenha())) {
+        if (!ehUsuarioSistema(email)
+                && seguranca.getDataExpiracaoSenha() != null
+                && LocalDateTime.now().isAfter(seguranca.getDataExpiracaoSenha())) {
             expirarSenha(seguranca.getEmail());
         }
         logger.info("Senha valida para o email: {}", email);
+    }
+
+    private boolean ehUsuarioSistema(String email) {
+        return usuarioRepositoryPort.buscarPorLogin(email)
+                .map(usuario -> UserRole.SYSTEM == usuario.getRole())
+                .orElse(false);
+    }
+
+    private void validarUsuarioNaoSistema(String email) {
+        if (ehUsuarioSistema(email)) {
+            throw new FichaTecnicaException("Usuário ROLE_SYSTEM não pode ser alterado.");
+        }
     }
 
     private Seguranca buscarSegurancaPorEmailOuFalhar(String email) {
@@ -195,5 +215,4 @@ public class SegurancaUseCase implements RecuperacaoSenhaPort, ControleAcessoPor
         return token.toString();
     }
 }
-
 

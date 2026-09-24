@@ -81,18 +81,24 @@ class UsuarioUseCaseTest {
         when(usuarioRepositoryPort.buscarPorLogin("user@email.com")).thenReturn(Optional.of(usuario));
 
         UsuarioListagemDTO dto = useCase.atualizarUsuario("user@email.com",
-                new AtualizarUsuarioRequestDTO(true, false, false, false, "Nome Atualizado", UserRole.SYSTEM));
+                new AtualizarUsuarioRequestDTO(true, false, false, false, "Nome Atualizado", UserRole.USER));
 
         assertEquals("Nome Atualizado", dto.nome());
-        assertEquals("SYSTEM", dto.role());
+        assertEquals("USER", dto.role());
+    }
+
+    @Test
+    void atualizarUsuario_DeveImpedirAlteracaoDeUsuarioSystem() {
+        usuario.setRole(UserRole.SYSTEM);
+        when(segurancaRepositoryPort.buscarPorEmail("user@email.com")).thenReturn(Optional.of(seguranca));
+        when(usuarioRepositoryPort.buscarPorLogin("user@email.com")).thenReturn(Optional.of(usuario));
+
+        assertThrows(FichaTecnicaException.class, () -> useCase.atualizarUsuario("user@email.com",
+                new AtualizarUsuarioRequestDTO(false, false, false, false, "Nome Atualizado", UserRole.ADMIN)));
     }
 
     @Test
     void excluirUsuario_DeveFalharSemSeguranca() {
-        when(segurancaRepositoryPort.buscarPorEmail("user@email.com")).thenReturn(Optional.empty());
-
         assertThrows(FichaTecnicaException.class, () -> useCase.excluirUsuario("user@email.com"));
     }
 }
-
-
