@@ -56,6 +56,7 @@ public class SecurityConfigurations {
                         .requestMatchers("/actuator/prometheus", "/actuator/info").permitAll()
                             .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/images/**").permitAll()
+                        .requestMatchers("/api/imagens/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/ficha-tecnica/login-recuperacao-senha").permitAll()
@@ -76,5 +77,4 @@ public class SecurityConfigurations {
         return new BCryptPasswordEncoder();
     }
 }
-
 

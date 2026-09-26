@@ -71,11 +71,8 @@ public class ProdutoController {
     private final GerarRelatorioPort gerarRelatorioPort;
     private final GerarGraficoPort gerarGraficoPort;
 
-    @Value("${digitalocean.storage.base-path:/olivander/ficha_tecnica/imagens}")
+    @Value("${app.storage.image-upload-dir:/var/www/fichatecnica/uploads/imagens}")
     private String storagePath;
-
-    @Value("${digitalocean.storage.public-url:http://localhost:8080/uploads}")
-    private String publicUrl;
 
     public ProdutoController(
             BuscarProdutoPort buscarProdutoPort,
@@ -410,8 +407,13 @@ public class ProdutoController {
             return null;
         }
         try {
-            String relativePath = imagemUrl.replace(publicUrl, "");
-            Path imagePath = Paths.get(storagePath + relativePath).normalize();
+            String relativePath = extrairPathRelativoImagem(imagemUrl);
+            if (relativePath == null || relativePath.isBlank()) {
+                logger.warn("Nao foi possivel extrair caminho relativo da imagem do produto id={}: {}", idProduto, imagemUrl);
+                return null;
+            }
+
+            Path imagePath = Paths.get(storagePath).resolve(relativePath).normalize();
             if (Files.exists(imagePath)) {
                 logger.info("Imagem do produto id={} carregada: {}", idProduto, imagePath);
                 return Files.readAllBytes(imagePath);
@@ -421,5 +423,23 @@ public class ProdutoController {
             logger.warn("Nao foi possivel carregar a imagem do produto id={}: {}", idProduto, e.getMessage());
         }
         return null;
+    }
+
+    private String extrairPathRelativoImagem(String imagemUrl) {
+        String valor = imagemUrl.trim();
+
+        if (valor.contains("/api/imagens/")) {
+            return valor.substring(valor.indexOf("/api/imagens/") + "/api/imagens/".length());
+        }
+
+        if (valor.contains("/uploads/")) {
+            return valor.substring(valor.indexOf("/uploads/") + "/uploads/".length());
+        }
+
+        if (valor.startsWith("http://") || valor.startsWith("https://")) {
+            return null;
+        }
+
+        return valor.replaceFirst("^/+", "");
     }
 }

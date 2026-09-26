@@ -13,11 +13,8 @@ import java.util.UUID;
 
 @Component
 public class ProdutoImagemStorageAdapter implements ProdutoImagemStoragePort {
-    @Value("${digitalocean.storage.base-path:/olivander/ficha_tecnica/imagens}")
+    @Value("${app.storage.image-upload-dir:/var/www/fichatecnica/uploads/imagens}")
     private String storagePath;
-
-    @Value("${digitalocean.storage.public-url:http://localhost:8080/uploads}")
-    private String publicUrl;
 
     @Override
     public String salvar(Long produtoId, String originalFilename, String contentType, byte[] content) {
@@ -29,7 +26,7 @@ public class ProdutoImagemStorageAdapter implements ProdutoImagemStoragePort {
             String nomeArquivo = UUID.randomUUID() + "." + ext;
             Path destino = dir.resolve(nomeArquivo);
             Files.copy(new ByteArrayInputStream(content), destino, StandardCopyOption.REPLACE_EXISTING);
-            return publicUrl + "/produtos/" + produtoId + "/" + nomeArquivo;
+            return "produtos/" + produtoId + "/" + nomeArquivo;
         } catch (Exception e) {
             throw new IllegalStateException("Erro ao salvar imagem do produto", e);
         }
@@ -53,5 +50,4 @@ public class ProdutoImagemStorageAdapter implements ProdutoImagemStoragePort {
         return nomeArquivo.substring(nomeArquivo.lastIndexOf('.') + 1);
     }
 }
-
 
