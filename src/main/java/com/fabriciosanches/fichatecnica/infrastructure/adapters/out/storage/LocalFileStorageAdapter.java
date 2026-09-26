@@ -15,13 +15,13 @@ import java.util.UUID;
 @Component
 public class LocalFileStorageAdapter implements ArmazenamentoArquivoPort {
 
-    @Value("${digitalocean.storage.base-path:/var/www/uploads}")
-    private String baseStoragePath;
+    @Value("${app.storage.image-upload-dir:/var/www/fichatecnica/uploads/imagens}")
+    private String uploadDir;
 
     @Override
     public String salvar(byte[] conteudo, String destinationPath, String fileName) throws IOException {
         String safeDestinationPath = Paths.get(destinationPath).normalize().toString();
-        Path targetLocation = Paths.get(baseStoragePath, safeDestinationPath).toAbsolutePath().normalize();
+        Path targetLocation = Paths.get(uploadDir, safeDestinationPath).toAbsolutePath().normalize();
         Files.createDirectories(targetLocation);
 
         String fileExtension = "";
@@ -38,14 +38,13 @@ public class LocalFileStorageAdapter implements ArmazenamentoArquivoPort {
 
     @Override
     public byte[] carregar(String relativePath) throws IOException {
-        Path filePath = Paths.get(baseStoragePath, relativePath).toAbsolutePath().normalize();
+        Path filePath = Paths.get(uploadDir, relativePath).toAbsolutePath().normalize();
         return Files.readAllBytes(filePath);
     }
 
     @Override
     public void deletar(String relativePath) throws IOException {
-        Path filePath = Paths.get(baseStoragePath, relativePath).toAbsolutePath().normalize();
+        Path filePath = Paths.get(uploadDir, relativePath).toAbsolutePath().normalize();
         Files.deleteIfExists(filePath);
     }
 }
-
