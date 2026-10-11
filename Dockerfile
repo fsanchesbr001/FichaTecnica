@@ -1,30 +1,38 @@
-# syntax=docker/dockerfile:1
+# syntax=docker/dockerfile:1.7
 
-# Build stage
-FROM maven:3.9.9-eclipse-temurin-17 AS build
+FROM maven:3.9.9-eclipse-temurin-17-alpine AS deps
 WORKDIR /workspace
 
-COPY pom.xml .
-COPY src ./src
-RUN mvn -B -DskipTests clean package
+COPY pom.xml ./
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn -B -ntp -DskipTests dependency:go-offline
 
-# Runtime stage
-FROM eclipse-temurin:17-jre
+FROM maven:3.9.9-eclipse-temurin-17-alpine AS build
+WORKDIR /workspace
+
+COPY --from=deps /root/.m2 /root/.m2
+COPY pom.xml ./
+COPY src ./src
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn -B -ntp -DskipTests clean package
+
+FROM eclipse-temurin:17-jre-alpine AS runtime
 WORKDIR /app
 
-COPY --from=build /workspace/target/*.jar app.jar
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+COPY --from=build /workspace/target/*.jar /app/app.jar
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+RUN chmod 755 /usr/local/bin/docker-entrypoint.sh && chown -R appuser:appgroup /app
 
 EXPOSE 8080
 
-# Defaults for local container runs. docker-compose can override these.
-ENV APP_PROFILE=development
-ENV DB_IP=mysql
-ENV DB_PORT=3306
-ENV DB_NAME=FichaTecnica
-ENV DB_USER=root
-ENV DB_PWD=root
+ENV APP_PROFILE=production \
+    DB_IP=mysql \
+    DB_PORT=3306 \
+    DB_NAME=FichaTecnica \
+    DB_USER=fichatecnica \
+    JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75 -XX:+UseContainerSupport"
 
+USER appuser
 ENTRYPOINT ["docker-entrypoint.sh"]
-
