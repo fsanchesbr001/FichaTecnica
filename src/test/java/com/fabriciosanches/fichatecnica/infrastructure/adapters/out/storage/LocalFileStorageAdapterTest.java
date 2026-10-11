@@ -22,7 +22,7 @@ class LocalFileStorageAdapterTest {
     void setUp() throws IOException {
         adapter = new LocalFileStorageAdapter();
         tempDir = Files.createTempDirectory("file-storage-test");
-        ReflectionTestUtils.setField(adapter, "baseStoragePath", tempDir.toString());
+        ReflectionTestUtils.setField(adapter, "uploadDir", tempDir.toString());
     }
 
     @Test

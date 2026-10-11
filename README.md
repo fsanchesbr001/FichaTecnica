@@ -215,3 +215,4 @@ sum(rate(http_server_requests_seconds_count{uri=~"/ficha-tecnica/unidades-medida
 - 19/09/2026 - Versão 2.1.2 - Migração para Clean Architecture (Arquitetura Hexagonal) - Testes de Usuario e correção de rotas.
 - 23/09/2026 - Versão 2.1.3 - Tratando Usuario System.
 - 26/09/2026 - Versão 2.1.4 - Correções da carga e exibição de imagens.
+- 11/10/2026 - Versão 2.1.5 - Preparando CI/CD para deploy em produção.

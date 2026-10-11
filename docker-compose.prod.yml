@@ -1,32 +1,97 @@
-services:
+name: ficha-tecnica-prod
 
+services:
   mysql:
+    image: mysql:8.4
+    container_name: ficha-mysql
+    command: --default-authentication-plugin=caching_sha2_password --mysql-native-password=OFF
+    restart: unless-stopped
     environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-FichaTecnica}
+      MYSQL_USER: ${MYSQL_USER:-fichatecnica}
       MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
       MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+      TZ: ${TIMEZONE:-America/Sao_Paulo}
+    volumes:
+      - mysql-data:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u${MYSQL_USER} -p$$(cat /run/secrets/mysql_password) --silent"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u$${MYSQL_USER} -p$$(cat /run/secrets/mysql_password) --silent"]
       interval: 10s
       timeout: 5s
-      retries: 10
-      start_period: 20s
+      retries: 12
+      start_period: 30s
+    networks:
+      - backend-internal
     secrets:
       - mysql_password
       - mysql_root_password
 
   backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${BACKEND_IMAGE:-ghcr.io/your-org/ficha-tecnica-backend:latest}
+    container_name: ficha-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
     environment:
       APP_PROFILE: production
+      DB_IP: mysql
+      DB_PORT: 3306
+      DB_NAME: ${MYSQL_DATABASE:-FichaTecnica}
+      DB_USER: ${MYSQL_USER:-fichatecnica}
       DB_PWD_FILE: /run/secrets/mysql_password
       JWT_SECRET_FILE: /run/secrets/jwt_secret
       MAIL_PWD_FILE: /run/secrets/mail_pwd
       SYSTEM_PWD_FILE: /run/secrets/system_pwd
-    restart: always
+      SITE_ORIGIN_ALLOWED: ${SITE_ORIGIN_ALLOWED:-https://your-frontend-domain}
+      DO_STORAGE_PATH: /var/lib/ficha-tecnica/imagens
+      TZ: ${TIMEZONE:-America/Sao_Paulo}
+    volumes:
+      - app-images-data:/var/lib/ficha-tecnica/imagens
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health | grep -q '\"status\":\"UP\"'"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks:
+      - backend-internal
+      - edge
     secrets:
       - mysql_password
       - jwt_secret
       - mail_pwd
       - system_pwd
+
+  frontend:
+    build:
+      context: ${FRONTEND_CONTEXT:-../FichaTecnicaUI}
+      dockerfile: Dockerfile
+    image: ${FRONTEND_IMAGE:-ghcr.io/your-org/ficha-tecnica-frontend:latest}
+    container_name: ficha-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_EXTERNAL_PORT:-80}:8080"
+    networks:
+      - edge
+      - backend-internal
+
+volumes:
+  mysql-data:
+  app-images-data:
+
+networks:
+  backend-internal:
+    driver: bridge
+    internal: true
+  edge:
+    driver: bridge
 
 secrets:
   mysql_password:
@@ -39,4 +104,3 @@ secrets:
     file: ${MAIL_PWD_FILE:-./docker/secrets/mail_pwd.txt.example}
   system_pwd:
     file: ${SYSTEM_PWD_FILE:-./docker/secrets/system_pwd.txt.example}
-
