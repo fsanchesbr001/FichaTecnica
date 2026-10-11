@@ -7,11 +7,8 @@ COPY pom.xml ./
 RUN --mount=type=cache,target=/root/.m2 \
     mvn -B -ntp -DskipTests dependency:go-offline
 
-FROM maven:3.9.9-eclipse-temurin-17-alpine AS build
-WORKDIR /workspace
+FROM deps AS build
 
-COPY --from=deps /root/.m2 /root/.m2
-COPY pom.xml ./
 COPY src ./src
 RUN --mount=type=cache,target=/root/.m2 \
     mvn -B -ntp -DskipTests clean package
