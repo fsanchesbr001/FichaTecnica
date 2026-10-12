@@ -52,7 +52,7 @@ jobs:
           images: docker.io/${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
-            type=sha,prefix=sha-
+            type=sha,format=long,prefix=sha-
 
       # Builda sempre; faz push apenas quando não for PR.
       - name: Build and (optionally) push Docker image
