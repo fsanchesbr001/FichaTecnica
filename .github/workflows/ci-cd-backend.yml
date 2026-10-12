@@ -17,8 +17,6 @@ jobs:
   build-test-and-push:
     name: Build, Test and Push Image
     runs-on: ubuntu-latest
-    outputs:
-      image_ref: ${{ steps.export-image.outputs.image_ref }}
 
     steps:
       - name: Checkout code
@@ -68,11 +66,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Export image reference for deploy job
-        id: export-image
-        if: github.event_name != 'pull_request'
-        run: echo "image_ref=docker.io/${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}" >> "$GITHUB_OUTPUT"
-
   deploy:
     name: Deploy to DigitalOcean
     runs-on: ubuntu-latest
@@ -102,7 +95,7 @@ jobs:
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-          DOCKER_IMAGE: ${{ needs.build-test-and-push.outputs.image_ref }}
+          DOCKER_IMAGE: docker.io/${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}
           DO_PROJECT_DIR: ${{ secrets.DO_PROJECT_DIR }}
           APP_ENV_FILE: ${{ secrets.APP_ENV_FILE }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
