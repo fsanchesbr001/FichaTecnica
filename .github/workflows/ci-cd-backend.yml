@@ -83,6 +83,9 @@ jobs:
       (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Copy production Compose file to DigitalOcean
         uses: appleboy/scp-action@v0.1.7
         with:
