@@ -163,12 +163,19 @@ jobs:
             printf '%s' "$MYSQL_ROOT_PASSWORD" > docker/secrets/mysql_root_password.txt
             printf '%s' "$SYSTEM_PWD" > docker/secrets/system_pwd.txt
 
-            # Persiste o backend image imutavel por SHA para o docker-compose.prod.yml.
+            # Configura o backend image e os arquivos de secrets usados pelo compose.
             if [ -f ".env" ]; then
-              grep -v '^BACKEND_IMAGE=' .env > .env.tmp || true
+              grep -v -E '^(BACKEND_IMAGE|MYSQL_PASSWORD_FILE|MYSQL_ROOT_PASSWORD_FILE|JWT_SECRET_FILE|MAIL_PWD_FILE|SYSTEM_PWD_FILE)=' .env > .env.tmp || true
               mv .env.tmp .env
             fi
-            printf 'BACKEND_IMAGE=%s\n' "$TARGET_BACKEND_IMAGE" >> .env
+            cat >> .env <<EOF
+            BACKEND_IMAGE=$TARGET_BACKEND_IMAGE
+            MYSQL_PASSWORD_FILE=./docker/secrets/mysql_password.txt
+            MYSQL_ROOT_PASSWORD_FILE=./docker/secrets/mysql_root_password.txt
+            JWT_SECRET_FILE=./docker/secrets/jwt_secret.txt
+            MAIL_PWD_FILE=./docker/secrets/mail_pwd.txt
+            SYSTEM_PWD_FILE=./docker/secrets/system_pwd.txt
+            EOF
 
             # c) Download da imagem nova (latest e tag por commit).
             docker pull "$DOCKER_IMAGE:latest"
