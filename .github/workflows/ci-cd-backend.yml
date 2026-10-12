@@ -83,6 +83,16 @@ jobs:
       (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
 
     steps:
+      - name: Copy production Compose file to DigitalOcean
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DO_HOST }}
+          username: ${{ secrets.DO_USERNAME }}
+          key: ${{ secrets.DO_SSH_KEY }}
+          source: docker-compose.prod.yml
+          target: ${{ secrets.DO_PROJECT_DIR || '/opt/fichatecnica' }}
+          overwrite: true
+
       # Deploy remoto via SSH com restart do docker-compose de produção.
       - name: Deploy on DigitalOcean droplet via SSH
         uses: appleboy/ssh-action@v1.0.3
