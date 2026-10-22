@@ -184,9 +184,8 @@ jobs:
             # Captura imagem atual para rollback rapido em caso de erro de health-check.
             PREVIOUS_BACKEND_IMAGE="$(docker inspect -f '{{.Config.Image}}' ficha-backend 2>/dev/null || true)"
 
-            # d) Reinicia a aplicacao em producao.
-            $COMPOSE_CMD -f docker-compose.prod.yml down
-            $COMPOSE_CMD -f docker-compose.prod.yml up -d --no-build
+            # d) Atualiza backend e dependencias sem gerenciar o frontend.
+            $COMPOSE_CMD -f docker-compose.prod.yml up -d --no-build backend
 
             # Health-check pos-deploy com rollback automatico se backend nao subir saudavel.
             BACKEND_HEALTHY="false"
@@ -205,8 +204,7 @@ jobs:
                 grep -v '^BACKEND_IMAGE=' .env > .env.tmp || true
                 mv .env.tmp .env
                 printf 'BACKEND_IMAGE=%s\n' "$PREVIOUS_BACKEND_IMAGE" >> .env
-                $COMPOSE_CMD -f docker-compose.prod.yml down
-                $COMPOSE_CMD -f docker-compose.prod.yml up -d --no-build
+                $COMPOSE_CMD -f docker-compose.prod.yml up -d --no-build backend
                 echo "Rollback executado para: $PREVIOUS_BACKEND_IMAGE" >&2
               else
                 echo "Rollback nao executado: imagem anterior nao encontrada." >&2
