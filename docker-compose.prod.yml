@@ -2,8 +2,6 @@ name: ficha-tecnica-prod
 
 services:
   mysql:
-    ports:
-      - "127.0.0.1:3307:3306"
     image: mysql:8.4
     container_name: ficha-mysql
     command: --default-authentication-plugin=caching_sha2_password --mysql-native-password=OFF
@@ -24,9 +22,12 @@ services:
       start_period: 30s
     networks:
       - backend-internal
+      - edge
     secrets:
       - mysql_password
       - mysql_root_password
+    ports:
+      - "127.0.0.1:3307:3306"
 
   backend:
     build:
