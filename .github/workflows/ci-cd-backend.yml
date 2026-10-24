@@ -189,7 +189,8 @@ jobs:
 
             # Health-check pos-deploy com rollback automatico se backend nao subir saudavel.
             BACKEND_HEALTHY="false"
-            for i in $(seq 1 30); do
+            # Cobre o start_period e as tentativas do healthcheck do Compose, com margem.
+            for i in $(seq 1 48); do
               STATUS="$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}unknown{{end}}' ficha-backend 2>/dev/null || echo 'missing')"
               if [ "$STATUS" = "healthy" ]; then
                 BACKEND_HEALTHY="true"
@@ -199,7 +200,7 @@ jobs:
             done
 
             if [ "$BACKEND_HEALTHY" != "true" ]; then
-              echo "Erro: backend nao ficou saudavel com a imagem nova. Iniciando rollback..." >&2
+              echo "Erro: backend nao ficou saudavel com a imagem nova (status: $STATUS). Iniciando rollback..." >&2
               if [ -n "$PREVIOUS_BACKEND_IMAGE" ]; then
                 grep -v '^BACKEND_IMAGE=' .env > .env.tmp || true
                 mv .env.tmp .env
