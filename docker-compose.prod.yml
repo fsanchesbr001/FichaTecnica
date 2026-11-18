@@ -51,7 +51,7 @@ services:
       JWT_SECRET_FILE: /run/secrets/jwt_secret
       MAIL_PWD_FILE: /run/secrets/mail_pwd
       SYSTEM_PWD_FILE: /run/secrets/system_pwd
-      SITE_ORIGIN_ALLOWED: ${SITE_ORIGIN_ALLOWED:-https://your-frontend-domain}
+      SITE_ORIGIN_ALLOWED: ${SITE_ORIGIN_ALLOWED:-https://ollivander.fabriciosanches.com}
       DO_STORAGE_PATH: /var/lib/ficha-tecnica/imagens
       TZ: ${TIMEZONE:-America/Sao_Paulo}
     volumes:
@@ -72,6 +72,8 @@ services:
       - system_pwd
 
   frontend:
+    profiles:
+      - frontend
     build:
       context: ${FRONTEND_CONTEXT:-../FichaTecnicaUI}
       dockerfile: Dockerfile
@@ -81,8 +83,10 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+    environment:
+      BACKEND_API_URL: ${BACKEND_API_URL:-https://ollivander.backend.fabriciosanches.com}
     ports:
-      - "${FRONTEND_EXTERNAL_PORT:-80}:8080"
+      - "127.0.0.1:${FRONTEND_EXTERNAL_PORT:-8081}:80"
     networks:
       - edge
       - backend-internal

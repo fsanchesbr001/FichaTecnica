@@ -34,8 +34,51 @@ docker compose --env-file .env up --build -d
 ### Subir ambiente com perfil de produção
 
 ```bash
-docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up --build -d
+docker compose --env-file .env.prod -f docker-compose.prod.yml up --build -d
 ```
+
+O Compose de producao e independente; nao o sobreponha ao Compose de
+desenvolvimento, que publica outras portas e usa outro esquema de senhas.
+
+### Producao em Droplets separados
+
+O backend Ollivander permanece em `127.0.0.1:8080:8080`; nao precisa mudar
+para 8081 nem expor a porta 8080 publicamente. No Droplet `159.203.68.36`,
+um Nginx no host deve encaminhar
+`https://ollivander.backend.fabriciosanches.com` para
+`http://127.0.0.1:8080`, preservando o caminho `/auth/login`.
+A configuracao compartilhada com `backend.fabriciosanches.com`, o DNS,
+os certificados e o rollback estao em
+`deploy/README.shared-proxy.md` do repositorio `ContatosSite`.
+
+Defina `SITE_ORIGIN_ALLOWED=https://ollivander.fabriciosanches.com` no
+ambiente real de producao (`APP_ENV_FILE` no deploy, se utilizado). O valor
+padrao nao substitui um valor antigo explicitamente definido no `.env`.
+Essa origem e a do frontend, nao a da API: o Spring valida o header `Origin`
+mesmo quando a requisicao passa pelos proxies.
+
+O servico `frontend` agora e opcional, pelo profile `frontend`, para que
+o deploy do backend nao crie um frontend extra na porta publica 80 e
+dispute a entrada HTTP/ACME do Nginx compartilhado. O pipeline existente
+continua iniciando somente os servicos sem profile (MySQL e backend).
+Se houver necessidade de uma UI local explicita:
+
+```bash
+docker compose --env-file .env.prod -f docker-compose.prod.yml --profile frontend up -d
+```
+
+Nesse caso, a UI publica `127.0.0.1:8081:80`; isso nao substitui o frontend
+no outro Droplet nem configura automaticamente um proxy de entrada.
+
+Valide primeiro `curl -f http://127.0.0.1:8080/actuator/health` no host,
+depois o mesmo caminho pela origem HTTPS publica. Nao envie credenciais
+reais para diagnosticar conectividade.
+
+O merge em `master` inicia o deploy existente, que transfere o Compose
+aprovado para o diretorio configurado em `DO_PROJECT_DIR` antes de atualizar
+a imagem. Confira esse caminho e o `APP_ENV_FILE` antes do merge.
+Preserve uma copia do Compose e do `.env` com suas permissoes para rollback;
+nao execute `down -v`, pois isso removeria os dados.
 
 ### Ver logs do backend
 
