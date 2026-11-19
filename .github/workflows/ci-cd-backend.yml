@@ -213,5 +213,4 @@ jobs:
               exit 1
             fi
 
-            # e) Limpa imagens antigas.
-            docker image prune -a -f
+            # Preserve imagens anteriores para rollback manual apos o deploy.

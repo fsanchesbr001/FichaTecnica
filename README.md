@@ -34,8 +34,152 @@ docker compose --env-file .env up --build -d
 ### Subir ambiente com perfil de produção
 
 ```bash
-docker compose --env-file .env.prod -f docker-compose.yml -f docker-compose.prod.yml up --build -d
+docker compose --env-file .env.prod -f docker-compose.prod.yml up --build -d
 ```
+
+O Compose de producao e independente; nao o sobreponha ao Compose de
+desenvolvimento, que publica outras portas e usa outro esquema de senhas.
+
+### Producao em Droplets separados
+
+O backend Ollivander permanece em `127.0.0.1:8080:8080`; nao precisa mudar
+para 8081 nem expor a porta 8080 publicamente. No Droplet `159.203.68.36`,
+um Nginx no host deve encaminhar
+`https://ollivander.backend.fabriciosanches.com` para
+`http://127.0.0.1:8080`, preservando o caminho `/auth/login`.
+A configuracao compartilhada com `backend.fabriciosanches.com`, o DNS,
+os certificados e o rollback estao em
+`deploy/README.shared-proxy.md` do repositorio `ContatosSite`
+([PR #31](https://github.com/fsanchesbr001/ContatosSite/pull/31)).
+Essa migracao e um pre-requisito para a entrada HTTPS publica; este
+repositorio nao instala nem ativa o Nginx do host.
+
+O fluxo e: navegador -> `https://ollivander.fabriciosanches.com`
+(frontend/Nginx no outro Droplet) -> `https://ollivander.backend.fabriciosanches.com`
+(Nginx compartilhado em `159.203.68.36`) -> `http://127.0.0.1:8080`
+(backend). As portas publicas 80/443 do Droplet do backend pertencem ao
+Nginx/ACME; nao abra 8080 no firewall.
+
+Defina `SITE_ORIGIN_ALLOWED=https://ollivander.fabriciosanches.com` no
+ambiente real de producao (`APP_ENV_FILE` no deploy, se utilizado). O valor
+padrao nao substitui um valor antigo explicitamente definido no `.env`.
+Variaveis exportadas no shell prevalecem sobre o `.env`; `--env-file`
+seleciona outro arquivo em lugar do `.env` carregado automaticamente.
+`APP_ENV_FILE` e o conteudo completo do arquivo, nao seu caminho: quando
+preenchido no workflow, substitui o `.env` do servidor antes do deploy.
+Essa origem e a do frontend, nao a da API: o Spring valida o header `Origin`
+mesmo quando a requisicao passa pelos proxies.
+
+O servico `frontend` agora e opcional, pelo profile `frontend`, para que
+o deploy do backend nao crie um frontend extra na porta publica 80 e
+dispute a entrada HTTP/ACME do Nginx compartilhado. O pipeline existente
+continua iniciando somente os servicos sem profile (MySQL e backend).
+Um frontend antigo ja em execucao nao e parado por essa mudanca. Antes de
+transferir as portas publicas para o Nginx, pare somente essa UI legada no
+diretorio de producao:
+
+```bash
+docker compose -f docker-compose.prod.yml --profile frontend stop frontend
+```
+
+Se houver necessidade de uma UI local explicita:
+
+```bash
+docker compose --env-file .env.prod -f docker-compose.prod.yml --profile frontend up -d
+```
+
+Nesse caso, a UI publica `127.0.0.1:8081:80`; isso nao substitui o frontend
+no outro Droplet nem configura automaticamente um proxy de entrada.
+`FRONTEND_EXTERNAL_PORT` nao altera essa porta fixa. O upstream padrao e
+`https://ollivander.backend.fabriciosanches.com`; remova ou corrija um
+`BACKEND_API_URL` antigo se habilitar essa UI.
+
+#### Validacao antes e depois do deploy
+
+O merge em `master` inicia o deploy existente, que transfere o Compose
+aprovado para o diretorio configurado em `DO_PROJECT_DIR` antes de atualizar
+a imagem. O fallback de `DO_PROJECT_DIR` e `/opt/fichatecnica`. Confira esse
+caminho e o `APP_ENV_FILE` antes do merge. O deploy executa `up -d --no-build
+backend`, incluindo sua dependencia MySQL, sem iniciar a UI nem remover volumes.
+
+Na raiz do repositorio, estes comandos validam a configuracao sem iniciar
+containers (na ausencia de ambiente real, usam os defaults e segredos de exemplo):
+
+```bash
+docker compose -f docker-compose.prod.yml config --format json
+docker compose -f docker-compose.prod.yml --profile frontend config --format json
+git diff --check
+git status --short --branch
+```
+
+Sem profile, espere apenas `mysql` e `backend`; com `frontend`, espere tambem
+a UI com `profiles: ["frontend"]`. Confirme `host_ip: 127.0.0.1`, porta publicada
+8080/target 8080 para o backend e publicada 8081/target 80 para a UI.
+Confirme tambem a origem permitida, o upstream HTTPS e os volumes persistentes
+`mysql-data` e `app-images-data`. No servidor, repita a validacao com o `.env`
+efetivo; se operar manualmente com `.env.prod`, acrescente `--env-file .env.prod`.
+Nao publique o JSON do ambiente real, que pode conter valores sensiveis.
+
+Depois do deploy e da migracao do Nginx, execute no Droplet do backend:
+
+```bash
+docker compose -f docker-compose.prod.yml ps
+curl -fsS http://127.0.0.1:8080/actuator/health
+sudo nginx -t
+sudo ss -ltnp '( sport = :80 or sport = :443 or sport = :8080 or sport = :8081 )'
+curl -fsS https://ollivander.backend.fabriciosanches.com/actuator/health
+curl -fi -X OPTIONS https://ollivander.backend.fabriciosanches.com/auth/login \
+  -H 'Origin: https://ollivander.fabriciosanches.com' \
+  -H 'Access-Control-Request-Method: POST' \
+  -H 'Access-Control-Request-Headers: content-type'
+```
+
+Espere health `UP`, 8080 somente em loopback e o header
+`Access-Control-Allow-Origin: https://ollivander.fabriciosanches.com` no preflight.
+Valide tambem o frontend e seu login pelo navegador no outro Droplet.
+Nao envie credenciais reais para diagnosticar conectividade.
+
+#### Rollback seguro
+
+Antes do merge (o SCP do workflow sobrescreve o Compose), no servidor,
+salve a configuracao e a imagem atual em uma sessao administrativa:
+
+```bash
+cd "${DO_PROJECT_DIR:-/opt/fichatecnica}" || exit 1
+umask 077
+BACKUP_DIR="$(mktemp -d "$PWD/rollback.XXXXXXXX")"
+cp -p docker-compose.prod.yml .env "$BACKUP_DIR/"
+cp -a docker/secrets "$BACKUP_DIR/secrets"
+docker inspect -f '{{.Config.Image}}' ficha-backend > "$BACKUP_DIR/backend-image.txt"
+printf 'Backup para rollback: %s\n' "$BACKUP_DIR"
+```
+
+Interrompa o procedimento se algum comando falhar. Guarde o caminho exibido;
+o backup contem segredos e nao deve ser versionado. Preserve tambem backups
+consistentes do MySQL e das imagens da aplicacao antes de qualquer migracao
+de dados; restaurar configuracao nao reverte schema nem dados.
+
+Em caso de falha, suspenda novos deploys e restaure no mesmo diretorio
+(defina `BACKUP_DIR` com o caminho salvo se abriu outra sessao):
+
+```bash
+cp -p "$BACKUP_DIR/docker-compose.prod.yml" "$BACKUP_DIR/.env" .
+cp -a "$BACKUP_DIR/secrets/." docker/secrets/
+docker compose -f docker-compose.prod.yml config --quiet
+BACKEND_IMAGE="$(cat "$BACKUP_DIR/backend-image.txt")" \
+  docker compose -f docker-compose.prod.yml up -d --no-build backend
+curl -fsS http://127.0.0.1:8080/actuator/health
+```
+
+Repita as validacoes de health/HTTPS acima apos a estabilizacao. O workflow
+reverte automaticamente apenas a imagem se o healthcheck falhar; ele nao
+restaura Compose, `.env`, segredos, Nginx ou dados. As imagens anteriores nao
+sao mais apagadas automaticamente; planeje sua retencao monitorando o disco.
+Antes de reativar a pipeline, corrija tambem `APP_ENV_FILE` se ele for a causa.
+Nao execute `down -v`, `docker volume prune` nem remova `mysql-data` ou
+`app-images-data`. Nao execute um `up` geral do Compose antigo: ele pode iniciar
+uma UI na porta publica 80. Para reverter a entrada HTTPS compartilhada,
+siga separadamente o runbook do `ContatosSite#31`.
 
 ### Ver logs do backend
 
