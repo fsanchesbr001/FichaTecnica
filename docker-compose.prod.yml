@@ -86,7 +86,7 @@ services:
     environment:
       BACKEND_API_URL: ${BACKEND_API_URL:-https://ollivander.backend.fabriciosanches.com}
     ports:
-      - "127.0.0.1:${FRONTEND_EXTERNAL_PORT:-8081}:80"
+      - "127.0.0.1:8081:80"
     networks:
       - edge
       - backend-internal
