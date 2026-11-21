@@ -123,6 +123,11 @@ public class UsuarioController {
     @PostMapping("/excluir-usuario")
     @Transactional
     @Operation(summary = "Exclui usuário", description = "Remove um usuário do sistema pelo e-mail informado.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Usuário excluído"),
+            @ApiResponse(responseCode = "400", description = "Usuário inválido ou não encontrado"),
+            @ApiResponse(responseCode = "409", description = "Usuário bloqueado por outra transação; tente novamente")
+    })
     public ResponseEntity<?> excluirUsuario(@RequestBody BloqueiosRequestDTO dados) {
         try {
             excluirUsuarioPort.excluirUsuario(dados.email());

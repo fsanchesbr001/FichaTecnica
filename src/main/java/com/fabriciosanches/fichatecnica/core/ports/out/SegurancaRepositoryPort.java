@@ -8,6 +8,8 @@ import java.util.Optional;
 public interface SegurancaRepositoryPort {
     Optional<Seguranca> buscarPorEmail(String email);
 
+    Optional<Seguranca> buscarPorEmailParaAtualizacao(String email);
+
     String buscarCpfPorEmail(String email);
 
     Seguranca salvar(Seguranca seguranca);

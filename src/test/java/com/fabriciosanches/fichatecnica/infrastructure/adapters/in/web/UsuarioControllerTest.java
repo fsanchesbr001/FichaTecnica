@@ -13,7 +13,13 @@ import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.http.MediaType;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
+import org.springframework.transaction.interceptor.TransactionInterceptor;
+import org.springframework.transaction.support.SimpleTransactionStatus;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -22,8 +28,11 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doThrow;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -37,6 +46,7 @@ class UsuarioControllerTest {
     private AtualizarUsuarioPort atualizarUsuarioPort;
     private BuscarUsuarioPort buscarUsuarioPort;
     private ControleAcessoPort controleAcessoPort;
+    private UsuarioController controller;
 
     @BeforeEach
     void setUp() {
@@ -48,7 +58,7 @@ class UsuarioControllerTest {
         buscarUsuarioPort = Mockito.mock(BuscarUsuarioPort.class);
         controleAcessoPort = Mockito.mock(ControleAcessoPort.class);
 
-        UsuarioController controller = new UsuarioController(
+        controller = new UsuarioController(
                 criarUsuarioPort,
                 excluirUsuarioPort,
                 primeiroAcessoPort,
@@ -57,7 +67,8 @@ class UsuarioControllerTest {
                 buscarUsuarioPort,
                 controleAcessoPort
         );
-        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(controller)
+                .setControllerAdvice(new DatabaseConcurrencyExceptionHandler()).build();
     }
 
     @Test
@@ -147,6 +158,46 @@ class UsuarioControllerTest {
                                 }
                                 """))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void excluirUsuario_DeveRetornarOkSemConflito() throws Exception {
+        mockMvc.perform(post("/ficha-tecnica/usuarios/excluir-usuario")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"user@email.com\"}"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void excluirUsuario_DeveRetornarConflitoSemExporSql() throws Exception {
+        doThrow(new PessimisticLockingFailureException("SQL com secret-value"))
+                .when(excluirUsuarioPort).excluirUsuario("user@email.com");
+
+        var response = mockMvc.perform(post("/ficha-tecnica/usuarios/excluir-usuario")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"user@email.com\"}"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("DATABASE_CONFLICT"))
+                .andExpect(jsonPath("$.detail").exists()).andReturn();
+
+        assertThat(response.getResponse().getContentAsString()).doesNotContain("secret-value");
+    }
+
+    @Test
+    void conflitoNoCommitTambemDeveRetornar409() throws Exception {
+        var manager = Mockito.mock(PlatformTransactionManager.class);
+        when(manager.getTransaction(any())).thenReturn(new SimpleTransactionStatus());
+        doThrow(new PessimisticLockingFailureException("Lock timeout no commit")).when(manager).commit(any());
+        var proxy = new ProxyFactory(controller);
+        proxy.addAdvice(new TransactionInterceptor(manager, new AnnotationTransactionAttributeSource()));
+        mockMvc = MockMvcBuilders.standaloneSetup(proxy.getProxy())
+                .setControllerAdvice(new DatabaseConcurrencyExceptionHandler()).build();
+
+        mockMvc.perform(post("/ficha-tecnica/usuarios/excluir-usuario")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\":\"user@email.com\"}"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("DATABASE_CONFLICT"));
     }
 }
 

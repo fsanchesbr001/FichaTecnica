@@ -103,6 +103,32 @@ a Zoho. Nao recrie o mesmo login nem tente recuperar a senha do hash.
 
 ## Docker (Backend + MySQL + Observabilidade)
 
+### Conflitos de escrita no MySQL
+
+A exclusao de usuario bloqueia `usuarios` e `seguranca` com `FOR UPDATE NOWAIT`
+na mesma transacao. Se outro processo estiver alterando um desses registros,
+a API responde HTTP 409 (`code: DATABASE_CONFLICT`) sem aguardar o timeout de
+50 segundos do MySQL. O rollback preserva os dois registros. Conflitos
+detectados no commit tambem recebem essa resposta, sem expor SQL ao cliente.
+A migracao `V004__Indexar-login-email.sql` adiciona indices nao unicos para
+esses lookups, evitando varreduras com locks em usuarios nao envolvidos.
+
+Para as demais esperas de locks, cada conexao do pool recebe
+`innodb_lock_wait_timeout=5` e `lock_wait_timeout=5` (locks de metadados);
+ajuste com `DB_LOCK_WAIT_SECONDS` se necessario.
+Isso nao altera a configuracao global nem as conexoes do Contatos. Leituras
+fora de transacao usam auto-commit; as operacoes `@Transactional`, incluindo
+a outbox, continuam atomicas. As configuracoes entram em vigor apos reiniciar
+o backend com a nova imagem.
+
+Um conflito persistente requer identificar a transacao que segura o registro
+e concluir seu commit/rollback, inclusive em clientes SQL administrativos.
+Conclua transacoes administrativas abertas antes do deploy da migracao de
+indices para que elas nao bloqueiem a alteracao de schema.
+Nao encerre sessoes indiscriminadamente. Os logs do incidente de exclusao
+registraram erro MySQL 1205 (`Lock wait timeout exceeded`), mas o bloqueador
+nao estava mais ativo na investigacao.
+
 Arquivos adicionados na raiz do projeto:
 - `Dockerfile`
 - `docker-compose.yml`
@@ -455,3 +481,4 @@ sum(rate(http_server_requests_seconds_count{uri=~"/ficha-tecnica/unidades-medida
 - 11/10/2026 - Versão 2.1.5 - Preparando CI/CD para deploy em produção.
 - 24/10/2026 - Versão 2.1.6 - Mapeando porta do banco para exposição no docker.
 - 21/11/2026 - Versão 2.2.0 - Atualização de dependências e melhorias gerais.
+- 21/11/2026 - Versão 2.2.1 - Correção de locks de banco e melhorias de performance.

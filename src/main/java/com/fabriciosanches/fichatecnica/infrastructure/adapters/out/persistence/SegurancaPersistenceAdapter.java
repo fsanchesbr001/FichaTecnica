@@ -22,6 +22,11 @@ public class SegurancaPersistenceAdapter implements SegurancaRepositoryPort {
     }
 
     @Override
+    public Optional<Seguranca> buscarPorEmailParaAtualizacao(String email) {
+        return repository.findForUpdateByEmail(email).map(this::toDomain);
+    }
+
+    @Override
     public String buscarCpfPorEmail(String email) {
         return repository.findCPFByEmail(email);
     }
