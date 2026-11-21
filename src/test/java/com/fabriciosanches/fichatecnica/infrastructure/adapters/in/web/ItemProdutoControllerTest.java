@@ -18,9 +18,11 @@ import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ItemP
 import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ProdutoCompletoDTO;
 import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ProdutosPorItemDTO;
 import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.QuantidadeValorDTO;
+import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -30,6 +32,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -65,7 +68,8 @@ class ItemProdutoControllerTest {
                 removerItemDoProdutoPort,
                 atualizarQuantidadeItemDoProdutoPort,
                 gerarGraficoPizzaProdutoPort);
-        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(controller)
+                .setControllerAdvice(new DatabaseConcurrencyExceptionHandler()).build();
     }
 
     @Test
@@ -117,6 +121,25 @@ class ItemProdutoControllerTest {
     void deletarItemProduto_DeveRetornarNoContent() throws Exception {
         mockMvc.perform(delete("/ficha-tecnica/produtos/{idProduto}/itens/{idItem}", 1L, 2L))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void deletarItemProduto_DeveRetornarBadRequestParaAssociacaoInexistente() throws Exception {
+        doThrow(new FichaTecnicaException("ItemProduto nao encontrado"))
+                .when(removerItemDoProdutoPort).remover(1L, 2L);
+
+        mockMvc.perform(delete("/ficha-tecnica/produtos/{idProduto}/itens/{idItem}", 1L, 2L))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void deletarItemProduto_DeveRetornarConflictParaLockDeBanco() throws Exception {
+        doThrow(new CannotAcquireLockException("Registro bloqueado"))
+                .when(removerItemDoProdutoPort).remover(1L, 2L);
+
+        mockMvc.perform(delete("/ficha-tecnica/produtos/{idProduto}/itens/{idItem}", 1L, 2L))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("DATABASE_CONFLICT"));
     }
 
     @Test

@@ -156,8 +156,9 @@ public class ItensProdutoUseCase implements AdicionarItemAoProdutoPort, ListarIt
     public void remover(Long idProduto, Long idItem) {
         ItemProduto itemProduto = itemProdutoRepositoryPort.buscarPorProdutoIdEItemId(idProduto, idItem)
                 .orElseThrow(() -> new FichaTecnicaException("ItemProduto não encontrado para o produto e item especificados"));
+        Produto produto = getProduto(idProduto);
         itemProdutoRepositoryPort.deletarPorProdutoIdEItemId(idProduto, idItem);
-        atualizarValorItensProduto(getProduto(idProduto));
+        atualizarValorItensProduto(produto);
     }
 
     @Override

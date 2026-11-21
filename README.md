@@ -152,6 +152,12 @@ exclui-la, utilize `DELETE /ficha-tecnica/produtos/{id}/imagem`.
 
 ### Conflitos de escrita no MySQL
 
+A exclusao de um ingrediente do produto executa a remocao da associacao e o
+recalculo de `valor_itens` na mesma transacao. Se a atualizacao do custo falhar,
+a associacao e preservada pelo rollback. Somente erros de negocio retornam
+HTTP 400; conflitos de banco retornam 409 e erros internos nao sao mascarados
+como dados invalidos. Isso nao exclui o item do catalogo nem de outros pratos.
+
 A exclusao de usuario bloqueia `usuarios` e `seguranca` com `FOR UPDATE NOWAIT`
 na mesma transacao. Se outro processo estiver alterando um desses registros,
 a API responde HTTP 409 (`code: DATABASE_CONFLICT`) sem aguardar o timeout de
@@ -531,3 +537,4 @@ sum(rate(http_server_requests_seconds_count{uri=~"/ficha-tecnica/unidades-medida
 - 21/11/2026 - Versão 2.2.1 - Correção de locks de banco e melhorias de performance.
 - 21/11/2026 - Versão 2.2.2 - Correção de bugs de permissão de impressão.
 - 21/11/2026 - Versão 2.2.3 - Correção na exibição da imagem dos produtos.
+- 21/11/2026 - Versão 2.2.4 - Correção de exclusao de item em Produtos.
