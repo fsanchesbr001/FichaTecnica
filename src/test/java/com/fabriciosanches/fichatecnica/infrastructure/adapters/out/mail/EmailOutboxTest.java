@@ -12,6 +12,8 @@ import com.fabriciosanches.fichatecnica.infrastructure.adapters.out.persistence.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -19,6 +21,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.transaction.IllegalTransactionStateException;
@@ -31,6 +34,7 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 import javax.sql.DataSource;
 import java.time.LocalDateTime;
+import java.time.Duration;
 import java.time.ZoneOffset;
 import java.util.Map;
 
@@ -42,6 +46,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
 
 @DataJpaTest(properties = {
         "spring.flyway.enabled=false",
@@ -73,6 +78,10 @@ class EmailOutboxTest {
         jdbc.execute("SET MODE MySQL");
         jdbc.execute("DROP TABLE IF EXISTS email_outbox");
         new ResourceDatabasePopulator(new ClassPathResource("db/migration/V003__Criar-email-outbox.sql"))
+                .execute(dataSource);
+        jdbc.execute("DROP INDEX IF EXISTS idx_usuarios_login");
+        jdbc.execute("DROP INDEX IF EXISTS idx_seguranca_email");
+        new ResourceDatabasePopulator(new ClassPathResource("db/migration/V004__Indexar-login-email.sql"))
                 .execute(dataSource);
         // Match the existing Flyway schema, where these credential fields are nullable.
         jdbc.execute("ALTER TABLE seguranca ALTER COLUMN token_seguranca DROP NOT NULL");
@@ -200,6 +209,64 @@ class EmailOutboxTest {
             assertThat(store.claim(LocalDateTime.now(ZoneOffset.UTC))).isEmpty();
         });
         assertThat(store.claim(LocalDateTime.now(ZoneOffset.UTC))).isPresent();
+    }
+
+    @Test
+    void exclusaoSemConflitoRemoveUsuarioESeguranca() {
+        register();
+
+        transaction.executeWithoutResult(tx -> useCase.excluirUsuario("new@example.com"));
+
+        assertThat(count("usuarios")).isZero();
+        assertThat(count("seguranca")).isZero();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"usuarios", "seguranca"})
+    void exclusaoConcorrenteFalhaRapidoESemExcluirParcialmente(String table) throws Exception {
+        register();
+        try (var blocker = dataSource.getConnection()) {
+            blocker.setAutoCommit(false);
+            String column = table.equals("usuarios") ? "login" : "email";
+            try (var statement = blocker.prepareStatement("SELECT * FROM " + table + " WHERE " + column + " = ? FOR UPDATE")) {
+                statement.setString(1, "new@example.com");
+                try (var result = statement.executeQuery()) {
+                    assertThat(result.next()).isTrue();
+                }
+            }
+
+            assertTimeout(Duration.ofSeconds(3), () ->
+                    assertThatThrownBy(() -> transaction.executeWithoutResult(tx -> {
+                        jdbc.execute("SET LOCK_TIMEOUT 10000");
+                        useCase.excluirUsuario("new@example.com");
+                    })).isInstanceOf(ConcurrencyFailureException.class));
+
+            assertThat(count("usuarios")).isEqualTo(1);
+            assertThat(count("seguranca")).isEqualTo(1);
+            assertThat(status()).isEqualTo("PENDING");
+            blocker.rollback();
+        }
+        transaction.executeWithoutResult(tx -> useCase.excluirUsuario("new@example.com"));
+        assertThat(count("usuarios")).isZero();
+        assertThat(count("seguranca")).isZero();
+    }
+
+    @Test
+    void primeiroAcessoContinuaAtomicoAposIntroduzirLocks() {
+        register();
+
+        transaction.executeWithoutResult(tx -> {
+            try {
+                useCase.primeiroAcesso("new@example.com");
+            } catch (jakarta.mail.MessagingException e) {
+                throw new IllegalStateException(e);
+            }
+        });
+
+        assertThat(count("usuarios")).isEqualTo(1);
+        assertThat(count("seguranca")).isEqualTo(1);
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM email_outbox WHERE status = 'PENDING'", Integer.class))
+                .isEqualTo(1);
     }
 
     private void register() {

@@ -74,11 +74,12 @@ public class UsuarioUseCase implements CriarUsuarioPort, BuscarUsuarioPort, Atua
 
     @Override
     public void excluirUsuario(String email) {
-        Usuario usuario = usuarioRepositoryPort.buscarPorLogin(email)
+        Usuario usuario = usuarioRepositoryPort.buscarPorLoginParaAtualizacao(email)
                 .orElseThrow(() -> new FichaTecnicaException("Usuário não encontrado"));
         validarUsuarioAdministravel(usuario);
 
-        Seguranca seguranca = buscarSegurancaOuFalhar(email);
+        Seguranca seguranca = segurancaRepositoryPort.buscarPorEmailParaAtualizacao(email)
+                .orElseThrow(() -> new FichaTecnicaException(Constants.MSG_DADOS_SEGURANCA_NAO_ENCONTRADOS));
         segurancaRepositoryPort.deletar(seguranca);
         usuarioRepositoryPort.deletar(usuario);
     }

@@ -48,6 +48,7 @@ services:
       DB_NAME: ${MYSQL_DATABASE:-FichaTecnica}
       DB_USER: ${MYSQL_USER:-fichatecnica}
       DB_PWD_FILE: /run/secrets/mysql_password
+      DB_LOCK_WAIT_SECONDS: ${DB_LOCK_WAIT_SECONDS:-5}
       JWT_SECRET_FILE: /run/secrets/jwt_secret
       MAIL_PWD_FILE: /run/secrets/mail_pwd
       MAIL_PROVIDER: ${MAIL_PROVIDER:-zoho}

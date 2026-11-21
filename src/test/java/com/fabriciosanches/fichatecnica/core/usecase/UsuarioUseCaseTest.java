@@ -23,6 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
+import static org.mockito.ArgumentMatchers.any;
 
 @ExtendWith(MockitoExtension.class)
 class UsuarioUseCaseTest {
@@ -99,6 +102,19 @@ class UsuarioUseCaseTest {
 
     @Test
     void excluirUsuario_DeveFalharSemSeguranca() {
+        when(usuarioRepositoryPort.buscarPorLoginParaAtualizacao("user@email.com")).thenReturn(Optional.of(usuario));
         assertThrows(FichaTecnicaException.class, () -> useCase.excluirUsuario("user@email.com"));
+        verify(usuarioRepositoryPort, never()).deletar(any());
+    }
+
+    @Test
+    void excluirUsuario_DevePreservarUsuarioSystem() {
+        usuario.setRole(UserRole.SYSTEM);
+        when(usuarioRepositoryPort.buscarPorLoginParaAtualizacao("user@email.com")).thenReturn(Optional.of(usuario));
+
+        assertThrows(FichaTecnicaException.class, () -> useCase.excluirUsuario("user@email.com"));
+
+        verify(usuarioRepositoryPort, never()).deletar(any());
+        verify(segurancaRepositoryPort, never()).deletar(any());
     }
 }

@@ -7,6 +7,8 @@ import java.util.Optional;
 public interface UsuarioRepositoryPort {
     Optional<Usuario> buscarPorLogin(String login);
 
+    Optional<Usuario> buscarPorLoginParaAtualizacao(String login);
+
     Usuario salvar(Usuario usuario);
 
     void deletar(Usuario usuario);

@@ -21,6 +21,11 @@ public class UsuarioPersistenceAdapter implements UsuarioRepositoryPort {
     }
 
     @Override
+    public Optional<Usuario> buscarPorLoginParaAtualizacao(String login) {
+        return repository.findForUpdateByLogin(login).map(this::toDomain);
+    }
+
+    @Override
     public Usuario salvar(Usuario usuario) {
         UsuarioEntity salvo = repository.save(toEntity(usuario));
         return toDomain(salvo);
