@@ -50,6 +50,14 @@ services:
       DB_PWD_FILE: /run/secrets/mysql_password
       JWT_SECRET_FILE: /run/secrets/jwt_secret
       MAIL_PWD_FILE: /run/secrets/mail_pwd
+      MAIL_PROVIDER: ${MAIL_PROVIDER:-zoho}
+      MAIL_FROM: ${MAIL_FROM:-contato@fabriciosanches.com}
+      ZOHO_CLIENT_ID_FILE: /run/secrets/zoho_client_id
+      ZOHO_CLIENT_SECRET_FILE: /run/secrets/zoho_client_secret
+      ZOHO_REFRESH_TOKEN_FILE: /run/secrets/zoho_refresh_token
+      ZOHO_ACCOUNT_ID: ${ZOHO_ACCOUNT_ID:-}
+      OUTBOX_ENCRYPTION_KEY_FILE: /run/secrets/outbox_encryption_key
+      MAIL_OUTBOX_WORKER_ENABLED: ${MAIL_OUTBOX_WORKER_ENABLED:-true}
       SYSTEM_PWD_FILE: /run/secrets/system_pwd
       SITE_ORIGIN_ALLOWED: ${SITE_ORIGIN_ALLOWED:-https://ollivander.fabriciosanches.com}
       DO_STORAGE_PATH: /var/lib/ficha-tecnica/imagens
@@ -70,6 +78,10 @@ services:
       - jwt_secret
       - mail_pwd
       - system_pwd
+      - zoho_client_id
+      - zoho_client_secret
+      - zoho_refresh_token
+      - outbox_encryption_key
 
   frontend:
     profiles:
@@ -113,3 +125,11 @@ secrets:
     file: ${MAIL_PWD_FILE:-./docker/secrets/mail_pwd.txt.example}
   system_pwd:
     file: ${SYSTEM_PWD_FILE:-./docker/secrets/system_pwd.txt.example}
+  zoho_client_id:
+    file: ${ZOHO_CLIENT_ID_FILE:-./docker/secrets/zoho_client_id.txt}
+  zoho_client_secret:
+    file: ${ZOHO_CLIENT_SECRET_FILE:-./docker/secrets/zoho_client_secret.txt}
+  zoho_refresh_token:
+    file: ${ZOHO_REFRESH_TOKEN_FILE:-./docker/secrets/zoho_refresh_token.txt}
+  outbox_encryption_key:
+    file: ${OUTBOX_ENCRYPTION_KEY_FILE:-./docker/secrets/outbox_encryption_key.txt}

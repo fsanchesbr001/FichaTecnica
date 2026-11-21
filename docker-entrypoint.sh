@@ -33,6 +33,10 @@ file_env DB_PWD
 file_env JWT_SECRET
 file_env MAIL_PWD
 file_env SYSTEM_PWD
+file_env ZOHO_CLIENT_ID
+file_env ZOHO_CLIENT_SECRET
+file_env ZOHO_REFRESH_TOKEN
+file_env OUTBOX_ENCRYPTION_KEY
 
 exec java -jar /app/app.jar
 

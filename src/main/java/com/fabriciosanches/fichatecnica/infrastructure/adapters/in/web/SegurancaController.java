@@ -98,9 +98,9 @@ public class SegurancaController {
     @PreAuthorize("hasAnyRole('SYSTEM', 'ADMIN')")
     @PostMapping("/enviar-email-seguranca")
     @Transactional
-    @Operation(summary = "Envia e-mail de segurança", description = "Dispara um e-mail para validação do fluxo de recuperação de senha.")
+    @Operation(summary = "Enfileira e-mail de segurança", description = "Grava o e-mail na outbox junto com o token; o envio ocorre em segundo plano.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "E-mail enviado com sucesso"),
+            @ApiResponse(responseCode = "200", description = "E-mail enfileirado com sucesso"),
             @ApiResponse(responseCode = "400", description = "Dados inválidos para envio"),
             @ApiResponse(responseCode = "500", description = "Erro inesperado ao enviar o e-mail")
     })
@@ -118,9 +118,9 @@ public class SegurancaController {
     @PreAuthorize("hasAnyRole('SYSTEM', 'ADMIN')")
     @PostMapping("/enviar-email-primeiro-acesso")
     @Transactional
-    @Operation(summary = "Envia e-mail de primeiro acesso", description = "Envia um e-mail com instruções para o primeiro acesso do usuário.")
+    @Operation(summary = "Enfileira e-mail de primeiro acesso", description = "Grava na outbox um e-mail com instruções para o primeiro acesso.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "E-mail enviado com sucesso"),
+            @ApiResponse(responseCode = "200", description = "E-mail enfileirado com sucesso"),
             @ApiResponse(responseCode = "400", description = "Dados inválidos para envio"),
             @ApiResponse(responseCode = "500", description = "Erro inesperado ao enviar o e-mail")
     })

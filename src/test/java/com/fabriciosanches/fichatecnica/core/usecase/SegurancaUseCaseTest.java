@@ -67,7 +67,8 @@ class SegurancaUseCaseTest {
 
         assertEquals("user@email.com", response.email());
         assertTrue(response.tokenSeguranca().length() == 8);
-        verify(enviarEmailPort).enviarComTemplate(eq("user@email.com"), eq(Constants.SUBJECT_EMAIL_RECUPERACAO_SENHA), eq("trocasenha"), any());
+        verify(enviarEmailPort).enviarComTemplate(eq("user@email.com"), eq(Constants.SUBJECT_EMAIL_RECUPERACAO_SENHA),
+                eq("trocasenha"), any(), eq(seguranca.getDataExpiracaoToken()));
     }
 
     @Test

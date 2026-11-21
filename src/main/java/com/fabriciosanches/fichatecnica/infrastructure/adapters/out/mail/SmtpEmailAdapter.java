@@ -1,70 +1,38 @@
 package com.fabriciosanches.fichatecnica.infrastructure.adapters.out.mail;
 
-import com.fabriciosanches.fichatecnica.core.ports.out.EnviarEmailPort;
-import jakarta.mail.internet.MimeMessage;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.core.env.Environment;
+import com.fabriciosanches.fichatecnica.core.domain.MensagemEmail;
+import com.fabriciosanches.fichatecnica.core.ports.out.EntregarEmailPort;
+import jakarta.mail.MessagingException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
-import org.thymeleaf.context.Context;
-import org.thymeleaf.spring6.SpringTemplateEngine;
-
-import java.util.Map;
-import java.util.Objects;
 
 @Component
-public class SmtpEmailAdapter implements EnviarEmailPort {
+@ConditionalOnProperty(name = "ficha-tecnica.mail.provider", havingValue = "smtp", matchIfMissing = true)
+public class SmtpEmailAdapter implements EntregarEmailPort {
 
-    private static final Logger logger = LogManager.getLogger(SmtpEmailAdapter.class);
-
-    private final Environment environment;
     private final JavaMailSender mailSender;
-    private final SpringTemplateEngine templateEngine;
+    private final String from;
 
-    public SmtpEmailAdapter(JavaMailSender mailSender, Environment environment, SpringTemplateEngine templateEngine) {
+    public SmtpEmailAdapter(JavaMailSender mailSender, @Value("${ficha-tecnica.mail.from}") String from) {
         this.mailSender = mailSender;
-        this.environment = environment;
-        this.templateEngine = templateEngine;
+        this.from = from;
     }
 
     @Override
-    public void enviar(String destinatario, String assunto, String corpoTexto) {
+    public void entregar(MensagemEmail mensagem) {
         try {
-            MimeMessage mimeMessage = this.mailSender.createMimeMessage();
-            MimeMessageHelper email = new MimeMessageHelper(mimeMessage, false, "UTF-8");
-            email.setTo(destinatario);
-            email.setSubject(assunto);
-            email.setFrom(Objects.requireNonNull(environment.getProperty("ficha-tecnica.mail.from")));
-            email.setText(corpoTexto, false);
+            var mimeMessage = mailSender.createMimeMessage();
+            var email = new MimeMessageHelper(mimeMessage, mensagem.html(), "UTF-8");
+            email.setTo(mensagem.destinatario());
+            email.setSubject(mensagem.assunto());
+            email.setFrom(from);
+            email.setText(mensagem.conteudo(), mensagem.html());
             mailSender.send(mimeMessage);
-        } catch (Exception e) {
-            logger.error("Erro ao enviar email para {}", destinatario, e);
-        }
-    }
-
-    @Override
-    public void enviarComTemplate(String destinatario, String assunto, String nomeTemplate, Map<String, Object> variaveis) {
-        try {
-            Context context = new Context();
-            if (variaveis != null) {
-                variaveis.forEach(context::setVariable);
-            }
-            String corpoHtml = templateEngine.process(nomeTemplate, context);
-            
-            MimeMessage mimeMessage = this.mailSender.createMimeMessage();
-            MimeMessageHelper email = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-            email.setTo(destinatario);
-            email.setSubject(assunto);
-            email.setFrom(Objects.requireNonNull(environment.getProperty("ficha-tecnica.mail.from")));
-            email.setText(corpoHtml, true);
-            mailSender.send(mimeMessage);
-            logger.info("Email enviado com sucesso para {} usando template {}", destinatario, nomeTemplate);
-        } catch (Exception e) {
-            logger.error("Erro ao enviar email com template para {}", destinatario, e);
+        } catch (MessagingException e) {
+            throw new IllegalStateException("Falha ao preparar email SMTP", e);
         }
     }
 }
-
-

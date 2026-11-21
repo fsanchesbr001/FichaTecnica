@@ -67,7 +67,8 @@ public class SegurancaUseCase implements RecuperacaoSenhaPort, ControleAcessoPor
         variaveis.put("validadeToken", dataExpiracaoTokenFormatada);
 
         // Enviar email usando template Thymeleaf
-        enviarEmailPort.enviarComTemplate(segurancaDTO.email(), Constants.SUBJECT_EMAIL_RECUPERACAO_SENHA, "trocasenha", variaveis);
+        enviarEmailPort.enviarComTemplate(segurancaDTO.email(), Constants.SUBJECT_EMAIL_RECUPERACAO_SENHA,
+                "trocasenha", variaveis, seguranca.getDataExpiracaoToken());
 
         return new EnviarEmailSegurancaResponseDTO(segurancaDTO, dataExpiracaoTokenFormatada);
     }
@@ -80,7 +81,11 @@ public class SegurancaUseCase implements RecuperacaoSenhaPort, ControleAcessoPor
         variaveis.put("senha", dados.senhaAleatoria());
 
         // Enviar email usando template Thymeleaf
-        enviarEmailPort.enviarComTemplate(dados.email(), Constants.SUBJECT_EMAIL_PRIMEIRO_ACESSO, "primeiroacesso", variaveis);
+        LocalDateTime expiraEm = segurancaRepositoryPort.buscarPorEmail(dados.email())
+                .map(Seguranca::getDataExpiracaoSenha)
+                .orElseThrow(() -> new FichaTecnicaException(Constants.MSG_DADOS_SEGURANCA_NAO_ENCONTRADOS));
+        enviarEmailPort.enviarComTemplate(dados.email(), Constants.SUBJECT_EMAIL_PRIMEIRO_ACESSO,
+                "primeiroacesso", variaveis, expiraEm);
     }
 
     @Override

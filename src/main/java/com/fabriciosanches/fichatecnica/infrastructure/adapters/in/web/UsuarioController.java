@@ -103,7 +103,7 @@ public class UsuarioController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/registrar-usuario")
     @Transactional
-    @Operation(summary = "Registra usuário", description = "Cria um novo usuário no sistema.")
+    @Operation(summary = "Registra usuário", description = "Cria o usuario e grava o e-mail na outbox na mesma transacao. O envio ocorre em segundo plano.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Usuário registrado com sucesso"),
             @ApiResponse(responseCode = "400", description = "Dados inválidos para registro")
