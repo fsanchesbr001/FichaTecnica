@@ -29,6 +29,22 @@ services:
     ports:
       - "127.0.0.1:3307:3306"
 
+  image-permissions:
+    image: ${BACKEND_IMAGE:-ghcr.io/your-org/ficha-tecnica-backend:latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    user: "0:0"
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - |
+        chown -R 100:101 /images
+        chmod 755 /images
+    restart: "no"
+    network_mode: none
+    volumes:
+      - app-images-data:/images
+
   backend:
     ports:
       - "127.0.0.1:8080:8080"
@@ -41,6 +57,9 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      image-permissions:
+        condition: service_completed_successfully
+        required: false
     environment:
       APP_PROFILE: production
       DB_IP: mysql

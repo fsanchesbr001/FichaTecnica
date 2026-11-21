@@ -5,6 +5,7 @@ import com.fabriciosanches.fichatecnica.core.ports.in.IniciarUploadImagemProduto
 import com.fabriciosanches.fichatecnica.core.ports.in.ListarJobsUploadImagemProdutoPort;
 import com.fabriciosanches.fichatecnica.core.ports.in.RemoverImagemProdutoPort;
 import com.fabriciosanches.fichatecnica.core.domain.ArquivoUpload;
+import com.fabriciosanches.fichatecnica.core.domain.enums.UploadJobStatus;
 import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.UploadJobDTO;
 import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -54,7 +55,7 @@ public class ProdutoImagemController {
         this.listarJobsUploadImagemProdutoPort = listarJobsUploadImagemProdutoPort;
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @PostMapping(value = "/{id}/imagem/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Inicia upload de imagem", description = "Inicia o upload assíncrono da imagem de um produto e retorna o job de processamento.")
     @ApiResponses({
@@ -71,6 +72,10 @@ public class ProdutoImagemController {
         try {
             ArquivoUpload arquivo = new ArquivoUpload(file.getOriginalFilename(), file.getContentType(), file.getBytes());
             UploadJobDTO job = iniciarUploadImagemProdutoPort.iniciar(id, arquivo);
+            if (job.status() == UploadJobStatus.ERROR) {
+                logger.error("[ProdutoImagemController] Upload falhou no job {} para produto id={}", job.jobId(), id);
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(job);
+            }
             logger.info("[ProdutoImagemController] Job {} registrado para produto id={}", job.jobId(), id);
             return ResponseEntity.accepted().body(job);
         } catch (FichaTecnicaException e) {
@@ -83,7 +88,7 @@ public class ProdutoImagemController {
         }
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping("/{id}/imagem/status/{jobId}")
     @Operation(summary = "Consulta status do upload", description = "Verifica o andamento de um job de upload de imagem.")
     @ApiResponses({
@@ -114,7 +119,7 @@ public class ProdutoImagemController {
         }
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @DeleteMapping("/{id}/imagem")
     @Operation(summary = "Remove imagem do produto", description = "Apaga a imagem vinculada ao produto e limpa o registro no banco.")
     @ApiResponses({

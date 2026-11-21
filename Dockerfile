@@ -16,7 +16,7 @@ RUN --mount=type=cache,target=/root/.m2 \
 FROM eclipse-temurin:17-jre-alpine AS runtime
 WORKDIR /app
 
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+RUN addgroup -S -g 101 appgroup && adduser -S -u 100 appuser -G appgroup
 
 COPY --from=build /workspace/target/*.jar /app/app.jar
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh

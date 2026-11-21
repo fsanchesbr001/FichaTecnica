@@ -8,12 +8,16 @@ import com.fabriciosanches.fichatecnica.core.ports.in.DeletarProdutoPort;
 import com.fabriciosanches.fichatecnica.core.ports.out.ProdutoRepositoryPort;
 import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.ProdutoDTO;
 import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
 public class ProdutoUseCase implements CriarProdutoPort, BuscarProdutoPort, AtualizarProdutoPort, DeletarProdutoPort {
+
+    private static final Logger logger = LogManager.getLogger(ProdutoUseCase.class);
 
     private final ProdutoRepositoryPort produtoRepositoryPort;
 
@@ -55,11 +59,12 @@ public class ProdutoUseCase implements CriarProdutoPort, BuscarProdutoPort, Atua
             throw new FichaTecnicaException("Produto já cadastrado");
         }
 
+        avisarImagemNaoAplicada(produtoDTO.imagem(), null, produtoDTO.codigo());
         Produto produto = new Produto(
                 produtoDTO.codigo(),
                 produtoDTO.nome(),
                 produtoDTO.descricao(),
-                produtoDTO.imagem(),
+                null,
                 produtoDTO.valorVenda(),
                 produtoDTO.valorItens(),
                 List.of()
@@ -80,9 +85,7 @@ public class ProdutoUseCase implements CriarProdutoPort, BuscarProdutoPort, Atua
 
         produto.setNome(novosDados.nome());
         produto.setDescricao(novosDados.descricao());
-        if (novosDados.imagem() != null && !novosDados.imagem().isBlank()) {
-            produto.setImagem(novosDados.imagem());
-        }
+        avisarImagemNaoAplicada(novosDados.imagem(), produto.getImagem(), id);
         produto.setValorVenda(novosDados.valorVenda());
         produto.setValorItens(novosDados.valorItens());
 
@@ -95,6 +98,13 @@ public class ProdutoUseCase implements CriarProdutoPort, BuscarProdutoPort, Atua
             throw new IllegalArgumentException("Id não pode ser nulo");
         }
         produtoRepositoryPort.deletarPorId(id);
+    }
+
+    private void avisarImagemNaoAplicada(String imagemInformada, String imagemAtual, Long produtoId) {
+        if (imagemInformada != null && !imagemInformada.isBlank() && !imagemInformada.equals(imagemAtual)) {
+            logger.warn("Referencia de imagem nao aplicada no cadastro/edicao do produto id={}; utilize o endpoint de upload.",
+                    produtoId);
+        }
     }
 
     private ProdutoDTO toDto(com.fabriciosanches.fichatecnica.core.domain.Produto produto) {

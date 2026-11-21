@@ -17,6 +17,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -91,6 +92,28 @@ class ProdutoUseCaseTest {
 
         assertEquals("Produto já cadastrado", exception.getMessage());
         verify(produtoRepositoryPort, never()).salvar(any());
+    }
+
+    @Test
+    void cadastrarProduto_NaoDeveGravarNomeDeArquivoSemUpload() {
+        ProdutoDTO dados = new ProdutoDTO(null, "Bolo", "Desc", "prato1.png",
+                new BigDecimal("19.90"), BigDecimal.ZERO);
+        when(produtoRepositoryPort.contarPorNome("Bolo")).thenReturn(0L);
+        when(produtoRepositoryPort.salvar(any(Produto.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        assertNull(useCase.cadastrarProduto(dados).imagem());
+        verify(produtoRepositoryPort).salvar(any(Produto.class));
+    }
+
+    @Test
+    void atualizarProduto_NaoDeveSubstituirImagemEnviadaPorNomeDeArquivo() {
+        produtoA.setImagem("produtos/1/imagem-enviada.png");
+        ProdutoDTO dados = new ProdutoDTO(1L, "Bolo Novo", "Nova Desc", "prato1.png",
+                new BigDecimal("21.90"), BigDecimal.ZERO);
+        when(produtoRepositoryPort.buscarPorId(1L)).thenReturn(Optional.of(produtoA));
+        when(produtoRepositoryPort.salvar(any(Produto.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        assertEquals("produtos/1/imagem-enviada.png", useCase.atualizarProduto(1L, dados).imagem());
     }
 
     @Test

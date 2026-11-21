@@ -11,6 +11,8 @@ import com.fabriciosanches.fichatecnica.core.ports.out.ProdutoRepositoryPort;
 import com.fabriciosanches.fichatecnica.infrastructure.adapters.in.web.dto.UploadJobDTO;
 import com.fabriciosanches.fichatecnica.core.domain.enums.UploadJobStatus;
 import com.fabriciosanches.fichatecnica.core.exceptions.FichaTecnicaException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.Map;
@@ -20,6 +22,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ProdutoImagemUploadUseCase implements IniciarUploadImagemProdutoPort, ConsultarUploadImagemProdutoPort,
         RemoverImagemProdutoPort, ListarJobsUploadImagemProdutoPort {
+
+    private static final Logger logger = LogManager.getLogger(ProdutoImagemUploadUseCase.class);
 
     private final ProdutoRepositoryPort produtoRepositoryPort;
     private final ProdutoImagemStoragePort produtoImagemStoragePort;
@@ -46,7 +50,8 @@ public class ProdutoImagemUploadUseCase implements IniciarUploadImagemProdutoPor
             produtoRepositoryPort.salvar(produto);
             atualizarJob(jobId, UploadJobStatus.DONE, imagemUrl, null);
         } catch (Exception e) {
-            atualizarJob(jobId, UploadJobStatus.ERROR, null, e.getMessage());
+            logger.error("Erro no upload de imagem para produto id={} | job={}", produtoId, jobId, e);
+            atualizarJob(jobId, UploadJobStatus.ERROR, null, "Erro ao salvar imagem do produto.");
         }
 
         return toDTO(jobs.get(jobId));
