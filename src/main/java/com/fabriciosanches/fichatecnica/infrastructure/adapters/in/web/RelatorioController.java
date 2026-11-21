@@ -38,7 +38,7 @@ public class RelatorioController {
         this.gerarRelatorioPort = gerarRelatorioPort;
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @PostMapping("/gerar-pdf")
     @Operation(summary = "Gera relatorio PDF", description = "Recebe os dados do relatorio em JSON e devolve o arquivo PDF pronto para download.")
     @ApiResponses({

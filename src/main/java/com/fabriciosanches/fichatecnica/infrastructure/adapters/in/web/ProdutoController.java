@@ -132,7 +132,7 @@ public class ProdutoController {
         }
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping("/produtos/gerar-pdf-lista")
     @Operation(summary = "Gera PDF da lista de produtos", description = "Exporta a lista completa de produtos em PDF.")
     @ApiResponses({
@@ -183,7 +183,7 @@ public class ProdutoController {
         }
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping("/produtos/gerar-pdf-detalhe/{id:[0-9]+}")
     @Operation(summary = "Gera PDF detalhado do produto", description = "Exporta a ficha detalhada de um produto especifico em PDF.")
     @ApiResponses({

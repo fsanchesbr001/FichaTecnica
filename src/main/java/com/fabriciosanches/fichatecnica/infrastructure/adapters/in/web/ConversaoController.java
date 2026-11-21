@@ -170,7 +170,7 @@ public class ConversaoController {
         }
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping("/conversoes/gerar-pdf-lista")
     @Operation(summary = "Gera PDF da lista de conversoes", description = "Exporta a lista completa de conversoes em PDF.")
     @ApiResponses({
@@ -222,7 +222,7 @@ public class ConversaoController {
         }
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping("/conversoes/gerar-pdf-detalhe/{id:[0-9]+}")
     @Operation(summary = "Gera PDF detalhado da conversao", description = "Exporta a ficha detalhada de uma conversao especifica em PDF.")
     @ApiResponses({

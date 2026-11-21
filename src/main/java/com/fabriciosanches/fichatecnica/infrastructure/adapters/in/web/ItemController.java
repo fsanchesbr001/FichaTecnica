@@ -163,7 +163,7 @@ public class ItemController {
         }
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping("/itens/gerar-pdf-lista")
     @Operation(summary = "Gera PDF da lista de itens", description = "Exporta a lista completa de itens em PDF.")
     public ResponseEntity<byte[]> gerarPdfLista() {
@@ -204,7 +204,7 @@ public class ItemController {
         }
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping("/itens/gerar-pdf-detalhe/{id:[0-9]+}")
     @Operation(summary = "Gera PDF detalhado do item", description = "Exporta a ficha detalhada de um item especifico em PDF.")
     public ResponseEntity<byte[]> gerarPdfDetalhe(@PathVariable Long id) {
