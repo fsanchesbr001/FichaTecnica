@@ -8,6 +8,15 @@ Este projeto visa a criação de uma ficha técnica de um produto, onde é poss�
 ## Dependências
 - Spring Data JPA
 
+## Permissoes de impressao
+
+Os perfis `USER` e `ADMIN` podem gerar PDFs de lista e detalhe de itens,
+produtos e conversoes, alem de usar o gerador de relatorios JSON. Os PDFs de
+unidades de medida continuam disponiveis para usuarios autenticados.
+A Gestao de Usuarios nao foi liberada: sua lista continua exclusiva de
+`ADMIN`, e as demais restricoes permanecem. O gerador generico recebe dados
+do cliente; ele nao consulta nem libera acesso a dados de usuarios.
+
 ## E-mail: Transactional Outbox e API Zoho
 
 O cadastro grava `usuarios`, `seguranca` e `email_outbox` na mesma transacao
@@ -482,3 +491,4 @@ sum(rate(http_server_requests_seconds_count{uri=~"/ficha-tecnica/unidades-medida
 - 24/10/2026 - Versão 2.1.6 - Mapeando porta do banco para exposição no docker.
 - 21/11/2026 - Versão 2.2.0 - Atualização de dependências e melhorias gerais.
 - 21/11/2026 - Versão 2.2.1 - Correção de locks de banco e melhorias de performance.
+- 21/11/2026 - Versão 2.2.2 - Correção de bugs de permissão de impressão.
