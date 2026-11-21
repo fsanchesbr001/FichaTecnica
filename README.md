@@ -8,6 +8,99 @@ Este projeto visa a criação de uma ficha técnica de um produto, onde é poss�
 ## Dependências
 - Spring Data JPA
 
+## E-mail: Transactional Outbox e API Zoho
+
+O cadastro grava `usuarios`, `seguranca` e `email_outbox` na mesma transacao
+MySQL. Recuperacao de senha e primeiro acesso tambem enfileiram o e-mail na
+transacao dos dados de seguranca. Uma falha ao gravar/renderizar a mensagem
+desfaz os dados; o envio remoto nunca acontece na requisicao HTTP. Os endpoints
+mantem HTTP 200 por compatibilidade: significa **dados gravados e e-mail
+enfileirado**, nao entregue. Chamadores novos de `EnviarEmailPort` precisam de
+uma transacao ativa; a outbox exige `MANDATORY`.
+
+A migracao Flyway `V003__Criar-email-outbox.sql` cria a tabela no deploy.
+O worker consulta a cada 5 segundos, processa ate 20 mensagens por rodada e
+faz o envio fora da transacao de banco. Claims usam `FOR UPDATE SKIP LOCKED`,
+lease de 2 minutos e token de ownership. Se o processo cair, outro worker
+recupera a mensagem apos o lease. Falhas geram retries persistidos com backoff
+de 30 segundos, dobrando ate 1 hora; nao existe limite de tentativas enquanto
+a mensagem estiver valida. Nao aumente os timeouts do transporte acima do lease.
+
+Emails de credenciais expiram conforme a senha/token salvo em `seguranca`;
+mensagens expiradas nao sao enviadas. Novas credenciais cancelam mensagens
+anteriores ainda pendentes do mesmo destinatario/template. Um envio ja em
+andamento nao pode ser desfeito. Estados: `PENDING`, `PROCESSING`, `SENT`,
+`EXPIRED` e `CANCELLED`. `SENT` indica aceite pelo provedor, nao recebimento
+na caixa de entrada. A garantia e **pelo menos uma vez**: uma queda entre o
+aceite da Zoho e a confirmacao no banco pode duplicar o e-mail. A API utilizada
+nao oferece uma chave de idempotencia para eliminar essa janela.
+
+Um rollback para uma imagem anterior a esta implementacao interrompe o worker,
+mas nao remove eventos da tabela. Retome uma versao com outbox para drenar a
+fila; nao remova a tabela nem sua chave durante um rollback.
+
+O payload, incluindo senha temporaria/token, fica protegido com AES-256-GCM e
+IV aleatorio. Ele e apagado ao enviar, expirar ou cancelar. A chave
+`OUTBOX_ENCRYPTION_KEY` e obrigatoria, independente do JWT e deve ser mantida
+entre deploys e junto aos backups. Nao a regenere enquanto houver mensagens
+pendentes/em processamento. Logs e `last_error` registram apenas ID, tentativa
+e codigo de erro, sem credenciais, destinatarios ou conteudo.
+
+### Preparar a Zoho antes do deploy
+
+1. Configure um cliente OAuth da Zoho e autorize a conta remetente com
+   `ZohoMail.messages.CREATE`. Para consultar o account ID pela API, autorize
+   tambem `ZohoMail.accounts.READ`. Obtenha client ID, client secret, refresh
+   token e account ID. Pode usar o mesmo cliente/conta do Contatos, se os
+   escopos forem adequados; nao copie valores para arquivos versionados.
+2. Cadastre os GitHub Actions Secrets `ZOHO_CLIENT_ID`, `ZOHO_CLIENT_SECRET`,
+   `ZOHO_REFRESH_TOKEN`, `ZOHO_ACCOUNT_ID` e `OUTBOX_ENCRYPTION_KEY`.
+   A chave deve conter exatamente 32 bytes aleatorios codificados em Base64.
+   Para um deploy manual Linux, gere uma unica vez em um diretorio privado:
+   `umask 077; mkdir -p docker/secrets; chmod 700 docker/secrets; openssl rand -base64 32 > docker/secrets/outbox_encryption_key.txt`.
+3. Defina `MAIL_FROM` no `APP_ENV_FILE` com a conta/alias autorizado pelo
+   account ID (padrao: `contato@fabriciosanches.com`). O workflow seleciona
+   `MAIL_PROVIDER=zoho`, valida os secrets e cria arquivos protegidos para
+   OAuth/chave da outbox. O Compose e o entrypoint ja os carregam via `_FILE`.
+   `MAIL_PWD` nao e exigido pelo deploy Zoho; seu arquivo permanece montado
+   apenas para compatibilidade SMTP.
+4. Faca backup consistente do MySQL e da chave antes de aplicar a migracao.
+   Apos o deploy, cadastre um usuario de teste autorizado, verifique a outbox
+   e confirme o recebimento do e-mail. Nao e necessario liberar portas SMTP:
+   OAuth usa `https://accounts.zoho.com/oauth/v2/token`, e o envio usa
+   `https://mail.zoho.com/api/accounts/{accountId}/messages`, ambos na porta 443.
+
+Em deploy manual, preencha `.env.prod` a partir de `.env.prod.example` e crie
+os arquivos reais indicados por `ZOHO_CLIENT_ID_FILE`, `ZOHO_CLIENT_SECRET_FILE`,
+`ZOHO_REFRESH_TOKEN_FILE` e `OUTBOX_ENCRYPTION_KEY_FILE`. Preserve os demais
+secrets existentes. No Compose standalone, os secrets de arquivo sao bind
+mounts: o backend roda como `appuser`, portanto arquivos root com modo `0600`
+nao sao legiveis. Use diretorio `docker/secrets` com modo `0700` e arquivos
+montados com modo `0644`, como faz o workflow. O diretorio privado impede
+acesso de outros usuarios no host; o bind mount permite leitura no container.
+Em desenvolvimento, defina `OUTBOX_ENCRYPTION_KEY` no
+ambiente da IDE ou no `.env` do Compose; `MAIL_PROVIDER=smtp` continua sendo
+o padrao. Para testar Zoho localmente, selecione `MAIL_PROVIDER=zoho` e preencha
+as variaveis OAuth. Contas de outro datacenter exigem ajustar as propriedades
+`ficha-tecnica.mail.zoho.accounts-url` e `ficha-tecnica.mail.zoho.mail-url`.
+
+Os timeouts Zoho sao 5 segundos para conexao e 20 segundos por requisicao.
+O worker pode ser suspenso com `MAIL_OUTBOX_WORKER_ENABLED=false` sem perder
+eventos; reative-o para retomar o envio. Monitore falhas e idade da fila:
+
+```sql
+SELECT status, COUNT(*) AS quantidade, MIN(created_at) AS mais_antigo
+FROM email_outbox GROUP BY status;
+SELECT id, status, attempts, next_attempt_at, last_error
+FROM email_outbox WHERE status IN ('PENDING', 'PROCESSING', 'EXPIRED');
+```
+
+Corrigir credenciais/conectividade permite o retry automatico. Para eventos
+`EXPIRED`, gere novas credenciais pelo fluxo de primeiro acesso/recuperacao;
+nao reenfileire a senha/token vencido. O usuario criado no incidente anterior
+nao tem evento de outbox retroativo: use primeiro acesso depois de configurar
+a Zoho. Nao recrie o mesmo login nem tente recuperar a senha do hash.
+
 ## Docker (Backend + MySQL + Observabilidade)
 
 Arquivos adicionados na raiz do projeto:
@@ -361,3 +454,4 @@ sum(rate(http_server_requests_seconds_count{uri=~"/ficha-tecnica/unidades-medida
 - 26/09/2026 - Versão 2.1.4 - Correções da carga e exibição de imagens.
 - 11/10/2026 - Versão 2.1.5 - Preparando CI/CD para deploy em produção.
 - 24/10/2026 - Versão 2.1.6 - Mapeando porta do banco para exposição no docker.
+- 21/11/2026 - Versão 2.2.0 - Atualização de dependências e melhorias gerais.

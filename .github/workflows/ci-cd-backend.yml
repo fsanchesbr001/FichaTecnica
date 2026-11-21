@@ -100,6 +100,11 @@ jobs:
           APP_ENV_FILE: ${{ secrets.APP_ENV_FILE }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           MAIL_PWD: ${{ secrets.MAIL_PWD }}
+          ZOHO_CLIENT_ID: ${{ secrets.ZOHO_CLIENT_ID }}
+          ZOHO_CLIENT_SECRET: ${{ secrets.ZOHO_CLIENT_SECRET }}
+          ZOHO_REFRESH_TOKEN: ${{ secrets.ZOHO_REFRESH_TOKEN }}
+          ZOHO_ACCOUNT_ID: ${{ secrets.ZOHO_ACCOUNT_ID }}
+          OUTBOX_ENCRYPTION_KEY: ${{ secrets.OUTBOX_ENCRYPTION_KEY }}
           MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
           SYSTEM_PWD: ${{ secrets.SYSTEM_PWD }}
@@ -107,7 +112,7 @@ jobs:
           host: ${{ secrets.DO_HOST }}
           username: ${{ secrets.DO_USERNAME }}
           key: ${{ secrets.DO_SSH_KEY }}
-          envs: DOCKER_USERNAME,DOCKER_PASSWORD,DOCKER_IMAGE,DO_PROJECT_DIR,APP_ENV_FILE,JWT_SECRET,MAIL_PWD,MYSQL_PASSWORD,MYSQL_ROOT_PASSWORD,SYSTEM_PWD
+          envs: DOCKER_USERNAME,DOCKER_PASSWORD,DOCKER_IMAGE,DO_PROJECT_DIR,APP_ENV_FILE,JWT_SECRET,MAIL_PWD,ZOHO_CLIENT_ID,ZOHO_CLIENT_SECRET,ZOHO_REFRESH_TOKEN,ZOHO_ACCOUNT_ID,OUTBOX_ENCRYPTION_KEY,MYSQL_PASSWORD,MYSQL_ROOT_PASSWORD,SYSTEM_PWD
           script_stop: true
           script: |
             set -e
@@ -117,7 +122,7 @@ jobs:
             TARGET_BACKEND_IMAGE="$DOCKER_IMAGE:sha-${{ github.sha }}"
 
             # Valida secrets obrigatorios para evitar deploy com configuracao incompleta.
-            REQUIRED_VARS="DOCKER_USERNAME DOCKER_PASSWORD JWT_SECRET MAIL_PWD MYSQL_PASSWORD MYSQL_ROOT_PASSWORD SYSTEM_PWD"
+            REQUIRED_VARS="DOCKER_USERNAME DOCKER_PASSWORD JWT_SECRET MYSQL_PASSWORD MYSQL_ROOT_PASSWORD SYSTEM_PWD ZOHO_CLIENT_ID ZOHO_CLIENT_SECRET ZOHO_REFRESH_TOKEN ZOHO_ACCOUNT_ID OUTBOX_ENCRYPTION_KEY"
             for var_name in $REQUIRED_VARS; do
               eval "var_value=\${$var_name}"
               if [ -z "$var_value" ]; then
@@ -152,7 +157,9 @@ jobs:
               exit 1
             fi
 
+            umask 077
             mkdir -p docker/secrets
+            chmod 700 docker/secrets
 
             if [ -n "$APP_ENV_FILE" ]; then
               printf '%s\n' "$APP_ENV_FILE" > .env
@@ -162,10 +169,18 @@ jobs:
             printf '%s' "$MYSQL_PASSWORD" > docker/secrets/mysql_password.txt
             printf '%s' "$MYSQL_ROOT_PASSWORD" > docker/secrets/mysql_root_password.txt
             printf '%s' "$SYSTEM_PWD" > docker/secrets/system_pwd.txt
+            printf '%s' "$ZOHO_CLIENT_ID" > docker/secrets/zoho_client_id.txt
+            printf '%s' "$ZOHO_CLIENT_SECRET" > docker/secrets/zoho_client_secret.txt
+            printf '%s' "$ZOHO_REFRESH_TOKEN" > docker/secrets/zoho_refresh_token.txt
+            printf '%s' "$OUTBOX_ENCRYPTION_KEY" > docker/secrets/outbox_encryption_key.txt
+            # Compose monta arquivos via bind: appuser precisa ler; o diretorio privado protege o host.
+            for secret_file in jwt_secret mail_pwd mysql_password mysql_root_password system_pwd zoho_client_id zoho_client_secret zoho_refresh_token outbox_encryption_key; do
+              chmod 644 "docker/secrets/$secret_file.txt"
+            done
 
             # Configura o backend image e os arquivos de secrets usados pelo compose.
             if [ -f ".env" ]; then
-              grep -v -E '^(BACKEND_IMAGE|MYSQL_PASSWORD_FILE|MYSQL_ROOT_PASSWORD_FILE|JWT_SECRET_FILE|MAIL_PWD_FILE|SYSTEM_PWD_FILE)=' .env > .env.tmp || true
+              grep -v -E '^(BACKEND_IMAGE|MYSQL_PASSWORD_FILE|MYSQL_ROOT_PASSWORD_FILE|JWT_SECRET_FILE|MAIL_PWD_FILE|SYSTEM_PWD_FILE|MAIL_PROVIDER|ZOHO_ACCOUNT_ID|ZOHO_CLIENT_ID_FILE|ZOHO_CLIENT_SECRET_FILE|ZOHO_REFRESH_TOKEN_FILE|OUTBOX_ENCRYPTION_KEY_FILE)=' .env > .env.tmp || true
               mv .env.tmp .env
             fi
             cat >> .env <<EOF
@@ -175,6 +190,12 @@ jobs:
             JWT_SECRET_FILE=./docker/secrets/jwt_secret.txt
             MAIL_PWD_FILE=./docker/secrets/mail_pwd.txt
             SYSTEM_PWD_FILE=./docker/secrets/system_pwd.txt
+            MAIL_PROVIDER=zoho
+            ZOHO_ACCOUNT_ID=$ZOHO_ACCOUNT_ID
+            ZOHO_CLIENT_ID_FILE=./docker/secrets/zoho_client_id.txt
+            ZOHO_CLIENT_SECRET_FILE=./docker/secrets/zoho_client_secret.txt
+            ZOHO_REFRESH_TOKEN_FILE=./docker/secrets/zoho_refresh_token.txt
+            OUTBOX_ENCRYPTION_KEY_FILE=./docker/secrets/outbox_encryption_key.txt
             EOF
 
             # c) Download da imagem nova (latest e tag por commit).
