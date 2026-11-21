@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -166,6 +167,18 @@ class ItensProdutoUseCaseTest {
 
         verify(itemProdutoRepositoryPort).deletarPorProdutoIdEItemId(1L, 10L);
         verify(produtoRepositoryPort).salvar(any(Produto.class));
+    }
+
+    @Test
+    void remover_NaoDeveExcluirAssociacaoSeProdutoNaoExistir() {
+        when(itemProdutoRepositoryPort.buscarPorProdutoIdEItemId(1L, 10L))
+                .thenReturn(Optional.of(new ItemProduto()));
+        when(produtoRepositoryPort.buscarPorId(1L)).thenReturn(Optional.empty());
+
+        org.junit.jupiter.api.Assertions.assertThrows(FichaTecnicaException.class,
+                () -> useCase.remover(1L, 10L));
+
+        verify(itemProdutoRepositoryPort, never()).deletarPorProdutoIdEItemId(any(), any());
     }
 
     @Test

@@ -23,6 +23,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
@@ -147,10 +148,13 @@ public class ItemProdutoController {
     }
 
     @DeleteMapping("/produtos/{idProduto}/itens/{idItem}")
+    @Transactional
     @Operation(summary = "Remove item do produto", description = "Desfaz a associação entre um item e um produto.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Associação removida com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Erro ao deletar item do produto")
+            @ApiResponse(responseCode = "400", description = "Associação ou produto não encontrado"),
+            @ApiResponse(responseCode = "409", description = "Conflito de concorrência; tente novamente"),
+            @ApiResponse(responseCode = "500", description = "Erro interno ao deletar item do produto")
     })
     public ResponseEntity<Void> deletarItemProduto(@PathVariable("idProduto") Long idProduto,
                                                     @PathVariable("idItem") Long idItem) {
@@ -158,8 +162,8 @@ public class ItemProdutoController {
         try {
             removerItemDoProdutoPort.remover(idProduto, idItem);
             return ResponseEntity.noContent().build();
-        } catch (Exception e) {
-            logger.error("Erro ao deletar item produto", e);
+        } catch (FichaTecnicaException e) {
+            logger.warn("Erro ao deletar item produto idProduto={} idItem={}: {}", idProduto, idItem, e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }
