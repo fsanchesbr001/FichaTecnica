@@ -112,6 +112,44 @@ a Zoho. Nao recrie o mesmo login nem tente recuperar a senha do hash.
 
 ## Docker (Backend + MySQL + Observabilidade)
 
+### Imagens de produtos
+
+`USER` e `ADMIN` podem enviar, consultar o status e remover imagens de produtos.
+A listagem global de jobs continua exclusiva de `ADMIN`.
+
+O cadastro e a edicao do produto independem da imagem: salve primeiro os dados
+do produto e somente depois tente o upload em uma requisicao separada. Uma
+falha de upload (validacao, timeout ou erro de armazenamento) nao desfaz a
+gravacao nem impede novas alteracoes. O frontend deve manter o resultado da
+gravacao e apresentar um aviso separado sobre a imagem, permitindo tentar
+novamente; nao deve tratar essa falha como erro ao salvar o produto.
+
+O campo `imagem` retornado no produto e controlado pelo upload/remocao: enviar
+apenas um nome de arquivo no JSON de cadastro ou edicao nao grava nem substitui
+a imagem. Cadastre o produto, envie o arquivo em
+`POST /ficha-tecnica/produtos/{id}/imagem/upload` (multipart, campo `file`) e use
+o `imagemUrl` retornado quando `status=DONE`, ou recarregue o produto. O caminho
+e relativo, como `produtos/{id}/{uuid}.png`; para exibir, acrescente
+`/api/imagens/` na URL do backend. Um job `ERROR` ja retornado pelo upload
+responde HTTP 500, nao 202. Jobs ainda pendentes devem ser acompanhados pelo
+endpoint `/{id}/imagem/status/{jobId}`.
+
+Os dois arquivos Compose executam `image-permissions` antes do backend.
+Esse container temporario, sem rede nem secrets, ajusta somente o volume de
+imagens para UID 100/GID 101. O backend permanece como `appuser`, sem root.
+Essa dependencia e opcional (`required: false`): se a preparacao falhar,
+o Compose emite um aviso e ainda inicia o backend para manter a gravacao dos
+produtos disponivel. Corrija o erro do inicializador para habilitar as imagens.
+Use o plugin Docker Compose V2 atualizado para essa configuracao.
+O deploy existente (`up -d --no-build backend`) inclui essa dependencia;
+publique a nova imagem e o novo Compose juntos. Nao use `--no-deps`, nao
+remova o volume e nao aplique `chmod 777`.
+
+Depois do deploy, envie novamente imagens cujo upload anterior falhou, como
+`prato1.png`: um nome no banco nao permite recuperar um arquivo que nao chegou
+ao servidor. A edicao dos demais dados preserva a imagem ja enviada; para
+exclui-la, utilize `DELETE /ficha-tecnica/produtos/{id}/imagem`.
+
 ### Conflitos de escrita no MySQL
 
 A exclusao de usuario bloqueia `usuarios` e `seguranca` com `FOR UPDATE NOWAIT`
@@ -492,3 +530,4 @@ sum(rate(http_server_requests_seconds_count{uri=~"/ficha-tecnica/unidades-medida
 - 21/11/2026 - Versão 2.2.0 - Atualização de dependências e melhorias gerais.
 - 21/11/2026 - Versão 2.2.1 - Correção de locks de banco e melhorias de performance.
 - 21/11/2026 - Versão 2.2.2 - Correção de bugs de permissão de impressão.
+- 21/11/2026 - Versão 2.2.3 - Correção na exibição da imagem dos produtos.
